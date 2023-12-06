@@ -31,8 +31,8 @@ from sktime.regression.distance_based import KNeighborsTimeSeriesRegressor
 from sktime.regression.deep_learning import CNNRegressor,TapNetRegressor
 
 
-from CUSTOM_MODELS.CUSTOM_MODELS import  CUSTOM_MODELS
-from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import CUSTOM_TRANSFORMS
+from CUSTOM_MODELS.CUSTOM_MODELS import  Custom_Models
+from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import Custom_Transforms
 
 
 
@@ -209,7 +209,7 @@ class TimeSeriesToPanelData(BaseEstimator, TransformerMixin):
 
 
 
-class CONFIG_UTILS(CUSTOM_TRANSFORMS,CUSTOM_MODELS):
+class Config_Utils(Custom_Transforms,Custom_Models):
     def __init__(self):
         'check in section for all function parameters and so on'
         self.configs={}

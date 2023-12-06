@@ -2,12 +2,12 @@ from collections import defaultdict
 from sktime.transformations.series.adapt import TabularToSeriesAdaptor
 import pandas as pd
 from scipy.sparse import csr_matrix
-from ML_CONFIGS_UTILS.ML_CONFIGS import CONFIG_UTILS
+from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
 
 
-class TRANSFORMERS(CONFIG_UTILS):
+class Transformers(Config_Utils):
     def __init__(self, transform, *args, **kwargs):
-        super(TRANSFORMERS, self).__init__()
+        super(Transformers, self).__init__()
 
         self.transform = transform
         self.args = args
@@ -26,7 +26,7 @@ class TRANSFORMERS(CONFIG_UTILS):
             raise ValueError("Transform is not supported")
 
 
-class ML_PROCESS(CONFIG_UTILS):
+class Ml_Process(Config_Utils):
     def __init__(self, X):
         super().__init__()
         self._validate_obj(X)
@@ -60,7 +60,7 @@ class ML_PROCESS(CONFIG_UTILS):
 
     def main_transform(self, transform, handle_cat=True, *args, **kwargs) -> pd.DataFrame:
 
-        transformer = TRANSFORMERS(transform, *args, **kwargs).get_transform()
+        transformer = Transformers(transform, *args, **kwargs).get_transform()
 
         is_3d = self._validate_3d(self.X)
         contains_nulls = self._validate_null(self.X)

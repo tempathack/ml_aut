@@ -1,8 +1,8 @@
 import seaborn as sns
 import pandas as pd
 import numpy as np
-from ML_CONFIGS_UTILS.ML_CONFIGS import CONFIG_UTILS
-from ML_HANDLING.ML_MAIN import ML_MAIN
+from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
+from ML_HANDLING.ML_MAIN import Ml_Main
 
 
 ds = sns.load_dataset("flights")
@@ -16,9 +16,9 @@ target=ds[['passengers']]
 X = ds.drop(columns=['passengers','month'])
 
 
-configs=CONFIG_UTILS()
+configs=Config_Utils()
 
-obj = ML_MAIN(X, y=target, transform=['RobustScaler', 'StandardScaler'],
+obj = Ml_Main(X, y=target, transform=[['RobustScaler', 'StandardScaler'],'StandardScaler'],
                   features_selection=None, ml_model=['KNeighborsTimeSeriesRegressor']).Process(mode='seq')
 print(obj)
 

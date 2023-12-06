@@ -9,12 +9,12 @@ from sklearn.manifold import SpectralEmbedding
 from umap import UMAP
 
 
-from ML_CONFIGS_UTILS.ML_CONFIGS import CONFIG_UTILS
+from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
 
 
-class ML_REDUCE(CONFIG_UTILS):
+class Ml_Reduce(Config_Utils):
     def __init__(self, X,y, *args, **kwargs):
-        super().__init__(X, y, *args, **kwargs)
+        super().__init__()
         self.X = self.eval_df(X)
         self.y = self.eval_df(y)
         self.args = args

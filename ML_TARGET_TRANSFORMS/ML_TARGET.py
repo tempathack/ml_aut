@@ -1,9 +1,9 @@
 from scipy import stats
 from statsmodels.tsa.seasonal import seasonal_decompose
 import pandas as pd
-from ML_CONFIGS_UTILS.ML_CONFIGS import CONFIG_UTILS
+from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
 
-class ML_TARGET(CONFIG_UTILS):
+class Ml_Target(Config_Utils):
     def __init__(self, X,y, *args, **kwargs):
         super().__init__(X, y, *args, **kwargs)
         self.X = self.eval_df(X)
@@ -22,7 +22,7 @@ class ML_TARGET(CONFIG_UTILS):
         return  pd.DataFrame(stats.boxcox(y)[0],columns=y.columns,index=y.index)
     @staticmethod
     def _yeo_johnson(y):
-        return  pd.DataFrame(stats.yeojohnson(x)[0],columns=y.columns,index=y.index)
+        return  pd.DataFrame(stats.yeojohnson(y)[0],columns=y.columns,index=y.index)
     @staticmethod
     def _decomp(y,deseasonalize=False,detrend=False):
 

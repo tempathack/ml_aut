@@ -1,16 +1,13 @@
 from collections import defaultdict
 from sklearn.model_selection import cross_val_score
-
-
-
-from ML_CONFIGS_UTILS.ML_CONFIGS import CONFIG_UTILS,MultiScorer
+from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,MultiScorer
 
 
 
 
-class MODELS(CONFIG_UTILS):
+class Models(Config_Utils):
     def __init__(self, model ,pred_method ,*args ,**kwargs):
-        super(MODELS ,self).__init__()
+        super(Models ,self).__init__()
         self.model = model
         self.args = args
         self.pred_method =pred_method
@@ -31,7 +28,7 @@ class MODELS(CONFIG_UTILS):
             raise ValueError(f"{self.model} is not supported")
 
 
-class ML_TRAIN(CONFIG_UTILS):
+class Ml_Train(Config_Utils):
     def __init__(self, X, y, *args, **kwargs):
         super().__init__()
         self.X = self.eval_df(X)
@@ -50,7 +47,7 @@ class ML_TRAIN(CONFIG_UTILS):
         if self.is_ts:
             if self.configs['models'][self.pred_method][model]['req_3d']:
                 self.X = self.to_panel(self.X, window_size=12)
-            model = MODELS(model, self.pred_method, *args, **kwargs).get_model()
+            model = Models(model, self.pred_method, *args, **kwargs).get_model()
 
             results = self._custom_evaluate(
                 model=model,
@@ -64,7 +61,7 @@ class ML_TRAIN(CONFIG_UTILS):
         else:
             self.metrics_scorer = MultiScorer(self.configs['metrics']['tab'][self.pred_method])
 
-            model = MODELS(model, self.pred_method, *args, **kwargs).get_model()
+            model = Models(model, self.pred_method, *args, **kwargs).get_model()
 
             _ = cross_val_score(model, self.X, self.y,
                                 cv=self.cv, scoring=self.metrics_scorer)

@@ -9,10 +9,10 @@ from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
 import plotly.express as px
 
-from ML_CONFIGS_UTILS.ML_CONFIGS import CONFIG_UTILS
+from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
 
 
-class ML_SELECT(CONFIG_UTILS):
+class Ml_Select(Config_Utils):
 
     def __init__(self, X,y, *args, **kwargs):
         super().__init__()

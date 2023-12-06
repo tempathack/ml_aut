@@ -2,7 +2,7 @@ from functools import wraps
 
 
 
-class WRAPSTACK(object):
+class WrapStack(object):
     'Class Method to Track all Functions Executed and to obtain Error Handling/Execution time'
     Logger_dict = {}
 
