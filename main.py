@@ -28,8 +28,8 @@ data['Label'] = np.random.randint(0, 2, size=len(data))
 
 configs=Config_Utils()
 X,target=data.drop(columns=['Label']),data[['Label']]
-obj = Ml_Main(X, y=target, transform=[['RobustScaler', 'StandardScaler'],'StandardScaler'],
-                  features_selection=None, ml_model=['RotationForest']).Process(mode='seq')
+obj = Ml_Main(X, y=target, transform=[['RobustScaler', 'StandardScaler'],'StandardScaler','PolynomialFeatures'],
+                  features_selection='all', ml_model=['RotationForest']).Process()
 
 
 print(obj)

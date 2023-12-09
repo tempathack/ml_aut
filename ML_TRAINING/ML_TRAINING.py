@@ -2,7 +2,7 @@ from collections import defaultdict
 from sklearn.model_selection import cross_val_score
 from tqdm import tqdm
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,MultiScorer
-
+from imblearn.over_sampling import SMOTE
 
 
 
@@ -40,7 +40,7 @@ class Ml_Train(Config_Utils):
         self.pred_method = self._class_or_reg(y)
         self.cv = self._define_cv(self.is_ts)
 
-    def train_model(self, model=None, *args, **kwargs):
+    def train_model(self, model=None,handle_imbalance=False, *args, **kwargs):
 
         if model is None or (not model in self.configs['models'][self.pred_method]):
             raise ValueError(f'model is either not specified or not part of {self.configs["models"][self.pred_method].keys()}')
@@ -67,11 +67,20 @@ class Ml_Train(Config_Utils):
 
             model = Models(model, self.pred_method, *args, **kwargs).get_model()
 
+            if handle_imbalance and self.pred_method=='Classification':
+                self.X, self.y = self._handle_imbalance(self.X, self.y)
+
+
             _ = cross_val_score(model, self.X, self.y,
                                 cv=self.cv, scoring=self.metrics_scorer)
 
             return self.metrics_scorer.get_results()
 
+    @staticmethod
+    def _handle_imbalance(X,y):
+        smote = SMOTE(random_state=42)
+        X, y = smote.fit_resample(X,y)
+        return X,y
     @staticmethod
     def _custom_evaluate(model, y, X, cv=None, scoring=None):
 

@@ -9,6 +9,9 @@ class Transformers(Config_Utils):
     def __init__(self, transform, *args, **kwargs):
         super(Transformers, self).__init__()
 
+        if not transform in self.checked_in_transforms:
+            raise ValueError(f"Transform is not supported use one of {self.configs['transforms'].keys()}")
+
         self.transform = transform
         self.args = args
         if self._empty_dict(kwargs):

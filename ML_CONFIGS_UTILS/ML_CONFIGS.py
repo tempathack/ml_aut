@@ -289,6 +289,9 @@ class Config_Utils(Custom_Transforms,Custom_Models):
         self.configs['imputers']={'KNNImputer': KNNImputer,
                     'SimpleImputer': SimpleImputer}
 
+        self.configs['feat_selections']={'Regression':['correlation', 'f_regression', 'DecisionTreeRegressor', 'RandomForestRegressor', 'mutual_info_regression', 'LassoCV','all'],
+                              'Classification':['permutation importance', 'f_classif', 'chi2', 'DecisionTreeClassifier', 'RandomForestClassifier', 'mutual_info_classif', 'LogisticRegressionCV','all']}
+
         self.configs['dim_reduction']=['method']
 
         self.configs['metrics']={'tab':{'Regression':{'mean_squared_error':(mean_squared_error,{}),

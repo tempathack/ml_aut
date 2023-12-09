@@ -1,17 +1,16 @@
-import ray
 from ML_CONFIGS_UTILS.ML_CONFIGS import  Config_Utils
 from ML_FEATURE_SELECTION.ML_FEATURE_SELECTION import Ml_Select
 from ML_TRAINING.ML_TRAINING import Ml_Train
 from ML_TRANSFORMING.ML_TRANSFORMING import Ml_Process
 from ML_DIMENSIONALITY_REDUCTION.ML_DIMENSIONALITY_REDUCTION import Ml_Reduce
-from ML_TARGET_TRANSFORMS.ML_TARGET import Ml_Target
-from itertools import product
+from joblib import Parallel, delayed
 
 class Ml_Main(Config_Utils):
     def __init__(self, X, y, transform=None,
                  features_selection=None,
                  dim_reduction=None,
-                 ml_model=None):
+                 ml_model=None,
+                 n_jobs=-1):
 
         super().__init__()
 
@@ -24,7 +23,7 @@ class Ml_Main(Config_Utils):
         self.features_selection = features_selection if features_selection is not None else False
         self.dim_reduction = dim_reduction if isinstance(dim_reduction, str) else None
         self.model = ml_model if isinstance(ml_model, list) else [ml_model]
-
+        self.n_jobs=n_jobs
         self.ml_train = None
 
         if isinstance(self.transform, list):
@@ -39,16 +38,14 @@ class Ml_Main(Config_Utils):
         self.ml_train = Ml_Train(X=self.X, y=self.y)
 
 
-    def Process(self, mode='raw',results_return=False, *args, **kwargs):
+    def Process(self, mode='seq',results_return=False, *args, **kwargs):
         self.is_ml_select = hasattr(self, 'ml_select')
         self.is_ml_reduce = hasattr(self, 'ml_reduce')
 
         self.results = []
 
-        if mode == 'ray':
-            ray.init()
-            self._process_ray(self.is_ml_select, self.is_ml_reduce)
-            ray.shutdown()
+        if mode == 'parallel':
+            self._process_parallel(self.is_ml_select, self.is_ml_reduce)
         elif mode == 'seq':
             self._process_seq(self.is_ml_select, self.is_ml_reduce, *args, **kwargs)
 
@@ -61,25 +58,23 @@ class Ml_Main(Config_Utils):
         else:
             return self
 
-    def _process_ray(self, is_ml_select, is_ml_reduce):
+    def _process_parallel(self, is_ml_select, is_ml_reduce,*args, **kwargs):
         # Initialize Ray (ideally done outside this method)
 
-        for transform_model in product(self.transform, self.model):
-            dim_red = self.dim_reduction if is_ml_reduce else None
-            future = self._generate_result.remote(transform_model, is_ml_select, is_ml_reduce, dim_red)
-            self.results.append(ray.get(future))
 
+        results = Parallel(n_jobs=self.n_jobs)(delayed(self._define_generator)(transform, model, is_ml_select, is_ml_reduce, self.dim_reduction, *args, **kwargs)
+                                                           for transform in self.transform for model in self.model)
+
+        return results
         # Shutdown Ray (ideally done outside this method)
     def _process_seq(self, is_ml_select, is_ml_reduce, *args, **kwargs):
         for transform in self.transform:
                 for model in self.model:
+
                     result = self._define_generator(transform, model, is_ml_select, is_ml_reduce, self.dim_reduction, *args, **kwargs)
                     self.results.append(result)
-    @ray.remote
-    def _generate_result(self, transform_model, is_ml_select, is_ml_reduce, dim_red):
-        return self._define_generator(*transform_model, is_ml_select=is_ml_select, is_ml_reduce=is_ml_reduce, dim_red=dim_red)
-    def _define_generator(self, transform, model, is_ml_select=False, is_ml_reduce=False, dim_red=None, *args, **kwargs):
 
+    def _define_generator(self, transform, model, is_ml_select=False, is_ml_reduce=False, dim_red=None, *args, **kwargs):
 
         if isinstance(transform,list):
             transform_cap = transform.copy()
@@ -95,6 +90,7 @@ class Ml_Main(Config_Utils):
         if is_ml_select:
             self.ml_select.set_X_y(X=X)
             X = self.ml_select.feature_selection(method=self.features_selection, *args, **kwargs)
+            self.ml_select.feat_metrics()
         if is_ml_reduce:
             self.ml_reduce.set_X_y(X=X)
             X = self.ml_reduce.dimensionality_reduction(method=dim_red, *args, **kwargs)
@@ -102,7 +98,7 @@ class Ml_Main(Config_Utils):
         self.ml_train.set_X_y(X=X)
         metrics = self.ml_train.train_model(model=model, *args, **kwargs)
 
-        return {'processing': {'transform': transform, 'features_selection': self.features_selection,
+        return {'processing': {'transform': transform, 'features_selection': {'method':self.features_selection,'feat_metrics':self.ml_select.feat_metrics()},
                                'dim_red': False if dim_red is None else dim_red, 'model': model},
                 'metrics': metrics}
     def Tune(self,k_best=3,results_return=False):
