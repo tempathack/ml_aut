@@ -431,9 +431,6 @@ class Config_Utils(Custom_Transforms,Custom_Models):
                               'default_kwargs': {}},
                                 }}
 
-
-
-
     def checked_in_models(self,pred_med):
         return self.configs['models'][pred_med].keys()
     @property
@@ -536,8 +533,12 @@ class Config_Utils(Custom_Transforms,Custom_Models):
     def _check_none_negative(obj):
         return obj.gt(0).all().all()
     def get_models_available(self,is_ts:bool,pred_med:str):
-        return [ k for k in self.configs['models'][pred_med].keys() if is_ts== self.configs['models'][pred_med][k]['ts_only']]
+        if not isinstance(is_ts,bool):
+            raise ValueError(" is_ts must be boolean either True or False")
+        if pred_med!='Classification' and pred_med!='Regression':
+            raise ValueError("specify prediction method either ==> Classification or Regression")
 
+        return [ k for k in self.configs['models'][pred_med].keys() if is_ts== self.configs['models'][pred_med][k]['ts_only']]
     def set_X_y(self,X=None,y=None):
         if not  y is  None:
             self.y=y

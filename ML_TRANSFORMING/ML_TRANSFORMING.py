@@ -41,11 +41,9 @@ class Ml_Process(Config_Utils):
     @property
     def possible_transforms(self) -> dict:
         return self.configs['transforms'].keys()
-
     @property
     def possible_imputation(self) -> dict:
         return self.configs['imputers'].keys()
-
     @staticmethod
     def _handle_cat(obj, handle_cat) -> pd.DataFrame:
         cat_cols = obj.select_dtypes(exclude=['float', 'integer']).columns
@@ -60,9 +58,7 @@ class Ml_Process(Config_Utils):
             return obj
         else:
             return obj.drop(columns=cat_cols)
-
     def main_transform(self, transform, handle_cat=True, *args, **kwargs) -> pd.DataFrame:
-
         transformer = Transformers(transform, *args, **kwargs).get_transform()
 
         is_3d = self._validate_3d(self.X)

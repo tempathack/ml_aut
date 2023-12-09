@@ -85,8 +85,6 @@ class Ml_Main(Config_Utils):
         else:
             X = self.ml_process.main_transform(transform=transform, *args, **kwargs)
 
-
-
         if is_ml_select:
             self.ml_select.set_X_y(X=X)
             X = self.ml_select.feature_selection(method=self.features_selection, *args, **kwargs)
