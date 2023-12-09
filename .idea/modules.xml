@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ML_FLOW.iml" filepath="$PROJECT_DIR$/.idea/ML_FLOW.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ml_aut.iml" filepath="$PROJECT_DIR$/.idea/ml_aut.iml" />
     </modules>
   </component>
 </project>

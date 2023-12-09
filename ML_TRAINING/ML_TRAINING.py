@@ -1,5 +1,6 @@
 from collections import defaultdict
 from sklearn.model_selection import cross_val_score
+from tqdm import tqdm
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,MultiScorer
 
 
@@ -41,8 +42,10 @@ class Ml_Train(Config_Utils):
 
     def train_model(self, model=None, *args, **kwargs):
 
-        if model is None:
-            raise ValueError('model must be specified')
+        if model is None or (not model in self.configs['models'][self.pred_method]):
+            raise ValueError(f'model is either not specified or not part of {self.configs["models"][self.pred_method].keys()}')
+
+
 
         if self.is_ts:
             if self.configs['models'][self.pred_method][model]['req_3d']:
@@ -54,7 +57,8 @@ class Ml_Train(Config_Utils):
                 y=self.y,
                 X=self.X,
                 cv=self.cv,
-                scoring=[val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method].items()],
+                scoring=[val[0] if self.pred_method=='Classification' else
+                         val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method].items()],
             )
 
             return results
@@ -76,11 +80,11 @@ class Ml_Train(Config_Utils):
 
         results = defaultdict(list)
 
-        for i, (train_index, test_index) in enumerate(cv.split(X, y)):
-            model.fit(X.iloc[train_index], y.iloc[train_index])
+        for i, (train_index, test_index) in tqdm(enumerate(cv.split(X, y))):
+            model.fit(X.iloc[train_index], y.iloc[train_index,0])
             preds = model.predict(X.iloc[test_index])
             for metrics in scoring:
-                name = str(metrics)[:-2]
+                name = str(metrics).replace('()','')
                 res = metrics(y.iloc[test_index], preds)
                 results[name].append(res)
 

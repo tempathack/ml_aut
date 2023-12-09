@@ -11,7 +11,6 @@ class Ml_Main(Config_Utils):
     def __init__(self, X, y, transform=None,
                  features_selection=None,
                  dim_reduction=None,
-                 target_adjustment=None,
                  ml_model=None):
 
         super().__init__()
@@ -24,7 +23,6 @@ class Ml_Main(Config_Utils):
         self.transform = transform if isinstance(transform, list) else [transform]
         self.features_selection = features_selection if features_selection is not None else False
         self.dim_reduction = dim_reduction if isinstance(dim_reduction, str) else None
-        self.target_adjustment = target_adjustment if target_adjustment is not None else False
         self.model = ml_model if isinstance(ml_model, list) else [ml_model]
 
         self.ml_train = None
@@ -41,19 +39,27 @@ class Ml_Main(Config_Utils):
         self.ml_train = Ml_Train(X=self.X, y=self.y)
 
 
-    def Process(self, mode='raw', *args, **kwargs):
-        is_ml_select = hasattr(self, 'ml_select')
-        is_ml_reduce = hasattr(self, 'ml_reduce')
+    def Process(self, mode='raw',results_return=False, *args, **kwargs):
+        self.is_ml_select = hasattr(self, 'ml_select')
+        self.is_ml_reduce = hasattr(self, 'ml_reduce')
+
         self.results = []
 
         if mode == 'ray':
             ray.init()
-            self._process_ray(is_ml_select, is_ml_reduce)
+            self._process_ray(self.is_ml_select, self.is_ml_reduce)
             ray.shutdown()
         elif mode == 'seq':
-            self._process_seq(is_ml_select, is_ml_reduce, *args, **kwargs)
+            self._process_seq(self.is_ml_select, self.is_ml_reduce, *args, **kwargs)
 
-        return self._unpack_results(self.results)
+
+        self.is_processed = True
+
+
+        if results_return:
+            return self._unpack_results(self.results)
+        else:
+            return self
 
     def _process_ray(self, is_ml_select, is_ml_reduce):
         # Initialize Ray (ideally done outside this method)
@@ -64,25 +70,23 @@ class Ml_Main(Config_Utils):
             self.results.append(ray.get(future))
 
         # Shutdown Ray (ideally done outside this method)
-
     def _process_seq(self, is_ml_select, is_ml_reduce, *args, **kwargs):
         for transform in self.transform:
                 for model in self.model:
                     result = self._define_generator(transform, model, is_ml_select, is_ml_reduce, self.dim_reduction, *args, **kwargs)
                     self.results.append(result)
-
     @ray.remote
     def _generate_result(self, transform_model, is_ml_select, is_ml_reduce, dim_red):
         return self._define_generator(*transform_model, is_ml_select=is_ml_select, is_ml_reduce=is_ml_reduce, dim_red=dim_red)
-
     def _define_generator(self, transform, model, is_ml_select=False, is_ml_reduce=False, dim_red=None, *args, **kwargs):
-        transform_cap=transform
+
 
         if isinstance(transform,list):
-            transform_cap = '-'.join(transform)
-            while len(transform)>0 and isinstance(transform,list):
-                X = self.ml_process.main_transform(transform=transform[0], *args, **kwargs)
-                transform.pop(0)
+            transform_cap = transform.copy()
+            transform = '-'.join(transform)
+            while len(transform_cap)>0 and isinstance(transform_cap ,list):
+                X = self.ml_process.main_transform(transform=transform_cap[0], *args, **kwargs)
+                transform_cap.pop(0)
         else:
             X = self.ml_process.main_transform(transform=transform, *args, **kwargs)
 
@@ -98,6 +102,13 @@ class Ml_Main(Config_Utils):
         self.ml_train.set_X_y(X=X)
         metrics = self.ml_train.train_model(model=model, *args, **kwargs)
 
-        return {'processing': {'transform': transform_cap, 'features_selection': self.features_selection,
+        return {'processing': {'transform': transform, 'features_selection': self.features_selection,
                                'dim_red': False if dim_red is None else dim_red, 'model': model},
                 'metrics': metrics}
+    def Tune(self,k_best=3,results_return=False):
+        if not self.is_processed:
+            raise ValueError("the models were not trained yet")
+
+    def Analyse(self):
+        if not self.is_processed:
+            raise ValueError("the models were not trained yet")

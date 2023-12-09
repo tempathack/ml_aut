@@ -18,17 +18,20 @@ from xgboost import XGBRegressor,XGBClassifier
 from lightgbm import LGBMRegressor,LGBMClassifier
 from catboost import CatBoostClassifier,CatBoostRegressor
 from sktime.classification.ensemble import BaggingClassifier
+from sktime.classification.sklearn import RotationForest
 from sktime.classification.deep_learning.cnn import CNNClassifier
 from sktime.classification.deep_learning.fcn import FCNClassifier
 from sktime.classification.distance_based import KNeighborsTimeSeriesClassifier
 from sktime.performance_metrics.forecasting import MeanAbsoluteError,MeanAbsolutePercentageError,MedianSquaredError
 from sktime.classification.hybrid import HIVECOTEV1,HIVECOTEV2
-from sktime.classification.kernel_based import RocketClassifier,TimeSeriesSVC
+from sktime.classification.kernel_based import RocketClassifier,TimeSeriesSVC,Arsenal
 from sktime.classification.shapelet_based import ShapeletTransformClassifier
-from sktime.classification.dictionary_based import BOSSEnsemble,IndividualBOSS
+from sktime.classification.dictionary_based import BOSSEnsemble,IndividualBOSS,WEASEL
+from sktime.classification.interval_based import SupervisedTimeSeriesForest,TimeSeriesForestClassifier
 from sktime.regression.kernel_based import RocketRegressor
 from sktime.regression.distance_based import KNeighborsTimeSeriesRegressor
 from sktime.regression.deep_learning import CNNRegressor,TapNetRegressor
+from sktime.forecasting.compose import DirectTabularRegressionForecaster
 
 
 from CUSTOM_MODELS.CUSTOM_MODELS import  Custom_Models
@@ -280,8 +283,6 @@ class Config_Utils(Custom_Transforms,Custom_Models):
                                                           'req_3d': False,
                                                           'default_kwargs': {}}}
 
-
-
         self.configs['is_sk_transform']=['RobustScaler', 'MinMaxScaler', 'KBinsDiscretizer', 'QuantileTransformer',
                            'StandardScaler', 'PowerTransformer','KernelCenterer']
 
@@ -289,7 +290,6 @@ class Config_Utils(Custom_Transforms,Custom_Models):
                     'SimpleImputer': SimpleImputer}
 
         self.configs['dim_reduction']=['method']
-
 
         self.configs['metrics']={'tab':{'Regression':{'mean_squared_error':(mean_squared_error,{}),
                                                'mean_absolute_error':(mean_absolute_error,{}),
@@ -351,7 +351,7 @@ class Config_Utils(Custom_Transforms,Custom_Models):
                                 'SVC': {'object': SVC, 'ts_only': False, 'req_3d': False,
                                                   'is_sklearn': True, 'default_kwargs': {}},
                                 'RandomForestClassifier': {'object': RandomForestClassifier, 'ts_only': False, 'req_3d': False,
-                                        'is_sklearn': True, 'default_kwargs': {}}},
+                                        'is_sklearn': True, 'default_kwargs': {}},
                                 'DecisionTreeClassifier': {'object': DecisionTreeClassifier, 'ts_only': False,
                                                            'req_3d': False,
                                                            'is_sklearn': True, 'default_kwargs': {}},
@@ -406,7 +406,27 @@ class Config_Utils(Custom_Transforms,Custom_Models):
                                                  'ts_only': True,
                                                  'req_3d': True, 'is_sklearn': False,
                                                  'default_kwargs': {}},
-                                }
+                                'SupervisedTimeSeriesForest':{'object': SupervisedTimeSeriesForest,
+                                                 'ts_only': True,
+                                                 'req_3d': True, 'is_sklearn': False,
+                                                 'default_kwargs': {}},
+                            'WEASEL': {'object':WEASEL,
+                                                 'ts_only': True,
+                                                'req_3d': True, 'is_sklearn': False,
+                                                'default_kwargs': {}},
+                             'TimeSeriesForestClassifier': {'object': TimeSeriesForestClassifier,
+                                          'ts_only': True,
+                                       'req_3d': True, 'is_sklearn': False,
+                              'default_kwargs': {}},
+                                'Arsenal': {'object':Arsenal,
+                                                 'ts_only': True,
+                                                'req_3d': True, 'is_sklearn': False,
+                                            'default_kwargs': {}},
+                               'RotationForest': {'object':RotationForest,
+                                   'ts_only': True,
+                              'req_3d': False, 'is_sklearn': True,
+                              'default_kwargs': {}},
+                                }}
 
 
 
