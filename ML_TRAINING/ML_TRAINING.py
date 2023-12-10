@@ -2,6 +2,7 @@ from collections import defaultdict
 from sklearn.model_selection import cross_val_score
 from tqdm import tqdm
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,MultiScorer
+from LOGGER.LOGGING import WrapStack
 from imblearn.over_sampling import SMOTE
 
 
@@ -39,7 +40,7 @@ class Ml_Train(Config_Utils):
         self.is_ts = self.TS_check(X)
         self.pred_method = self._class_or_reg(y)
         self.cv = self._define_cv(self.is_ts)
-
+    @WrapStack.FUNCTION_SCREEN
     def train_model(self, model=None,handle_imbalance=False, *args, **kwargs):
 
         if model is None or (not model in self.configs['models'][self.pred_method]):
@@ -89,7 +90,7 @@ class Ml_Train(Config_Utils):
 
         results = defaultdict(list)
 
-        for i, (train_index, test_index) in tqdm(enumerate(cv.split(X, y))):
+        for i, (train_index, test_index) in enumerate(cv.split(X, y)):
             model.fit(X.iloc[train_index], y.iloc[train_index,0])
             preds = model.predict(X.iloc[test_index])
             for metrics in scoring:

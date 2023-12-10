@@ -4,6 +4,9 @@ from ML_TRAINING.ML_TRAINING import Ml_Train
 from ML_TRANSFORMING.ML_TRANSFORMING import Ml_Process
 from ML_DIMENSIONALITY_REDUCTION.ML_DIMENSIONALITY_REDUCTION import Ml_Reduce
 from joblib import Parallel, delayed
+from LOGGER.LOGGING import WrapStack
+
+
 
 class Ml_Main(Config_Utils):
     def __init__(self, X, y, transform=None,
@@ -25,6 +28,8 @@ class Ml_Main(Config_Utils):
         self.model = ml_model if isinstance(ml_model, list) else [ml_model]
         self.n_jobs=n_jobs
         self.ml_train = None
+        self.mode= 'seq' if n_jobs==1 else 'parallel'
+        self.Logger=WrapStack()
 
         if isinstance(self.transform, list):
             self.ml_process = Ml_Process(X=self.X)
@@ -38,15 +43,15 @@ class Ml_Main(Config_Utils):
         self.ml_train = Ml_Train(X=self.X, y=self.y)
 
 
-    def Process(self, mode='seq',results_return=False, *args, **kwargs):
+    def Process(self,results_return=False, *args, **kwargs):
         self.is_ml_select = hasattr(self, 'ml_select')
         self.is_ml_reduce = hasattr(self, 'ml_reduce')
 
         self.results = []
 
-        if mode == 'parallel':
+        if self.mode == 'parallel':
             self._process_parallel(self.is_ml_select, self.is_ml_reduce)
-        elif mode == 'seq':
+        elif self.mode == 'seq':
             self._process_seq(self.is_ml_select, self.is_ml_reduce, *args, **kwargs)
 
 
@@ -57,7 +62,7 @@ class Ml_Main(Config_Utils):
             return self._unpack_results(self.results)
         else:
             return self
-
+    @WrapStack.FUNCTION_SCREEN
     def _process_parallel(self, is_ml_select, is_ml_reduce,*args, **kwargs):
         # Initialize Ray (ideally done outside this method)
 
@@ -67,7 +72,9 @@ class Ml_Main(Config_Utils):
 
         return results
         # Shutdown Ray (ideally done outside this method)
+    @WrapStack.FUNCTION_SCREEN
     def _process_seq(self, is_ml_select, is_ml_reduce, *args, **kwargs):
+
         for transform in self.transform:
                 for model in self.model:
 

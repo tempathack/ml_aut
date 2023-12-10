@@ -8,7 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
 import plotly.express as px
-
+from LOGGER.LOGGING import WrapStack
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
 
 
@@ -117,6 +117,7 @@ class Ml_Select(Config_Utils):
                                   'Ranks': corr_info[:-1].argsort().argsort(),
                                   'Columns': X.columns.tolist()})
 
+    @WrapStack.FUNCTION_SCREEN
     def feature_selection(self, method=None,k_best=15, *args, **kwargs):
 
         k_best=min(k_best,self.feat_dim)

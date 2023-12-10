@@ -6,6 +6,7 @@ from sklearn.manifold import Isomap
 from sklearn.manifold import LocallyLinearEmbedding
 from sklearn.manifold import MDS
 from sklearn.manifold import SpectralEmbedding
+from LOGGER.LOGGING import WrapStack
 from umap import UMAP
 
 
@@ -115,6 +116,7 @@ class Ml_Reduce(Config_Utils):
 
         else:
             return X_reduced
+    @WrapStack.FUNCTION_SCREEN
     def dimensionality_reduction(self,method=None,upper_limit=20,*args,**kwargs):
 
         if method is None :

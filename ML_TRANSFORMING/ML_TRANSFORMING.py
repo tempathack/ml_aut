@@ -3,7 +3,7 @@ from sktime.transformations.series.adapt import TabularToSeriesAdaptor
 import pandas as pd
 from scipy.sparse import csr_matrix
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
-
+from LOGGER.LOGGING import WrapStack
 
 class Transformers(Config_Utils):
     def __init__(self, transform, *args, **kwargs):
@@ -58,6 +58,8 @@ class Ml_Process(Config_Utils):
             return obj
         else:
             return obj.drop(columns=cat_cols)
+
+    @WrapStack.FUNCTION_SCREEN
     def main_transform(self, transform, handle_cat=True, *args, **kwargs) -> pd.DataFrame:
         transformer = Transformers(transform, *args, **kwargs).get_transform()
 

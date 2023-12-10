@@ -28,7 +28,7 @@ data['Label'] = np.random.randint(0, 2, size=len(data))
 
 configs=Config_Utils()
 X,target=data.drop(columns=['Label']),data[['Label']]
-obj = Ml_Main(X, y=target, transform=[['RobustScaler', 'StandardScaler'],'StandardScaler','PolynomialFeatures'],
+obj = Ml_Main(X, y=target, transform=[['RobustScaler', 'StandardScaler'],['StandardScaler','PolynomialFeatures']],
                   features_selection='all', ml_model=['RotationForest']).Process()
 
 
