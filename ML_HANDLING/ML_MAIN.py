@@ -5,7 +5,7 @@ from ML_TRANSFORMING.ML_TRANSFORMING import Ml_Process
 from ML_DIMENSIONALITY_REDUCTION.ML_DIMENSIONALITY_REDUCTION import Ml_Reduce
 from joblib import Parallel, delayed
 from LOGGER.LOGGING import WrapStack
-
+from multiprocessing import Manager,current_process
 
 
 class Ml_Main(Config_Utils):
@@ -13,7 +13,7 @@ class Ml_Main(Config_Utils):
                  features_selection=None,
                  dim_reduction=None,
                  ml_model=None,
-                 n_jobs=-1):
+                 n_jobs=1):
 
         super().__init__()
 
@@ -30,6 +30,7 @@ class Ml_Main(Config_Utils):
         self.ml_train = None
         self.mode= 'seq' if n_jobs==1 else 'parallel'
         self.Logger=WrapStack()
+
 
         if isinstance(self.transform, list):
             self.ml_process = Ml_Process(X=self.X)
@@ -65,10 +66,12 @@ class Ml_Main(Config_Utils):
     @WrapStack.FUNCTION_SCREEN
     def _process_parallel(self, is_ml_select, is_ml_reduce,*args, **kwargs):
         # Initialize Ray (ideally done outside this method)
+        manager=Manager()
+        shared_dict = manager.dict()
 
 
-        results = Parallel(n_jobs=self.n_jobs)(delayed(self._define_generator)(transform, model, is_ml_select, is_ml_reduce, self.dim_reduction, *args, **kwargs)
-                                                           for transform in self.transform for model in self.model)
+        results = Parallel(n_jobs=self.n_jobs)(delayed(self._define_generator)(transform, model, is_ml_select, is_ml_reduce, self.dim_reduction,shared_dict, *args, **kwargs)
+                                                           for model in self.model for transform in self.transform)
 
         return results
         # Shutdown Ray (ideally done outside this method)
@@ -81,7 +84,7 @@ class Ml_Main(Config_Utils):
                     result = self._define_generator(transform, model, is_ml_select, is_ml_reduce, self.dim_reduction, *args, **kwargs)
                     self.results.append(result)
 
-    def _define_generator(self, transform, model, is_ml_select=False, is_ml_reduce=False, dim_red=None, *args, **kwargs):
+    def _define_generator(self, transform, model, is_ml_select=False, is_ml_reduce=False, dim_red=None,shared_dict=None, *args, **kwargs):
 
         if isinstance(transform,list):
             transform_cap = transform.copy()
@@ -90,7 +93,14 @@ class Ml_Main(Config_Utils):
                 X = self.ml_process.main_transform(transform=transform_cap[0], *args, **kwargs)
                 transform_cap.pop(0)
         else:
-            X = self.ml_process.main_transform(transform=transform, *args, **kwargs)
+            if isinstance(shared_dict,dict):
+                if transform in shared_dict:
+                    X=shared_dict[transform]
+                else:
+                    X = self.ml_process.main_transform(transform=transform, *args, **kwargs)
+                    shared_dict[transform]=X
+            else:
+                X = self.ml_process.main_transform(transform=transform, *args, **kwargs)
 
         if is_ml_select:
             self.ml_select.set_X_y(X=X)
@@ -103,7 +113,8 @@ class Ml_Main(Config_Utils):
         self.ml_train.set_X_y(X=X)
         metrics = self.ml_train.train_model(model=model, *args, **kwargs)
 
-        return {'processing': {'transform': transform, 'features_selection': {'method':self.features_selection,'feat_metrics':self.ml_select.feat_metrics()},
+        return {'processing': {'transform': transform, 'features_selection': {'method':self.features_selection,'feat_metrics':self.ml_select.feat_metrics()
+        if is_ml_select else False},
                                'dim_red': False if dim_red is None else dim_red, 'model': model},
                 'metrics': metrics}
     def Tune(self,k_best=3,results_return=False):

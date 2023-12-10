@@ -28,11 +28,18 @@ data['Label'] = np.random.randint(0, 2, size=len(data))
 
 configs=Config_Utils()
 X,target=data.drop(columns=['Label']),data[['Label']]
-obj = Ml_Main(X, y=target, transform=[['RobustScaler', 'StandardScaler'],['StandardScaler','PolynomialFeatures']],
-                  features_selection='all', ml_model=['RotationForest']).Process()
+ct=0
+for trans in configs.get_transforms_available(True,pred_med='Classification'):
+    for model in configs.get_models_available(True,pred_med='Classification'):
+        print(trans,model)
+        if ct>100:
+            continue
+        ct+=1
+        obj = Ml_Main(X, y=target, transform=trans,
+                  features_selection=None,n_jobs=-1, ml_model=model).Process(results_return=True)
 
 
-print(obj)
+obj.to_csv("Results.csv")
 
 
 

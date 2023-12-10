@@ -122,6 +122,10 @@ class Ml_Select(Config_Utils):
 
         k_best=min(k_best,self.feat_dim)
 
+        if not self.is_2d(self.X):
+            return self.X
+
+
 
         if (method is None) or  (method not in self.configs['feat_selections'][self.pred_method]) :
             raise ValueError(f"method must be one of {self.configs['feat_selections'][self.pred_method]}  ")
