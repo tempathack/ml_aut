@@ -9,12 +9,8 @@ from sktime.base import BaseEstimator
 from sklearn.manifold import TSNE,LocallyLinearEmbedding
 from umap import UMAP
 import numpy as np
-from sktime.classification.dictionary_based import BOSSEnsemble,IndividualBOSS
-from sktime.classification.shapelet_based import ShapeletTransformClassifier
 from sktime.datasets import load_unit_test
-X_train, y_train = load_unit_test(split="train", return_X_y=True)
-X_train['dim_2']=X_train['dim_0']
-X_train['dim_3']=X_train['dim_0']
+
 
 class UniToMultivariateWrapper(BaseEstimator):
    def __init__(self, model: Type[BaseEstimator],var_thres=0.8, n_components: int = 1, *args, **kwargs):
