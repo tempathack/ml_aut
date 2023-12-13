@@ -3,7 +3,11 @@ import pandas as pd
 import numpy as np
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
 from ML_HANDLING.ML_MAIN import Ml_Main
+import warnings
+import warnings
 
+# Ignore all warnings
+warnings.filterwarnings("ignore")
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -16,7 +20,7 @@ end_date = datetime(2022, 12, 31)
 date_range = pd.date_range(start=start_date, end=end_date, freq='H')
 
 # Create a DataFrame with DateTimeIndex
-data = pd.DataFrame(index=date_range)
+data = pd.DataFrame(index=date_range).iloc[:1000]
 
 # Generating features (random in this example)
 data['Feature1'] = np.random.randn(len(data))
@@ -29,10 +33,11 @@ data['Label'] = np.random.randint(0, 2, size=len(data))
 configs=Config_Utils()
 X,target=data.drop(columns=['Label']),data[['Label']]
 ct=0
+#notworked 'WindowSummarizer' 'Rocket'  'MiniRocket''MiniRocketMultivariate'
 for trans in configs.get_transforms_available(True,pred_med='Classification'):
     for model in configs.get_models_available(True,pred_med='Classification'):
         print(trans,model)
-        if ct>100:
+        if trans in ['SummaryTransformer','WindowSummarizer','Rocket', 'MiniRocket','MiniRocketMultivariate'] or not model in ['ShapeletTransformClassifier']:
             continue
         ct+=1
         obj = Ml_Main(X, y=target, transform=trans,

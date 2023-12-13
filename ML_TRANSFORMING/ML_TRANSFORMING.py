@@ -61,7 +61,6 @@ class Ml_Process(Config_Utils):
             return obj.drop(columns=cat_cols)
 
     @WrapStack.FUNCTION_SCREEN
-    @lru_cache(maxsize=None)
     def main_transform(self, transform, handle_cat=True, *args, **kwargs) -> pd.DataFrame:
         transformer = Transformers(transform, *args, **kwargs).get_transform()
 
@@ -98,5 +97,4 @@ class Ml_Process(Config_Utils):
 
         self.global_transform_track[transform].append(transformer)
 
-        self.X = X
-        return self.X
+        return X

@@ -10,7 +10,7 @@ from sklearn.tree import DecisionTreeClassifier,DecisionTreeRegressor
 import plotly.express as px
 from LOGGER.LOGGING import WrapStack
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
-
+from ML_CONFIGS_UTILS.Custom_Errors import MethodNotExecutedError
 
 class Ml_Select(Config_Utils):
 
@@ -122,13 +122,11 @@ class Ml_Select(Config_Utils):
 
         k_best=min(k_best,self.feat_dim)
 
+        if (method is None) or  (method not in self.configs['feat_selections'][self.pred_method]) :
+            raise KeyError(f"method must be one of {self.configs['feat_selections'][self.pred_method]}  ")
+
         if not self.is_2d(self.X):
             return self.X
-
-
-
-        if (method is None) or  (method not in self.configs['feat_selections'][self.pred_method]) :
-            raise ValueError(f"method must be one of {self.configs['feat_selections'][self.pred_method]}  ")
 
         self.cv = self._define_cv(self.is_ts)
 
@@ -211,8 +209,13 @@ class Ml_Select(Config_Utils):
 
         return self.X.loc[:,self.feat_metrics().query(f"Selection_Method==@method").nlargest(k_best, columns=['Ranks']).Columns.tolist()]
     def feat_metrics(self):
-        assert self.track_feat_metrics != {}, "track_feat_metrics can not be empty"
-        return pd.concat([pd.DataFrame(data={'Ranks': self.track_feat_metrics[k]['Ranks'],
+        if  self.track_feat_metrics == {} :
+            if self.is_2d(self.X):
+                raise MethodNotExecutedError('Execute featureselection method first')
+            else:
+                return 'Feature Selection is not Available for 3D Datasets'
+        else:
+             return pd.concat([pd.DataFrame(data={'Ranks': self.track_feat_metrics[k]['Ranks'],
                                              'Columns': self.track_feat_metrics[k]['Columns'],
                                              'Raw_Metric':self.track_feat_metrics[k]['raw_metric'],
                                              'Selection_Method': k

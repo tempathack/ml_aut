@@ -36,7 +36,7 @@ from sktime.forecasting.compose import DirectTabularRegressionForecaster
 
 
 from CUSTOM_MODELS.CUSTOM_MODELS import  Custom_Models
-from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import Custom_Transforms
+from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import UniToMultivariateWrapper
 
 
 
@@ -212,7 +212,7 @@ class TimeSeriesToPanelData(BaseEstimator, TransformerMixin):
 
 
 
-class Config_Utils(Custom_Transforms,Custom_Models):
+class Config_Utils(Custom_Models):
     def __init__(self):
         'check in section for all function parameters and so on'
         self.configs={}
@@ -389,7 +389,7 @@ class Config_Utils(Custom_Transforms,Custom_Models):
                                                'ts_only': True,
                                                'req_3d':True, 'is_sklearn': False,
                                                'default_kwargs': {}},
-                                'ShapeletTransformClassifier': {'object': ShapeletTransformClassifier,
+                                'ShapeletTransformClassifier': {'object': UniToMultivariateWrapper(ShapeletTransformClassifier),
                                                'ts_only': True,
                                                'req_3d': True, 'is_sklearn': False,
                                                'default_kwargs': {}},
@@ -438,7 +438,7 @@ class Config_Utils(Custom_Transforms,Custom_Models):
         if isinstance(obj.iat[0, 0], pd.Series):
             return True
         else:
-            False
+            return False
     @staticmethod
     def _validate_categorical(obj) -> bool:
         cat_cols = obj.select_dtypes(exclude=['float', 'integer']).columns
@@ -462,7 +462,6 @@ class Config_Utils(Custom_Transforms,Custom_Models):
             False
     @staticmethod
     def to_panel(obj, window_size=None) -> pd.DataFrame:
-
         if window_size is None or obj.shape[0] < window_size:
             raise AttributeError("window can not be None or bigger than df.shape[0]")
 
@@ -471,7 +470,7 @@ class Config_Utils(Custom_Transforms,Custom_Models):
         numeric_cols = obj.select_dtypes(include=['float', 'integer']).columns.tolist()
 
         if len(numeric_cols) == 0:
-            raise ValueError('expecting numeric columns')
+            raise AttributeError('expecting numeric columns')
 
         transformer = TimeSeriesToPanelData(window_size=window_size)
 
@@ -501,7 +500,9 @@ class Config_Utils(Custom_Transforms,Custom_Models):
         return cv
     @staticmethod
     def _unpack_results(results : list ):
-        assert isinstance(results,list) and len(results)!=0,'Must be a list and can not be empty'
+
+        if not ((isinstance(results,list)) and  len(results)>0):
+            raise AttributeError('Must be a list and can not be empty')
         collect = []
         for res in results:
             obj = pd.DataFrame(res['metrics']).assign(CV=lambda df: np.arange(df.shape[0]) + 1)
@@ -523,7 +524,7 @@ class Config_Utils(Custom_Transforms,Custom_Models):
         if not isinstance(is_ts,bool):
             raise ValueError(" is_ts must be boolean either True or False")
         if pred_med!='Classification' and pred_med!='Regression':
-            raise ValueError("specify prediction method either ==> Classification or Regression")
+            raise ValueError("specify prediction method either ==> 'Classification' or 'Regression'")
         if is_ts:
             return [ k for k in self.configs['transforms'].keys() ]
         else:

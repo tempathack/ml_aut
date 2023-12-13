@@ -119,12 +119,11 @@ class Ml_Reduce(Config_Utils):
     @WrapStack.FUNCTION_SCREEN
     def dimensionality_reduction(self,method=None,upper_limit=20,*args,**kwargs):
 
-        if method is None :
-            raise ValueError("specify method first")
+        if method is None or  method in self.configs['dim_reduction'] :
+            raise KeyError("specify valid method first")
 
-        assert method in self.configs['dim_reduction'],f'Method {method} is not supported'
 
-        self.is_2d(self.X),'Data can not be in 3D Shape for the purpose of reduction'
+        assert self.is_2d(self.X),'Data can not be in 3D Shape for the purpose of reduction'
 
         if self.X.shape[1]>upper_limit:
             self.X=self._perform_pca(self.X, self.y, *args, **kwargs.update({'n_components':upper_limit}))

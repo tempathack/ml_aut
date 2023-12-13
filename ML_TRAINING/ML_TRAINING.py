@@ -27,7 +27,7 @@ class Models(Config_Utils):
 
             return method(*self.args, **self.kwargs)
         else:
-            raise ValueError(f"{self.model} is not supported")
+            raise KeyError(f"{self.model} is not supported")
 
 
 class Ml_Train(Config_Utils):
@@ -44,12 +44,12 @@ class Ml_Train(Config_Utils):
     def train_model(self, model=None,handle_imbalance=False, *args, **kwargs):
 
         if model is None or (not model in self.configs['models'][self.pred_method]):
-            raise ValueError(f'model is either not specified or not part of {self.configs["models"][self.pred_method].keys()}')
+            raise KeyError(f'model is either not specified or not part of {self.configs["models"][self.pred_method].keys()}')
 
 
 
         if self.is_ts:
-            if self.configs['models'][self.pred_method][model]['req_3d']:
+            if self.configs['models'][self.pred_method][model]['req_3d'] and  self.is_2d(self.X):
                 self.X = self.to_panel(self.X, window_size=12)
             model = Models(model, self.pred_method, *args, **kwargs).get_model()
 
