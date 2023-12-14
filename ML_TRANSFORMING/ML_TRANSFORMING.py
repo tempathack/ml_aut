@@ -11,7 +11,7 @@ class Transformers(Config_Utils):
         super(Transformers, self).__init__()
 
         if not transform in self.checked_in_transforms:
-            raise ValueError(f"Transform is not supported use one of {self.configs['transforms'].keys()}")
+            raise KeyError(f"Transform is not supported use one of {self.configs['transforms'].keys()}")
 
         self.transform = transform
         self.args = args

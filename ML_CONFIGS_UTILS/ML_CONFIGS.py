@@ -33,11 +33,7 @@ from sktime.regression.kernel_based import RocketRegressor
 from sktime.regression.distance_based import KNeighborsTimeSeriesRegressor
 from sktime.regression.deep_learning import CNNRegressor,TapNetRegressor
 from sktime.forecasting.compose import DirectTabularRegressionForecaster
-
-
 from CUSTOM_MODELS.CUSTOM_MODELS import  UniToMultivariateWrapper
-from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import UniToMultivariateWrapper
-
 
 
 
@@ -212,7 +208,7 @@ class TimeSeriesToPanelData(BaseEstimator, TransformerMixin):
 
 
 
-class Config_Utils(Custom_Models):
+class Config_Utils():
     def __init__(self):
         'check in section for all function parameters and so on'
         self.configs={}

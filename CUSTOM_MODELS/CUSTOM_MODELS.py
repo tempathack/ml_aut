@@ -25,15 +25,6 @@ class UniToMultivariateWrapper(BaseEstimator):
                      ('umap',UMAP(n_components= self.n_components))]))
        self._is_fitted = False
 
-   @property
-   def n_components(self):
-       return self.self.n_components
-
-   @n_components.setter
-   def n_components(self, new_value):
-       # Prevent modification of the attribute
-       raise AttributeError("This attribute is read-only")
-
    def __call__(self, *args, **kwargs):
        self.model = self.model(*args, **kwargs)
        return self
