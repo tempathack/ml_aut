@@ -84,7 +84,7 @@ class Ml_Process(Config_Utils):
         transformer = Transformers(transform, *args, **kwargs).get_transform()
 
         is_3d = self._validate_3d(self.X)
-        contains_nulls = self._validate_null(self.X)
+        contains_nulls = self._validate_null(self.X,is_3d)
         contains_categorical = self._validate_categorical(self.X)
         is_ts = self.TS_check(self.X)
         X = self.X
@@ -103,6 +103,11 @@ class Ml_Process(Config_Utils):
             transformed_df = transformer.fit_transform(X)
         else:  # tabular transformations
             transformed_df = transformer.fit_transform(X)
+
+        is_3d = self._validate_3d(transformed_df)
+        contains_nulls = self._validate_null(transformed_df, is_3d)
+        if contains_nulls:
+            X = self._impute(transformed_df, is_3d, *args, **kwargs)
 
         if isinstance(transformed_df, csr_matrix):
 

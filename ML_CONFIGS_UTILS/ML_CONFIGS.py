@@ -35,7 +35,7 @@ from sktime.regression.deep_learning import CNNRegressor,TapNetRegressor
 from sktime.forecasting.compose import DirectTabularRegressionForecaster
 
 
-from CUSTOM_MODELS.CUSTOM_MODELS import  Custom_Models,UniToMultivariateWrapper
+from CUSTOM_MODELS.CUSTOM_MODELS import  UniToMultivariateWrapper
 from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import UniToMultivariateWrapper
 
 
@@ -465,8 +465,13 @@ class Config_Utils(Custom_Models):
         else:
             return True
     @staticmethod
-    def _validate_null(obj) -> bool:
-        return obj.isnull().any().any()
+    def _validate_null(obj,is_3d) -> bool:
+        if is_3d:
+            return np.any([obj.loc[:, col].loc[j].isnull().any() for j in range(obj.loc[:, col].size) for col in
+                    obj.columns])
+        else:
+
+            return obj.isnull().any().any()
     @staticmethod
     def eval_df(obj) -> bool:
         assert isinstance(obj, pd.DataFrame), 'invalid needs to be DataFrame'
