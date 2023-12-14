@@ -35,7 +35,7 @@ from sktime.regression.deep_learning import CNNRegressor,TapNetRegressor
 from sktime.forecasting.compose import DirectTabularRegressionForecaster
 
 
-from CUSTOM_MODELS.CUSTOM_MODELS import  Custom_Models
+from CUSTOM_MODELS.CUSTOM_MODELS import  Custom_Models,UniToMultivariateWrapper
 from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import UniToMultivariateWrapper
 
 
@@ -381,6 +381,10 @@ class Config_Utils(Custom_Models):
                                                'ts_only': True,
                                                'req_3d': True, 'is_sklearn': False,
                                                'default_kwargs': {}},
+                                                  'HIVECOTEV1': {'object': UniToMultivariateWrapper(HIVECOTEV1),
+                                                                 'ts_only': True,
+                                                                 'req_3d': True, 'is_sklearn': False,
+                                                                 'default_kwargs': {}},
                                 'RocketClassifier': {'object': RocketClassifier,
                                                'ts_only': True,
                                                'req_3d': True, 'is_sklearn': False,
@@ -393,7 +397,17 @@ class Config_Utils(Custom_Models):
                                                'ts_only': True,
                                                'req_3d': True, 'is_sklearn': False,
                                                'default_kwargs': {}},
-                            'WEASEL': {'object':WEASEL,
+                                                  'BOSSEnsemble': {
+                                                      'object': UniToMultivariateWrapper(BOSSEnsemble),
+                                                      'ts_only': True,
+                                                      'req_3d': True, 'is_sklearn': False,
+                                                      'default_kwargs': {}},
+                                                  'IndividualBOSS': {
+                                                      'object': UniToMultivariateWrapper(IndividualBOSS),
+                                                      'ts_only': True,
+                                                      'req_3d': True, 'is_sklearn': False,
+                                                      'default_kwargs': {}},
+                            'WEASEL': {'object':UniToMultivariateWrapper(WEASEL),
                                                  'ts_only': True,
                                                 'req_3d': True, 'is_sklearn': False,
                                                 'default_kwargs': {}},
@@ -401,6 +415,10 @@ class Config_Utils(Custom_Models):
                                           'ts_only': True,
                                        'req_3d': True, 'is_sklearn': False,
                               'default_kwargs': {}},
+                                'TimeSeriesForestClassifier': {'object':  UniToMultivariateWrapper(SupervisedTimeSeriesForest),
+                                                             'ts_only': True,
+                                                            'req_3d': True, 'is_sklearn': False,
+                                                            'default_kwargs': {}},
                                 'Arsenal': {'object':Arsenal,
                                                  'ts_only': True,
                                                 'req_3d': True, 'is_sklearn': False,
