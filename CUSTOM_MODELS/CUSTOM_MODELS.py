@@ -55,12 +55,12 @@ class FlattenedTransforms(BaseEstimator, TransformerMixin):
         else:
             X_arr = pd.DataFrame(self.pipe.fit_transform(X_arr), columns=X.columns)
 
-        X_arr=self.to_panel(X_arr)
+        X_arr=self._re_panel(X_arr,window_size=14)
         return X_arr
     @staticmethod
-    def to_panel(obj, window_size=None) -> pd.DataFrame:
+    def _re_panel(obj, window_size=None) -> pd.DataFrame:
         if window_size is None or obj.shape[0] < window_size:
-            raise AttributeError("window can not be None or bigger than df.shape[0]")
+            raise AttributeError(f"window can not be None or bigger than df.shape[0]")
 
         # obtain numeric columns
 
@@ -69,11 +69,12 @@ class FlattenedTransforms(BaseEstimator, TransformerMixin):
         if len(numeric_cols) == 0:
             raise AttributeError('expecting numeric columns')
 
-        transformer = TimeSeriesToPanelData(window_size=window_size)
+        df_ = pd.concat([pd.Series(
+            [pd.Series(obj.loc[:, col].iloc[idx:idx + window_size]) for idx in range(0, obj.shape[0], window_size)])
+            for col in obj.columns], axis=1)
+        df_.columns =obj.columns
 
-        res = list(map(transformer.transform, [obj.loc[:, col] for col in numeric_cols]))
-
-        return pd.concat(res, axis=1)
+        return df_
 
 from sktime.base import BaseEstimator
 

@@ -1,0 +1,6 @@
+<function log_loss at 0x7fed73c77d90>,<function accuracy_score at 0x7fed73c769e0>,<function f1_score at 0x7fed73c771c0>,<function roc_auc_score at 0x7fed73c99a20>,<function precision_score at 0x7fed73c777f0>,CV,transform,features_selection,dim_red,model
+16.719044041939885,0.536144578313253,0.5925925925925926,0.533115468409586,0.5384615384615384,1,SummaryTransformer,,False,KNeighborsTimeSeriesClassifier
+19.7588702313835,0.45180722891566266,0.5027322404371585,0.44726107226107226,0.4842105263157895,2,SummaryTransformer,,False,KNeighborsTimeSeriesClassifier
+18.45608757876481,0.4879518072289157,0.5454545454545455,0.4864982578397212,0.49514563106796117,3,SummaryTransformer,,False,KNeighborsTimeSeriesClassifier
+20.410261557692845,0.43373493975903615,0.41975308641975306,0.43358067801542266,0.40963855421686746,4,SummaryTransformer,,False,KNeighborsTimeSeriesClassifier
+18.673218020867925,0.4819277108433735,0.5057471264367817,0.4808139534883721,0.5,5,SummaryTransformer,,False,KNeighborsTimeSeriesClassifier

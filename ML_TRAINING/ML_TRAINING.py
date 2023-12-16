@@ -50,7 +50,7 @@ class Ml_Train(Config_Utils):
 
         if self.is_ts:
             if self.configs['models'][self.pred_method][model]['req_3d'] and  self.is_2d(self.X):
-                self.X = self.to_panel(self.X, window_size=12)
+                self.X = self.to_panel(self.X, window_size=14)
             model = Models(model, self.pred_method, *args, **kwargs).get_model()
 
             results = self._custom_evaluate(
@@ -94,7 +94,7 @@ class Ml_Train(Config_Utils):
             model.fit(X.iloc[train_index], y.iloc[train_index,0])
             preds = model.predict(X.iloc[test_index])
             for metrics in scoring:
-                name = str(metrics).replace('()','')
+                name = metrics.__name__
                 res = metrics(y.iloc[test_index], preds)
                 results[name].append(res)
 

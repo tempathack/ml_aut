@@ -1,0 +1,6 @@
+<function log_loss at 0x7f06eef2fd90>,<function accuracy_score at 0x7f06eef2e9e0>,<function f1_score at 0x7f06eef2f1c0>,<function roc_auc_score at 0x7f06eef4da20>,<function precision_score at 0x7f06eef2f7f0>,CV,transform,features_selection,dim_red,model
+16.936174484043,0.5301204819277109,0.5851063829787234,0.5356104651162791,0.5092592592592593,1,SummaryTransformer,,False,ShapeletTransformClassifier
+19.7588702313835,0.45180722891566266,0.4739884393063584,0.45194139194139193,0.5,2,SummaryTransformer,,False,ShapeletTransformClassifier
+19.107478905074156,0.46987951807228917,0.5510204081632654,0.4825174825174825,0.4576271186440678,3,SummaryTransformer,,False,ShapeletTransformClassifier
+16.936174484043,0.5301204819277109,0.49350649350649345,0.5276806526806527,0.5,4,SummaryTransformer,,False,ShapeletTransformClassifier
+20.41026155769285,0.43373493975903615,0.47191011235955055,0.43466898954703825,0.4375,5,SummaryTransformer,,False,ShapeletTransformClassifier
