@@ -436,6 +436,7 @@ class Config_Utils():
                               'req_3d': False, 'is_sklearn': True,
                               'default_kwargs': {}},
                                 }}
+        self.configs['n_cvs']=5
 
     def checked_in_models(self,pred_med):
         return self.configs['models'][pred_med].keys()
@@ -528,12 +529,12 @@ class Config_Utils():
             return True
         else:
             False
-    @staticmethod
-    def _define_cv(is_ts):
+
+    def _define_cv(self,is_ts):
         if not is_ts:
-            cv = KFold(n_splits=5, shuffle=True, random_state=42)
+            cv = KFold(n_splits=self.configs['n_cvs'], shuffle=True, random_state=42)
         else:
-            cv = TimeSeriesSplit(n_splits=5)
+            cv = TimeSeriesSplit(n_splits=self.configs['n_cvs'])
         return cv
     @staticmethod
     def _unpack_results(results : list ):
