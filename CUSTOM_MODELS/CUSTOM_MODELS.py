@@ -45,9 +45,14 @@ class FlattenedTransforms(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        panel_data = self.process_to_panel(X, window_l=self.window_size)
-        return panel_data
+        X_arr = np.array(from_nested_to_2d_array(X).T).reshape(-1, X.shape[1])
+        if self.single_dim:
+            X_arr = pd.DataFrame(self.pipe.transform(X_arr), columns=['single_dim'])
+        else:
+            X_arr = pd.DataFrame(self.pipe.transform(X_arr), columns=X.columns)
 
+        X_arr=self._re_panel(X_arr,window_size=14)
+        return X_arr
     def fit_transform(self, X, y=None):
         X_arr = np.array(from_nested_to_2d_array(X).T).reshape(-1, X.shape[1])
         if self.single_dim:
@@ -93,15 +98,18 @@ class UniToMultivariateWrapper(BaseEstimator):
        return self
    def fit(self, X, y):
        y = np.asarray(y)
-       X_new = self._pca_transform(X)
+       X_new = self._pca_fit_transform(X)
        self.model.fit(X_new, y)
        self._is_fitted = True
        return self
    def predict(self, X):
-       if not self.is_fitted:
+       if not  self._is_fitted:
            raise AssertionError("Model needs to be fitted first")
        X_new = self._pca_transform(X)
        return self.model.predict(X_new)
-   def _pca_transform(self, X):
+   def _pca_fit_transform(self, X):
        X_new = self.pipe.fit_transform(X)
+       return X_new
+   def _pca_transform(self, X):
+       X_new = self.pipe.transform(X)
        return X_new

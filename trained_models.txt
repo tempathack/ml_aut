@@ -1,0 +1,5 @@
+CNNClassifier
+FCNClassifier
+KNeighborsTimeSeriesClassifier
+RocketClassifier
+TimeSeriesSVC

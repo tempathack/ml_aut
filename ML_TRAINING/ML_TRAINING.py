@@ -1,7 +1,7 @@
 from collections import defaultdict
 from sklearn.model_selection import cross_val_score
 from tqdm import tqdm
-from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,MultiScorer
+from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,MultiScorer,FunctionTimer
 from LOGGER.LOGGING import WrapStack
 from imblearn.over_sampling import SMOTE
 
@@ -40,8 +40,10 @@ class Ml_Train(Config_Utils):
         self.is_ts = self.TS_check(X)
         self.pred_method = self._class_or_reg(y)
         self.cv = self._define_cv(self.is_ts)
+    def __repr__(self):
+        return  f"Ml_Train()"
     @WrapStack.FUNCTION_SCREEN
-    def train_model(self, model=None,handle_imbalance=False, *args, **kwargs):
+    def train_model(self, model=None,handle_imbalance=False,timeout=30000, *args, **kwargs):
 
         if model is None or (not model in self.configs['models'][self.pred_method]):
             raise KeyError(f'model is either not specified or not part of {self.configs["models"][self.pred_method].keys()}')
@@ -53,14 +55,18 @@ class Ml_Train(Config_Utils):
                 self.X = self.to_panel(self.X, window_size=14)
             model = Models(model, self.pred_method, *args, **kwargs).get_model()
 
-            results = self._custom_evaluate(
-                model=model,
+            timer = FunctionTimer(func=self._custom_evaluate,timeout=timeout)
+            results=timer.run(model=model,
                 y=self.y,
                 X=self.X,
                 cv=self.cv,
                 scoring=[val[0] if self.pred_method=='Classification' else
-                         val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method].items()],
-            )
+                         val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method].items()])
+
+            if results is None:
+                func_names=[val[0].__name__ if self.pred_method == 'Classification' else
+                 val[0]().__name__ for k, val in self.configs['metrics']['ts'][self.pred_method].items()]
+                results={f_name:['timed_out' for _ in range(5)] for f_name in func_names}
 
             return results
         else:
@@ -72,7 +78,7 @@ class Ml_Train(Config_Utils):
                 self.X, self.y = self._handle_imbalance(self.X, self.y)
 
 
-            _ = cross_val_score(model, self.X, self.y,
+            _ = cross_val_score(estimator=model, X=self.X, y=self.y,
                                 cv=self.cv, scoring=self.metrics_scorer)
 
             return self.metrics_scorer.get_results()

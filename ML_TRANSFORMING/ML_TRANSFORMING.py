@@ -39,12 +39,6 @@ class Ml_Process(Config_Utils):
         self.dimensions = X.shape[0]
         self.global_transform_track = defaultdict(list)
 
-    @property
-    def possible_transforms(self) -> dict:
-        return self.configs['transforms'].keys()
-    @property
-    def possible_imputation(self) -> dict:
-        return self.configs['imputers'].keys()
     @staticmethod
     def _handle_cat(obj, handle_cat) -> pd.DataFrame:
         cat_cols = obj.select_dtypes(exclude=['float', 'integer']).columns
@@ -75,7 +69,7 @@ class Ml_Process(Config_Utils):
         X =imputer.fit_transform(obj)
 
         if not isinstance(X,pd.DataFrame):
-            return pd.DataFrame(X).add_suffix(f'{how}_imputed')
+            return pd.DataFrame(X).add_prefix(f'{how}_imputed')
         else:
             return X
 

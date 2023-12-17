@@ -38,7 +38,8 @@ from sklearn.preprocessing import StandardScaler
 from sktime.forecasting.compose import DirectTabularRegressionForecaster
 from sktime.datatypes._panel._convert import from_nested_to_2d_array
 from CUSTOM_MODELS.CUSTOM_MODELS import  UniToMultivariateWrapper,TimeSeriesToPanelData
-
+import time
+import threading
 
 def unpack_args(func):
     from functools import wraps
@@ -183,7 +184,38 @@ class MultiScorer():
 		else:
 			raise ValueError('Unexpected fold value: %s' %(str(fold)))
 
+class FunctionTimer:
+    def __init__(self, func, timeout=5):
+        self.func = func
+        self.timeout = timeout
+        self.result = None
+        self.exception = None
+        self.elapsed_time = None
+        self.thread = None
 
+
+    def run(self, *args, **kwargs):
+        def target():
+            start_time = time.time()
+            try:
+                self.result = self.func(*args, **kwargs)
+            except Exception as e:
+                self.exception = e
+            finally:
+                self.elapsed_time = time.time() - start_time
+
+        self.thread = threading.Thread(target=target)
+        self.thread.start()
+
+        self.thread.join(self.timeout)
+        if self.thread.is_alive():
+            # Function or thread took too long, terminate it
+            return None
+
+        if self.exception:
+            raise self.exception
+
+        return self.result
 
 
 
@@ -410,6 +442,12 @@ class Config_Utils():
     @property
     def checked_in_transforms(self):
         return self.configs['transforms'].keys()
+    @property
+    def possible_transforms(self) -> dict:
+        return self.configs['transforms'].keys()
+    @property
+    def possible_imputation(self) -> dict:
+        return self.configs['imputers'].keys()
     @staticmethod
     def _val_task(task)-> str:
         if not(  task == 'TAB' or task == 'TS'):
@@ -514,16 +552,16 @@ class Config_Utils():
         return obj.gt(0).all().all()
     def get_models_available(self,is_ts:bool,pred_med:str):
         if not isinstance(is_ts,bool):
-            raise ValueError(" is_ts must be boolean either True or False")
+            raise AttributeError(" is_ts must be boolean either True or False")
         if pred_med!='Classification' and pred_med!='Regression':
             raise ValueError("specify prediction method either ==> Classification or Regression")
 
         return [ k for k in self.configs['models'][pred_med].keys() if is_ts== self.configs['models'][pred_med][k]['ts_only']]
     def get_transforms_available(self,is_ts:bool,pred_med:str):
         if not isinstance(is_ts,bool):
-            raise ValueError(" is_ts must be boolean either True or False")
+            raise AttributeError(f" is_ts must be boolean either True or False not {type(is_ts)}")
         if pred_med!='Classification' and pred_med!='Regression':
-            raise ValueError("specify prediction method either ==> 'Classification' or 'Regression'")
+            raise ValueError(f"specify prediction method either ==> 'Classification' or 'Regression' not {pred_med}")
         if is_ts:
             return [ k for k in self.configs['transforms'].keys() ]
         else:

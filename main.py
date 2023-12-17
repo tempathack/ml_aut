@@ -11,6 +11,9 @@ warnings.filterwarnings("ignore")
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+import yfinance as yf
+
+
 
 # Define the start and end dates for the time series
 start_date = datetime(2022, 1, 1)
@@ -32,6 +35,14 @@ data['Label'] = np.random.randint(0, 2, size=len(data))
 
 configs=Config_Utils()
 X,target=data.drop(columns=['Label']),data[['Label']]
+
+
+msft = yf.Ticker("MSFT").history(start='1980-01-01').drop(columns=['Dividends', 'Stock Splits'])\
+    .assign(target=lambda df: np.where(df.Open.pct_change().shift(-10).gt(0),1,0) ).dropna()
+X,target=msft.drop(columns=['target']),msft[['target']]
+
+
+
 ct=0
 
 if __name__ == '__main__':
@@ -52,6 +63,11 @@ if __name__ == '__main__':
         with open('trained_models.txt', 'a') as file:
             file.write(model_name + '\n')
 
+
+    res = [i for i in configs.get_models_available(is_ts=True,pred_med='Classification') if i not in ['HIVECOTEV1','HIVECOTEV2']]
+    obj = Ml_Main(X, y=target, transform=['SummaryTransformer'],
+                  features_selection=None, n_jobs=-1, ml_model=res).Process(results_return=True)
+    obj.to_csv(f"./Outputs/All.csv", index=None)
     for trans in configs.get_transforms_available(is_ts=True,pred_med='Classification'):
         for model in configs.get_models_available(is_ts=True,pred_med='Classification'):
             print(trans,model)

@@ -17,9 +17,8 @@ class Ml_Main(Config_Utils):
                  n_jobs=1):
 
         super().__init__()
-
-        assert transform is not None, "Please specify a transform you want to train"
-        assert ml_model is not None, "Please specify a model you want to train"
+        if transform is None or ml_model is None:
+            raise AttributeError("Handover transform as well as model argument")
 
         self.X = self.eval_df(X)
         self.y = self.eval_df(y)
@@ -71,8 +70,9 @@ class Ml_Main(Config_Utils):
         shared_dict = manager.dict()
 
 
-        results = Parallel(n_jobs=self.n_jobs)(delayed(self._define_generator)(transform, model, is_ml_select, is_ml_reduce, self.dim_reduction,shared_dict, *args, **kwargs)
-                                                           for model in self.model for transform in self.transform)
+        results = Parallel(n_jobs=self.n_jobs)(delayed(self._define_generator)
+                                               (transform, model, is_ml_select, is_ml_reduce, self.dim_reduction,shared_dict, *args, **kwargs)
+                                                for model in self.model for transform in self.transform)
 
         return results
         # Shutdown Ray (ideally done outside this method)
