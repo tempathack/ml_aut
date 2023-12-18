@@ -4,6 +4,8 @@ from tqdm import tqdm
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,MultiScorer,FunctionTimer
 from LOGGER.LOGGING import WrapStack
 from imblearn.over_sampling import SMOTE
+from sktime.classification.base import BaseClassifier
+from sktime.datatypes import check_is_scitype
 
 
 
@@ -67,7 +69,7 @@ class Ml_Train(Config_Utils):
         return results
 
     def _train_ts(self,model:str,*args,**kwargs):
-        if self.configs['models'][self.pred_method][model]['req_3d'] and self.is_2d(self.X):
+        if self.configs['models'][self.pred_method][model]['req_3d'] and not self._validate_3d(self.X):
             self.X = self.to_panel(self.X, window_size=14)
         model = Models(model, self.pred_method, *args, **kwargs).get_model()
 

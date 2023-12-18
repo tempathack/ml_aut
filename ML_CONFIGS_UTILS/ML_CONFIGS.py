@@ -40,6 +40,7 @@ from sktime.datatypes._panel._convert import from_nested_to_2d_array
 from CUSTOM_MODELS.CUSTOM_MODELS import  UniToMultivariateWrapper,TimeSeriesToPanelData
 import time
 import threading
+from sktime.datatypes import check_is_scitype
 
 def unpack_args(func):
     from functools import wraps
@@ -231,8 +232,6 @@ class Config_Utils():
                                     'RandomIntervalFeatureExtractor': {'object':RandomIntervalFeatureExtractor, 'ts_only': True,
                                                           'req_3d': True, 'default_kwargs': {}},
                                     'Rocket': {'object': Rocket,'ts_only': True, 'req_3d': True, 'default_kwargs': {}},
-                                    'MiniRocket': {'object': MiniRocket, 'ts_only': True, 'req_3d': True,
-                                                'default_kwargs': {}},
                                     'MiniRocketMultivariate': {'object': MiniRocketMultivariate, 'ts_only': True, 'req_3d': True,
                                                     'default_kwargs': {}},
                                     'TSFreshFeatureExtractor': {'object': TSFreshFeatureExtractor, 'ts_only': True,
@@ -242,14 +241,6 @@ class Config_Utils():
                                                                          'ts_only': True,
                                                                          'req_3d': False,
                                                                          'default_kwargs': {}},
-                                    'LogTransformer': {'object': LogTransformer,
-                                                                 'ts_only': True,
-                                                                 'req_3d': True,
-                                                                 'default_kwargs': {}},
-                                    'SqrtTransformer': {'object': SqrtTransformer,
-                                                        'ts_only': True,
-                                                        'req_3d': True,
-                                                        'default_kwargs': {}},
                                     'Detrender': {'object': Detrender,
                                                          'ts_only': True,
                                                          'req_3d': True,
@@ -274,15 +265,7 @@ class Config_Utils():
                                                              'ts_only': False,
                                                              'req_3d': False,
                                                              'default_kwargs': {}},
-                                    'KBinsDiscretizer': {'object': KBinsDiscretizer,
-                                                      'ts_only': False,
-                                                      'req_3d': False,
-                                                      'default_kwargs': {}},
                                     'MinMaxScaler': {'object': MinMaxScaler,
-                                                          'ts_only': False,
-                                                          'req_3d': False,
-                                                          'default_kwargs': {}},
-                                    'KernelCenterer': {'object': KernelCenterer,
                                                           'ts_only': False,
                                                           'req_3d': False,
                                                           'default_kwargs': {}},
@@ -468,10 +451,20 @@ class Config_Utils():
             assert obj.index.inferred_type == 'datetime64', "must have a datetime index for Timeseries Mode"
     @staticmethod
     def _validate_3d(obj) -> bool:
-        if isinstance(obj.iat[0, 0], pd.Series):
+        valid=check_is_scitype(
+            obj, scitype="Panel")
+        if valid:
             return True
         else:
             return False
+    @staticmethod
+    def _is_df(obj,prefix:str="trans") -> pd.DataFrame:
+        if isinstance(obj,pd.DataFrame):
+            return obj
+        elif isinstance(obj,np.ndarray) or isinstance(obj,pd.Series):
+            return pd.DataFrame(obj).add_prefix(prefix)
+        else:
+            raise AttributeError("Nno convertible type needsto be Series ndarray or Dataframe")
     @staticmethod
     def _validate_categorical(obj) -> bool:
         cat_cols = obj.select_dtypes(exclude=['float', 'integer']).columns
@@ -482,8 +475,11 @@ class Config_Utils():
     @staticmethod
     def _validate_null(obj,is_3d) -> bool:
         if is_3d:
-            return np.any([obj.loc[:, col].loc[j].isnull().any() for j in range(obj.loc[:, col].size) for col in
-                    obj.columns])
+            res=[]
+            for col in obj.columns:
+                for j in range(obj.loc[:, col].size):
+                    res.append(obj.loc[:, col].loc[j].isnull().any())
+            return np.any(res)
         else:
 
             return obj.isnull().any().any()

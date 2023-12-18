@@ -96,7 +96,8 @@ class Ml_Process(Config_Utils):
             transformer = TabularToSeriesAdaptor(transformer)
             transformed_df = transformer.fit_transform(X)
         else:  # tabular transformations
-            transformed_df = transformer.fit_transform(X)
+            transformed_arr = transformer.fit_transform(X)
+            transformed_df=self._is_df(transformed_arr,prefix=transformer.__repr__)
 
         is_3d = self._validate_3d(transformed_df)
         contains_nulls = self._validate_null(transformed_df, is_3d)

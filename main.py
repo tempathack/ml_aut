@@ -40,7 +40,7 @@ X,target=data.drop(columns=['Label']),data[['Label']]
 msft = yf.Ticker("MSFT").history(start='1980-01-01').drop(columns=['Dividends', 'Stock Splits'])\
     .assign(target=lambda df: np.where(df.Open.pct_change().shift(-10).gt(0),1,0) ).dropna()
 X,target=msft.drop(columns=['target']),msft[['target']]
-
+X,target=data.drop(columns=['Label']),data[['Label']]
 
 
 ct=0
@@ -64,26 +64,23 @@ if __name__ == '__main__':
             file.write(model_name + '\n')
 
 
-    res = [i for i in configs.get_models_available(is_ts=True,pred_med='Classification') if i not in ['HIVECOTEV1','HIVECOTEV2']]
-    obj = Ml_Main(X, y=target, transform=['SummaryTransformer'],
-                  features_selection=None, n_jobs=-1, ml_model=res).Process(results_return=True)
-    obj.to_csv(f"./Outputs/All.csv", index=None)
+
     for trans in configs.get_transforms_available(is_ts=True,pred_med='Classification'):
         for model in configs.get_models_available(is_ts=True,pred_med='Classification'):
             print(trans,model)
-            if (not trans in ['SummaryTransformer'] ) or check_model_already_trained(model) :
+            if (not model in ['KNeighborsTimeSeriesClassifier'] ) or check_model_already_trained(trans):
                 continue
-            if model == 'HIVECOTEV2' or model == 'HIVECOTEV1':
-                continue
-            start=datetime.now()
+            obj = Ml_Main(X, y=target, transform='MiniRocketMultivariate',
+                          features_selection=None, n_jobs=1, ml_model='KNeighborsTimeSeriesClassifier').Process(
+                results_return=True)
             try:
                 ct+=1
-                obj=Ml_Main(X, y=target, transform=trans,
-                    features_selection=None,n_jobs=-1, ml_model=model).Process(results_return=True)
+                obj=Ml_Main(X, y=target, transform='MiniRocketMultivariate',
+                    features_selection=None,n_jobs=-1, ml_model='KNeighborsTimeSeriesClassifier').Process(results_return=True)
                 if obj is not None:
-                    obj.to_csv(f"./Outputs/{model}.csv",index=None)
-                save_model_to_file(model)
+                    obj.to_csv(f"./Outputs/{trans}.csv",index=None)
+                save_model_to_file(trans)
             except:
-                print("did not",model)
+                print("did not",model,trans)
 
 
