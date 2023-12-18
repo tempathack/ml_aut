@@ -125,7 +125,7 @@ class Ml_Select(Config_Utils):
         if (method is None) or  (method not in self.configs['feat_selections'][self.pred_method]) :
             raise KeyError(f"method must be one of {self.configs['feat_selections'][self.pred_method]}  ")
 
-        if not self.is_2d(self.X):
+        if self._validate_3d(self.X):
             return self.X
 
         self.cv = self._define_cv(self.is_ts)
@@ -210,7 +210,7 @@ class Ml_Select(Config_Utils):
         return self.X.loc[:,self.feat_metrics().query(f"Selection_Method==@method").nlargest(k_best, columns=['Ranks']).Columns.tolist()]
     def feat_metrics(self):
         if  self.track_feat_metrics == {} :
-            if self.is_2d(self.X):
+            if not  self._validate_3d(self.X):
                 raise MethodNotExecutedError('Execute featureselection method first')
             else:
                 return 'Feature Selection is not Available for 3D Datasets'

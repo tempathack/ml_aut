@@ -38,7 +38,7 @@ class Ml_Main(Config_Utils):
         if isinstance(self.features_selection, str):
             self.ml_select = Ml_Select(X=self.X.copy(), y=self.y.copy())
 
-        if isinstance(self.dim_reduction, list):
+        if isinstance(self.dim_reduction, str):
             self.ml_reduce = Ml_Reduce(X=self.X.copy(), y=self.y.copy())
 
         self.ml_train = Ml_Train(X=self.X.copy(), y=self.y.copy())
@@ -105,7 +105,8 @@ class Ml_Main(Config_Utils):
         if is_ml_select:
             self.ml_select.set_X_y(X=X)
             X = self.ml_select.feature_selection(method=self.features_selection, *args, **kwargs)
-        if is_ml_reduce and self.is_2d(X):
+
+        if is_ml_reduce and not self._validate_3d(X):
             self.ml_reduce.set_X_y(X=X)
             X = self.ml_reduce.dimensionality_reduction(method=dim_red, *args, **kwargs)
 

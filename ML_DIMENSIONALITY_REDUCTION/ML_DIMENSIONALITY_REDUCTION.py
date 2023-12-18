@@ -123,7 +123,8 @@ class Ml_Reduce(Config_Utils):
             raise KeyError("specify valid method first")
 
 
-        assert self.is_2d(self.X),'Data can not be in 3D Shape for the purpose of reduction'
+        if  self._validate_3d(self.X):
+            raise AttributeError('Data can not be in 3D Shape for the purpose of reduction')
 
         if self.X.shape[1]>upper_limit:
             self.X=self._perform_pca(self.X, self.y, *args, **kwargs.update({'n_components':upper_limit}))

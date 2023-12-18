@@ -71,7 +71,7 @@ if __name__ == '__main__':
             if (not model in ['KNeighborsTimeSeriesClassifier'] ) or check_model_already_trained(trans):
                 continue
             obj = Ml_Main(X, y=target, transform='MiniRocketMultivariate',
-                          features_selection=None, n_jobs=1, ml_model='KNeighborsTimeSeriesClassifier').Process(
+                          features_selection='mutual_info_classif',dim_reduction='LDA', n_jobs=1, ml_model='KNeighborsTimeSeriesClassifier').Process(
                 results_return=True)
             try:
                 ct+=1
