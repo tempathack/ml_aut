@@ -71,12 +71,13 @@ if __name__ == '__main__':
         for model in configs.get_models_available(is_ts=False,pred_med='Classification'):
             for dim_red in configs.get_dim_reductions_available()+[None]:
                 print(trans,model)
-
-                obj = Ml_Main(X, y=target, transform=trans,#DWTTransformer#PartialAutoCorrelationTransformer
+                try:
+                    obj = Ml_Main(X, y=target, transform=trans,#DWTTransformer#PartialAutoCorrelationTransformer
                           features_selection='LogisticRegressionCV',dim_reduction=dim_red, n_jobs=1, ml_model=model).Process(
                 results_return=True)
-                obj.to_csv(f"./Outputs/{trans+model+str(dim_red)}.csv",index=None)
-
+                    obj.to_csv(f"./Outputs/{trans+model+str(dim_red)}.csv",index=None)
+                except:
+                    pass
 
 
 
