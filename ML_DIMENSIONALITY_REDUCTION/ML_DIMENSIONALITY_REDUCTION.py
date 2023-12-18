@@ -17,7 +17,7 @@ from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
 class Ml_Reduce(Config_Utils):
     def __init__(self, X,y, *args, **kwargs):
         super().__init__()
-        self.X = self.eval_df(X)
+        self.X = X
         self.y = self.eval_df(y)
         self.args = args
         self.kwargs = kwargs
@@ -132,7 +132,7 @@ class Ml_Reduce(Config_Utils):
 
         scaler=StandardScaler()
         self.X=scaler.fit_transform(self.X)
-        self.X=self._is_df(self.X,prefix=scaler.__repr__)
+        self.X=self._is_df(self.X,prefix='StandardScaler')
 
         if method=='PCA':
             res=self._perform_pca(self.X,self.y,*args,**kwargs)

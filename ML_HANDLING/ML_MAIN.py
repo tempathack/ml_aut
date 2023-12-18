@@ -20,7 +20,7 @@ class Ml_Main(Config_Utils):
         if transform is None or ml_model is None:
             raise AttributeError("Handover transform as well as model argument")
 
-        self.X = self.eval_df(X)
+        self.X = X
         self.y = self.eval_df(y)
         self.transform = transform if isinstance(transform, list) else [transform]
         self.features_selection = features_selection if features_selection is not None else False

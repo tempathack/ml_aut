@@ -13,7 +13,7 @@ import numpy as np
 from datetime import datetime, timedelta
 import yfinance as yf
 
-
+import seaborn
 
 # Define the start and end dates for the time series
 start_date = datetime(2022, 1, 1)
@@ -42,7 +42,9 @@ msft = yf.Ticker("MSFT").history(start='1980-01-01').drop(columns=['Dividends', 
 X,target=msft.drop(columns=['target']),msft[['target']]
 X,target=data.drop(columns=['Label']),data[['Label']]
 
-
+sns.load_dataset('titanic')
+d=sns.load_dataset('titanic').drop(columns=['alive'])
+X,target=d.drop(columns=['survived']),d[['survived']]
 ct=0
 
 if __name__ == '__main__':
@@ -65,23 +67,16 @@ if __name__ == '__main__':
 
 
 
-    for trans in configs.get_transforms_available(is_ts=True,pred_med='Classification'):
-        for model in configs.get_models_available(is_ts=True,pred_med='Classification'):
-            print(trans,model)
-            if (not model in ['KNeighborsTimeSeriesClassifier'] ) or check_model_already_trained(trans):
-                continue
-            obj = Ml_Main(X, y=target, transform='PartialAutoCorrelationTransformer',#DWTTransformer#PartialAutoCorrelationTransformer
-                          features_selection='LogisticRegressionCV',dim_reduction='LDA', n_jobs=1, ml_model='ElasticEnsemble').Process(
+    for trans in configs.get_transforms_available(is_ts=False,pred_med='Classification'):
+        for model in configs.get_models_available(is_ts=False,pred_med='Classification'):
+            for dim_red in configs.get_dim_reductions_available()+[None]:
+                print(trans,model)
+
+                obj = Ml_Main(X, y=target, transform=trans,#DWTTransformer#PartialAutoCorrelationTransformer
+                          features_selection='LogisticRegressionCV',dim_reduction=dim_red, n_jobs=1, ml_model=model).Process(
                 results_return=True)
-            print(obj)
-            try:
-                ct+=1
-                obj=Ml_Main(X, y=target, transform='MiniRocketMultivariate',
-                    features_selection=None,n_jobs=-1, ml_model='KNeighborsTimeSeriesClassifier').Process(results_return=True)
-                if obj is not None:
-                    obj.to_csv(f"./Outputs/{trans}.csv",index=None)
-                save_model_to_file(trans)
-            except:
-                print("did not",model,trans)
+                obj.to_csv(f"./Outputs/{trans+model+str(dim_red)}.csv",index=None)
+
+
 
 

@@ -35,7 +35,7 @@ class Models(Config_Utils):
 class Ml_Train(Config_Utils):
     def __init__(self, X, y, *args, **kwargs):
         super().__init__()
-        self.X = self.eval_df(X)
+        self.X = X
         self.y = self.eval_df(y)
         self.args = args
         self.kwargs = kwargs
@@ -91,6 +91,7 @@ class Ml_Train(Config_Utils):
         if handle_imbalance and self.pred_method == 'Classification':
             self.X, self.y = self._handle_imbalance(self.X, self.y)
 
+        print(self.X)
         _ = cross_val_score(estimator=model, X=self.X, y=self.y,
                             cv=self.cv, scoring=self.metrics_scorer)
 

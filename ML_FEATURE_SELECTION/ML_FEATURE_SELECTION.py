@@ -16,7 +16,7 @@ class Ml_Select(Config_Utils):
 
     def __init__(self, X,y, *args, **kwargs):
         super().__init__()
-        self.X = self.eval_df(X)
+        self.X =X
         self.y = self.eval_df(y)
         self.args = args
         self.kwargs = kwargs

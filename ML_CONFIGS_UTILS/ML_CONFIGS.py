@@ -593,7 +593,7 @@ class Config_Utils():
         if is_ts:
             return [ k for k in self.configs['transforms'].keys() ]
         else:
-            return [k for k in self.configs['transforms'].keys() if not is_ts == self.configs['transforms'][k]['ts_only']]
+            return [k for k in self.configs['transforms'].keys() if not self.configs['transforms'][k]['ts_only']]
     def get_feat_selections_available(self,pred_med:str):
         return self.configs['feat_selections'][pred_med]
     def get_dim_reductions_available(self):
