@@ -1,5 +1,10 @@
 from sktime.transformations.all  import (SummaryTransformer,WindowSummarizer,RandomIntervalFeatureExtractor,Rocket,MiniRocket,MiniRocketMultivariate,TSFreshRelevantFeatureExtractor,BoxCoxTransformer,LogTransformer,SqrtTransformer,Detrender,Deseasonalizer)
 from sklearn.preprocessing import MinMaxScaler,PolynomialFeatures,StandardScaler,RobustScaler,PowerTransformer,QuantileTransformer,KBinsDiscretizer,KernelCenterer
+from sktime.transformations.panel.dwt import DWTTransformer
+from sktime.transformations.panel.dictionary_based import PAA,SFA
+from sktime.transformations.panel.hog1d import HOG1DTransformer
+from sktime.transformations.series.lag import  Lag
+from sktime.transformations.series.acf import PartialAutoCorrelationTransformer,AutoCorrelationTransformer
 from sktime.transformations.panel.tsfresh import TSFreshFeatureExtractor
 import pandas as pd
 import numpy as np
@@ -23,12 +28,12 @@ from sktime.classification.ensemble import BaggingClassifier
 from sktime.classification.sklearn import RotationForest
 from sktime.classification.deep_learning.cnn import CNNClassifier
 from sktime.classification.deep_learning.fcn import FCNClassifier
-from sktime.classification.distance_based import KNeighborsTimeSeriesClassifier
+from sktime.classification.distance_based import KNeighborsTimeSeriesClassifier,ElasticEnsemble
 from sktime.performance_metrics.forecasting import MeanAbsoluteError,MeanAbsolutePercentageError,MedianSquaredError
 from sktime.classification.hybrid import HIVECOTEV1,HIVECOTEV2
 from sktime.classification.kernel_based import RocketClassifier,TimeSeriesSVC,Arsenal
 from sktime.classification.shapelet_based import ShapeletTransformClassifier
-from sktime.classification.dictionary_based import BOSSEnsemble,IndividualBOSS,WEASEL
+from sktime.classification.dictionary_based import BOSSEnsemble,IndividualBOSS,WEASEL,MUSE,ContractableBOSS
 from sktime.classification.interval_based import SupervisedTimeSeriesForest,TimeSeriesForestClassifier
 from sktime.regression.kernel_based import RocketRegressor
 from sktime.regression.distance_based import KNeighborsTimeSeriesRegressor
@@ -38,10 +43,16 @@ from sklearn.preprocessing import StandardScaler
 from sktime.forecasting.compose import DirectTabularRegressionForecaster
 from sktime.datatypes._panel._convert import from_nested_to_2d_array
 from CUSTOM_MODELS.CUSTOM_MODELS import  UniToMultivariateWrapper,TimeSeriesToPanelData
+from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import CustomDWTTransformer,CustomPartialAutoCorrelationTransformer,CustomAutoCorrelationTransformer
 import time
 import threading
 from sktime.datatypes import check_is_scitype
-
+clf = ElasticEnsemble(
+    proportion_of_param_options=0.1,
+    proportion_train_for_test=0.1,
+    distance_measures = ["dtw","ddtw"],
+    majority_vote=True,
+)
 def unpack_args(func):
     from functools import wraps
     @wraps(func)
@@ -231,24 +242,29 @@ class Config_Utils():
                                                             'req_3d': True, 'default_kwargs': {}},
                                     'RandomIntervalFeatureExtractor': {'object':RandomIntervalFeatureExtractor, 'ts_only': True,
                                                           'req_3d': True, 'default_kwargs': {}},
+                                    'DWTTransformer': {'object': CustomDWTTransformer,
+                                                                       'ts_only': True,
+                                                                       'req_3d': True, 'default_kwargs': {}},
+                                    'PAA': {'object': PAA,
+                                                       'ts_only': True,
+                                                       'req_3d': True, 'default_kwargs': {}},
                                     'Rocket': {'object': Rocket,'ts_only': True, 'req_3d': True, 'default_kwargs': {}},
                                     'MiniRocketMultivariate': {'object': MiniRocketMultivariate, 'ts_only': True, 'req_3d': True,
                                                     'default_kwargs': {}},
                                     'TSFreshFeatureExtractor': {'object': TSFreshFeatureExtractor, 'ts_only': True,
                                                                 'req_3d': True,
                                                                 'default_kwargs': {}},
+                                    'HOG1DTransformer': {'object': HOG1DTransformer, 'ts_only': True,
+                                                                'req_3d': True,
+                                                                'default_kwargs': {}},
                                     'BoxCoxTransformer': {'object': BoxCoxTransformer,
                                                                          'ts_only': True,
                                                                          'req_3d': False,
                                                                          'default_kwargs': {}},
-                                    'Detrender': {'object': Detrender,
-                                                         'ts_only': True,
-                                                         'req_3d': True,
-                                                         'default_kwargs': {}},
-                                    'Deseasonalizer': {'object': Deseasonalizer,
-                                                   'ts_only': True,
-                                                   'req_3d': True,
-                                                   'default_kwargs': {}},
+                                    'Lag': {'object': Lag,
+                                                          'ts_only': True,
+                                                          'req_3d': False,
+                                                          'default_kwargs': {'lags':[1,3,5,10]}},
                                     'StandardScaler': {'object': StandardScaler,
                                                         'ts_only':False,
                                                         'req_3d': False,
@@ -376,10 +392,25 @@ class Config_Utils():
                                                                  'ts_only': True,
                                                                  'req_3d': True, 'is_sklearn': False,
                                                                  'default_kwargs': {}},
+                                                  'MUSE': {'object': MUSE,
+                                                                 'ts_only': True,
+                                                                 'req_3d': True, 'is_sklearn': False,
+                                                                 'default_kwargs': {}},
+                                                  'ContractableBOSS': {'object': UniToMultivariateWrapper(ContractableBOSS),
+                                                           'ts_only': True,
+                                                           'req_3d': True, 'is_sklearn': False,
+                                                           'default_kwargs': {}},
                                 'RocketClassifier': {'object': RocketClassifier,
                                                'ts_only': True,
                                                'req_3d': True, 'is_sklearn': False,
                                                'default_kwargs': {}},
+                                                  'ElasticEnsemble': {'object': UniToMultivariateWrapper(ElasticEnsemble),
+                                                                       'ts_only': True,
+                                                                       'req_3d': True, 'is_sklearn': False,
+                                                                       'default_kwargs': {'proportion_of_param_options':0.1,
+                                                                                          'proportion_train_for_test':0.1,
+                                                                                          'distance_measures':['dtw','ddtw'],
+                                                                                          'majority_vote':True}},
                                 'TimeSeriesSVC': {'object': TimeSeriesSVC,
                                                'ts_only': True,
                                                'req_3d':True, 'is_sklearn': False,
@@ -478,7 +509,7 @@ class Config_Utils():
             res=[]
             for col in obj.columns:
                 for j in range(obj.loc[:, col].size):
-                    res.append(obj.loc[:, col].loc[j].isnull().any())
+                    res.append(obj.loc[:, col].iloc[j].isnull().any())
             return np.any(res)
         else:
 

@@ -70,9 +70,10 @@ if __name__ == '__main__':
             print(trans,model)
             if (not model in ['KNeighborsTimeSeriesClassifier'] ) or check_model_already_trained(trans):
                 continue
-            obj = Ml_Main(X, y=target, transform='MiniRocketMultivariate',
-                          features_selection='mutual_info_classif',dim_reduction='LDA', n_jobs=1, ml_model='KNeighborsTimeSeriesClassifier').Process(
+            obj = Ml_Main(X, y=target, transform='PartialAutoCorrelationTransformer',#DWTTransformer#PartialAutoCorrelationTransformer
+                          features_selection='LogisticRegressionCV',dim_reduction='LDA', n_jobs=1, ml_model='ElasticEnsemble').Process(
                 results_return=True)
+            print(obj)
             try:
                 ct+=1
                 obj=Ml_Main(X, y=target, transform='MiniRocketMultivariate',

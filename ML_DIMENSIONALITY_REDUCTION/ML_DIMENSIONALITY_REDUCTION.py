@@ -6,6 +6,7 @@ from sklearn.manifold import Isomap
 from sklearn.manifold import LocallyLinearEmbedding
 from sklearn.manifold import MDS
 from sklearn.manifold import SpectralEmbedding
+from sklearn.preprocessing import StandardScaler
 from LOGGER.LOGGING import WrapStack
 from umap import UMAP
 
@@ -129,6 +130,9 @@ class Ml_Reduce(Config_Utils):
         if self.X.shape[1]>upper_limit:
             self.X=self._perform_pca(self.X, self.y, *args, **kwargs.update({'n_components':upper_limit}))
 
+        scaler=StandardScaler()
+        self.X=scaler.fit_transform(self.X)
+        self.X=self._is_df(self.X,prefix=scaler.__repr__)
 
         if method=='PCA':
             res=self._perform_pca(self.X,self.y,*args,**kwargs)
