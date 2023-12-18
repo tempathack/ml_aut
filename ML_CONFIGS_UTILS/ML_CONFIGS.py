@@ -563,6 +563,12 @@ class Config_Utils():
             return [ k for k in self.configs['transforms'].keys() ]
         else:
             return [k for k in self.configs['transforms'].keys() if not is_ts == self.configs['transforms'][k]['ts_only']]
+    def get_feat_selections_available(self,pred_med:str):
+        return self.configs['feat_selections'][pred_med]
+    def get_dim_reductions_available(self):
+        return ['LDA','TSNE','PCA','SE','UMAP','LLE','MDS','ISOMAP']
+
+
     def set_X_y(self,X=None,y=None):
         if not  y is  None:
             self.y=y
