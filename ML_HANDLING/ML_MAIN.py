@@ -1,3 +1,5 @@
+import pandas as pd
+
 from ML_CONFIGS_UTILS.ML_CONFIGS import  Config_Utils
 from ML_FEATURE_SELECTION.ML_FEATURE_SELECTION import Ml_Select
 from ML_TRAINING.ML_TRAINING import Ml_Train
@@ -7,7 +9,10 @@ from ML_CONFIGS_UTILS.Custom_Errors import MethodNotExecutedError
 from joblib import Parallel, delayed
 from LOGGER.LOGGING import WrapStack
 from multiprocessing import Manager,current_process,managers
-
+from functools import partial
+from sklearn.linear_model import LogisticRegression
+import numpy as np
+import optuna
 
 class Ml_Main(Config_Utils):
     def __init__(self, X, y, transform=None,
@@ -28,6 +33,7 @@ class Ml_Main(Config_Utils):
         self.model = ml_model if isinstance(ml_model, list) else [ml_model]
         self.n_jobs=n_jobs
         self.ml_train = None
+        self.pred_method=self._class_or_reg(self.y)
         self.mode= 'seq' if n_jobs==1 else 'parallel'
         self.Logger=WrapStack()
 
@@ -58,9 +64,9 @@ class Ml_Main(Config_Utils):
 
         self.is_processed = True
 
-
+        self.unpacked_results=self._unpack_results(results)
         if results_return:
-            return self._unpack_results(results)
+            return self.unpacked_results
         else:
             return self
     @WrapStack.FUNCTION_SCREEN
@@ -117,11 +123,51 @@ class Ml_Main(Config_Utils):
         return {'processing': {'transform': transform, 'features_selection': {'method':self.features_selection,'feat_metrics':self.ml_select.feat_metrics()
         if is_ml_select else False},
                                'dim_red': False if dim_red is None else dim_red, 'model': model},
-                'metrics': metrics}
-    def Tune(self,k_best=3,results_return=False):
+                'metrics': metrics,'X':X,'y':self.y}
+    def Tune(self,k_best=3):
         if not self.is_processed:
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
 
+        k_best=int(min(len(self.unpacked_results['model_metrics'])/self.configs['n_cvs'],k_best))
+        if self.pred_method=='Classification':
+            dic={'log_loss':['mean']}
+        else:
+            dic={'mean_squared_error': ['mean']}
+
+        model_metrics=pd.concat(self.unpacked_results['model_metrics'])
+        k_best_models=model_metrics\
+                            .groupby(['model','transform','dim_red']).agg(dic)\
+                            .droplevel(level=1,axis=1)\
+                            .nsmallest(k_best,columns=['log_loss' if self.pred_method=='Classification' else 'mean_squared_error'])\
+                            .reset_index()
+
+
+
+
+
+        for model,transform in zip(k_best_models['model'].tolist(),k_best_models['transform'].tolist()):
+
+            # Create a partial function that includes the extra_args and the trial object
+            partial_objective = partial(self.objective_function, model, transform,X,y)
+
+            # Optimize using the partial function
+            study = optuna.create_study()
+            study.optimize(lambda trial: self.optimize(trial, partial_objective), n_trials=100)
+            print(study.best_params)
+
+
+    def objective_function(self,model, transform,X,y, trial):
+        params=self.hyper_parameter_register(model,trial)
+        model = LogisticRegression(**params)
+        model.fit(X, y)
+        model.predict(X)
+        return np.mean(model.predict(X))
+    def optimize(self,partial_objective,trial):
+        return partial_objective(trial)
+    def hyper_parameter_register(self,model,trial):
+
+        if model == 'LogisticRegression':
+            hypers = {'penalty': trial.suggest_categorical('penalty', ['l1', 'l2'])}
     def Analyse(self):
         if not self.is_processed:
             raise MethodNotExecutedError("please make sure to atleast execute Process method beforehand")

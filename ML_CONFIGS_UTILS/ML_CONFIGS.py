@@ -49,6 +49,7 @@ from CUSTOM_MODELS.CUSTOM_MODELS import  UniToMultivariateWrapper,TimeSeriesToPa
 from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import CustomDWTTransformer,CustomMathTransformer,CustomPartialAutoCorrelationTransformer,CustomAutoCorrelationTransformer
 import time
 import threading
+from collections import defaultdict
 from sktime.datatypes import check_is_scitype
 clf = ElasticEnsemble(
     proportion_of_param_options=0.1,
@@ -591,13 +592,20 @@ class Config_Utils():
 
         if not ((isinstance(results,list)) and  len(results)>0):
             raise AttributeError('Must be a list and can not be empty')
-        collect = []
-        for res in results:
+        collect = defaultdict(list)
+        for idx,res in enumerate(results):
+            idx=str(idx)
             obj = pd.DataFrame(res['metrics']).assign(CV=lambda df: np.arange(df.shape[0]) + 1)
             obj_2 = pd.concat([pd.DataFrame(res['processing'], index=[i]) for i in range(obj.shape[0])])
             cmb = pd.concat([obj, obj_2], axis=1)
-            collect.append(cmb)
-        return pd.concat(collect)
+            cmb=cmb.assign(features_selections=res['processing']['features_selection']['method'])
+
+            collect['metrics_model'].append(cmb.assign(ID=idx))
+            collect['metrics_features'].append(pd.DataFrame(res['processing']['features_selection']['feat_metrics']).assign(ID=idx))
+            collect['X'].append(res['X'].assign(ID=idx))
+            collect['y'].append(res['y'].assign(ID=idx))
+
+        return collect
     @staticmethod
     def _check_none_negative(obj):
         return obj.gt(0).all().all()
