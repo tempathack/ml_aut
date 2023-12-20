@@ -13,7 +13,31 @@ from sktime.datasets import load_unit_test
 from sktime.transformations.panel.dwt import DWTTransformer
 from sktime.transformations.series.acf import AutoCorrelationTransformer,PartialAutoCorrelationTransformer
 import pandas as pd
+from sklearn.base import  TransformerMixin,BaseEstimator
+from itertools import combinations
+import pandas as pd
+class CustomMathTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.max_scale=50
 
+    def fit(self, X, y=None):
+        return self  # There is no fitting necessary
+    def transform(self, X, y=None, **fit_params):
+        return self.calculate_combinations(X,self.max_scale)
+    def fit_transform(self, X, y=None, **fit_params):
+        self.transform(X)
+    @staticmethod
+    def calculate_combinations(df,max_scale=50):
+        combinations_list = list(combinations(df.columns, 2))  # Get all pairs of feature names
+
+        results = pd.DataFrame()  # Create an empty DataFrame to store results
+        combinations_list=combinations_list[:min(len(combinations_list), max_scale)]
+        for feat1, feat2 in combinations_list:
+            # Calculate product and sum of each pair of features
+            results[f'{feat1}_times_{feat2}'] = df[feat1] * df[feat2]  # Product
+            results[f'{feat1}_plus_{feat2}'] = df[feat1] + df[feat2]  # Sum
+
+        return results
 
 class CustomDWTTransformer(DWTTransformer):
     def __init__(self, **kwargs):
@@ -124,3 +148,5 @@ class CustomPartialAutoCorrelationTransformer(PartialAutoCorrelationTransformer)
         filled_series = series.reindex(new_index, fill_value=0)
 
         return filled_series
+
+

@@ -36,14 +36,17 @@ from sktime.classification.shapelet_based import ShapeletTransformClassifier
 from sktime.classification.dictionary_based import BOSSEnsemble,IndividualBOSS,WEASEL,MUSE,ContractableBOSS
 from sktime.classification.interval_based import SupervisedTimeSeriesForest,TimeSeriesForestClassifier
 from sktime.regression.kernel_based import RocketRegressor
+from feature_engine.discretisation import DecisionTreeDiscretiser,ArbitraryDiscretiser,EqualWidthDiscretiser,GeometricWidthDiscretiser
 from sktime.regression.distance_based import KNeighborsTimeSeriesRegressor
 from sktime.regression.deep_learning import CNNRegressor,TapNetRegressor
+from feature_engine.transformation import YeoJohnsonTransformer
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from feature_engine.discretisation import DecisionTreeDiscretiser,ArbitraryDiscretiser,EqualWidthDiscretiser,GeometricWidthDiscretiser
 from sktime.forecasting.compose import DirectTabularRegressionForecaster
 from sktime.datatypes._panel._convert import from_nested_to_2d_array
 from CUSTOM_MODELS.CUSTOM_MODELS import  UniToMultivariateWrapper,TimeSeriesToPanelData
-from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import CustomDWTTransformer,CustomPartialAutoCorrelationTransformer,CustomAutoCorrelationTransformer
+from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import CustomDWTTransformer,CustomMathTransformer,CustomPartialAutoCorrelationTransformer,CustomAutoCorrelationTransformer
 import time
 import threading
 from sktime.datatypes import check_is_scitype
@@ -277,6 +280,26 @@ class Config_Utils():
                                                         'ts_only': False,
                                                         'req_3d': False,
                                                         'default_kwargs': {}},
+                                    'CustomMathTransformer': {'object': CustomMathTransformer,
+                                                            'ts_only': False,
+                                                            'req_3d': False,
+                                                            'default_kwargs': {}},
+                                    'GeometricWidthDiscretiser': {'object': GeometricWidthDiscretiser,
+                                                              'ts_only': False,
+                                                              'req_3d': False,
+                                                              'default_kwargs': {}},
+                                    'EqualWidthDiscretiser': {'object': EqualWidthDiscretiser,
+                                                                  'ts_only': False,
+                                                                  'req_3d': False,
+                                                                  'default_kwargs': {}},
+                                    'ArbitraryDiscretiser': {'object': ArbitraryDiscretiser,
+                                                              'ts_only': False,
+                                                              'req_3d': False,
+                                                              'default_kwargs': {}},
+                                    'DecisionTreeDiscretiser': {'object': DecisionTreeDiscretiser,
+                                                             'ts_only': False,
+                                                             'req_3d': False,
+                                                             'default_kwargs': {}},
                                     'RobustScaler': {'object': RobustScaler,
                                                              'ts_only': False,
                                                              'req_3d': False,
@@ -450,7 +473,7 @@ class Config_Utils():
                               'req_3d': False, 'is_sklearn': True,
                               'default_kwargs': {}},
                                 }}
-        self.configs['n_cvs']=5
+        self.configs['n_cvs']=10
 
     def checked_in_models(self,pred_med):
         return self.configs['models'][pred_med].keys()
