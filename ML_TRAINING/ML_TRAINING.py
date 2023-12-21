@@ -91,7 +91,6 @@ class Ml_Train(Config_Utils):
         if handle_imbalance and self.pred_method == 'Classification':
             self.X, self.y = self._handle_imbalance(self.X, self.y)
 
-        print(self.X)
         _ = cross_val_score(estimator=model, X=self.X, y=self.y,
                             cv=self.cv, scoring=self.metrics_scorer)
 

@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 from sklearn.impute import KNNImputer,SimpleImputer
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, explained_variance_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, explained_variance_score,log_loss
 from sklearn.metrics import f1_score, precision_score,log_loss,accuracy_score
 from sklearn.model_selection import KFold,StratifiedKFold
 from sklearn.model_selection import TimeSeriesSplit
@@ -45,18 +45,14 @@ from sklearn.preprocessing import StandardScaler
 from feature_engine.discretisation import DecisionTreeDiscretiser,ArbitraryDiscretiser,EqualWidthDiscretiser,GeometricWidthDiscretiser
 from sktime.forecasting.compose import DirectTabularRegressionForecaster
 from sktime.datatypes._panel._convert import from_nested_to_2d_array
-from CUSTOM_MODELS.CUSTOM_MODELS import  UniToMultivariateWrapper,TimeSeriesToPanelData
+from CUSTOM_MODELS.CUSTOM_MODELS import  TimeSeriesToPanelData
+from CUSTOM_MODELS.MODEL_UTILS import UniToMultivariateWrapper
 from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import CustomDWTTransformer,CustomMathTransformer,CustomPartialAutoCorrelationTransformer,CustomAutoCorrelationTransformer
 import time
 import threading
 from collections import defaultdict
 from sktime.datatypes import check_is_scitype
-clf = ElasticEnsemble(
-    proportion_of_param_options=0.1,
-    proportion_train_for_test=0.1,
-    distance_measures = ["dtw","ddtw"],
-    majority_vote=True,
-)
+
 def unpack_args(func):
     from functools import wraps
     @wraps(func)
@@ -349,6 +345,9 @@ class Config_Utils():
                                               'LGBMRegressor': {'object': LGBMRegressor, 'ts_only': False,
                                                                'req_3d': False, 'is_sklearn': True,
                                                                'default_kwargs': {}},
+                                              'ExtraTreesRegressor': {'object': ExtraTreesRegressor, 'ts_only': False,
+                                                                'req_3d': False, 'is_sklearn': True,
+                                                                'default_kwargs': {}},
                                               'RandomForestRegressor': {'object': RandomForestRegressor, 'ts_only': False,
                                                                 'req_3d': False, 'is_sklearn': True,
                                                                 'default_kwargs': {}},
@@ -382,6 +381,9 @@ class Config_Utils():
                                 'CatBoostClassifier': {'object': CatBoostClassifier, 'ts_only': False, 'req_3d': False,'is_sklearn': True, 'default_kwargs': {}},
                                 'LGBMClassifier': {'object': LGBMClassifier, 'ts_only': False, 'req_3d': False,
                                                   'is_sklearn': True, 'default_kwargs': {}},
+                                                  'ExtraTreesClassifier': {'object': ExtraTreesClassifier, 'ts_only': False,
+                                                                     'req_3d': False,
+                                                                     'is_sklearn': True, 'default_kwargs': {}},
                                 'SVC': {'object': SVC, 'ts_only': False, 'req_3d': False,
                                                   'is_sklearn': True, 'default_kwargs': {}},
                                 'RandomForestClassifier': {'object': RandomForestClassifier, 'ts_only': False, 'req_3d': False,
@@ -513,11 +515,11 @@ class Config_Utils():
         else:
             return False
     @staticmethod
-    def _is_df(obj,prefix:str="trans") -> pd.DataFrame:
+    def _is_df(obj,prefix:str="trans",idx=None) -> pd.DataFrame:
         if isinstance(obj,pd.DataFrame):
             return obj
         elif isinstance(obj,np.ndarray) or isinstance(obj,pd.Series):
-            return pd.DataFrame(obj).add_prefix(prefix)
+            return pd.DataFrame(obj,index=idx).add_prefix(prefix)
         else:
             raise AttributeError("Nno convertible type needsto be Series ndarray or Dataframe")
     @staticmethod
@@ -600,7 +602,7 @@ class Config_Utils():
             cmb = pd.concat([obj, obj_2], axis=1)
             cmb=cmb.assign(features_selections=res['processing']['features_selection']['method'])
 
-            collect['metrics_model'].append(cmb.assign(ID=idx))
+            collect['metrics_model'].append(cmb.assign(ID=idx).copy())
             collect['metrics_features'].append(pd.DataFrame(res['processing']['features_selection']['feat_metrics']).assign(ID=idx))
             collect['X'].append(res['X'].assign(ID=idx))
             collect['y'].append(res['y'].assign(ID=idx))
