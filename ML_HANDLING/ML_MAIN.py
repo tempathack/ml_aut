@@ -129,14 +129,11 @@ class Ml_Main(Config_Utils):
         if not self.is_processed:
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
 
-
-
         self.ml_tune=Ml_Tune(self.unpacked_results,
                              self.pred_method,
                              self.is_ts,
                              k_best=k_best)
         return  self.ml_tune.tune()
-
     def get_feature_selections(self):
         if not self.is_processed:
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
