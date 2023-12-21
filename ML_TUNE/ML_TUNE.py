@@ -88,6 +88,8 @@ class Ml_Tune(Config_Utils):
             results= cross_val_score(estimator=model, X=X, y=y,
                                 cv=self.cv, scoring='neg_log_loss'  if self.pred_method == 'Classification' else 'neg_mean_squared_error')
             results=np.mean(results)
+
+
         return  results
 
     def optimize(self, partial_objective, trial):
@@ -95,9 +97,38 @@ class Ml_Tune(Config_Utils):
     def hyper_parameter_register(self, key, trial):
 
         if key == 'LogisticRegression':
-            return  {'penalty': trial.suggest_categorical('penalty', [ 'l2'])}
+            return  {'penalty': trial.suggest_categorical('penalty', [ 'l2']),
+                     'C':trial.suggest_float("C", 0.5, 1.5),
+                     'max_iter':trial.suggest_categorical('max_iter', [100,200,300]),
+                     'solver':trial.suggest_categorical('solver',['lbfgs', 'liblinear', 'newton-cg'
+                         , 'newton-cholesky', 'sag', 'saga'])}
         elif key=='StandardScaler':
             return {}
+        elif key=='LinearRegression':
+            return {}
+        elif key=='QuantileTransformer':
+            return {'n_quantiles':trial.suggest_categorical('n_quantiles', [j for j in range(0,3000,500)]),
+                    'output_distribution':trial.suggest_categorical('output_distribution',['uniform','normal'])}
+        elif key=='PowerTransformer':
+            return {'method':trial.suggest_categorical('method',['box-cox','yeo-johnson'])}
+        elif key=='RobustScaler':
+            return {'unit_variance': trial.suggest_categorical('unit_variance', [False, True])}
+        elif key=='PolynomialFeatures':
+            return {'degree': trial.suggest_categorical('degree', [ i for i in range(1,5)])}
+        elif key=='SVC':
+            return {'C':trial.suggest_float("C", 0.5, 1.5),
+                    'kernel': trial.suggest_categorical('kernel',
+                    ['linear', 'poly', 'rbf’', 'sigmoid', 'precomputed']),
+                    'degree':trial.suggest_categorical('degree', [ i for i in range(1,8)]),
+                    }
+        elif key=='MinMaxScaler':
+            return {}
+        elif key=='SVR':
+            return {'C':trial.suggest_float("C", 0.5, 1.5),
+                    'kernel': trial.suggest_categorical('kernel',
+                    ['linear', 'poly', 'rbf’', 'sigmoid', 'precomputed']),
+                    'degree':trial.suggest_categorical('degree', [ i for i in range(1,8)]),
+                    }
         elif key=='XGBClassifier':
             return {
                 # this parameter means using the GPU when training our model to speedup the training process
@@ -106,13 +137,130 @@ class Ml_Tune(Config_Utils):
                 'colsample_bytree': trial.suggest_categorical('colsample_bytree',
                                                               [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
                 'subsample': trial.suggest_categorical('subsample', [0.4, 0.5, 0.6, 0.7, 0.8, 1.0]),
-                'learning_rate': trial.suggest_categorical('learning_rate',
-                                                           [0.008, 0.01, 0.012, 0.014, 0.016, 0.018, 0.02]),
+                'learning_rate': trial.suggest_float("learning_rate", 1e-3, 1.0, log=True),
                 'n_estimators': trial.suggest_categorical('n_estimators', [i for i in range(0,2000,100)]),
                 'max_depth': trial.suggest_categorical('max_depth', [5, 7, 9, 11, 13, 15, 17,20]),
                 'random_state': trial.suggest_categorical('random_state', [2020]),
                 'min_child_weight': trial.suggest_int('min_child_weight', 1, 300),
             }
+        elif key=='RandomForestClassifier':
+            return  {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'max_depth': trial.suggest_int('max_depth', 4, 30),
+            'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+        }
+        elif key == 'ExtraTreesRegressor':
+            return {
+                'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+                'max_depth': trial.suggest_int('max_depth', 4, 30),
+                'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
+                'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+                'warm_start': trial.suggest_categorical('warm_start', [True, False])
+            }
+        elif key == 'ExtraTreesClassifier':
+            return {
+                'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+                'max_depth': trial.suggest_int('max_depth', 4, 30),
+                'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
+                'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+                'warm_start': trial.suggest_categorical('warm_start',[True,False])
+            }
+        elif key=='DecisionTreeClassifier':
+            return {'max_depth': trial.suggest_int('max_depth', 4, 30),
+                    'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
+                    'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+                    }
+        elif key=='DecisionTreeRegressor':
+            return {'max_depth': trial.suggest_int('max_depth', 4, 30),
+                    'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
+                    'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+                    }
+        elif key=='AdaBoostClassifier':
+            return {
+                'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+                'learning_rate': trial.suggest_float("learning_rate", 1e-3, 1.0, log=True),
+            }
+        elif key=='AdaBoostRegressor':
+            return {
+                'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+                'learning_rate': trial.suggest_float("learning_rate", 1e-3, 1.0, log=True),
+            }
+        elif key=='RandomForestRegressor':
+            return  {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'max_depth': trial.suggest_int('max_depth', 4, 30),
+            'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+        }
+        elif key=='XGBRegressor':
+            return {
+                # this parameter means using the GPU when training our model to speedup the training process
+                'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
+                'alpha': trial.suggest_loguniform('alpha', 1e-3, 10.0),
+                'colsample_bytree': trial.suggest_categorical('colsample_bytree',
+                                                              [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
+                'subsample': trial.suggest_categorical('subsample', [0.4, 0.5, 0.6, 0.7, 0.8, 1.0]),
+                'learning_rate': trial.suggest_float("learning_rate", 1e-3, 1.0, log=True),
+                'n_estimators': trial.suggest_categorical('n_estimators', [i for i in range(0,2000,100)]),
+                'max_depth': trial.suggest_categorical('max_depth', [5, 7, 9, 11, 13, 15, 17,20]),
+                'random_state': trial.suggest_categorical('random_state', [2020]),
+                'min_child_weight': trial.suggest_int('min_child_weight', 1, 300),
+            }
+        elif key=='LGBMRegressor':
+            return {
+        "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(0,2000,100)]),
+        "verbosity": -1,
+        "bagging_freq": 1,
+        "learning_rate": trial.suggest_float("learning_rate", 1e-3, 1.0, log=True),
+        "num_leaves": trial.suggest_int("num_leaves", 2, 2**10),
+        "subsample": trial.suggest_float("subsample", 0.05, 1.0),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.05, 1.0),
+        "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 1, 100) }
+
+        elif key=='LGBMClassifier':
+            return {
+        "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(0,2000,100)]),
+        "verbosity": -1,
+        "bagging_freq": 1,
+        "learning_rate": trial.suggest_float("learning_rate", 1e-3, 0.1, log=True),
+        "num_leaves": trial.suggest_int("num_leaves", 2, 2**10),
+        "subsample": trial.suggest_float("subsample", 0.05, 1.0),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.05, 1.0),
+        "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 1, 100) }
+        elif key=='CatBoostClassifier':
+            return {
+        "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(0, 2000, 100)]),
+        'iterations' : trial.suggest_int('iterations', 50, 500),
+        'leaf_estimation_iterations':1,
+        'boosting_type':'Plain',
+        'depth' : trial.suggest_int('depth', 4, 26),
+        'random_strength' :trial.suggest_int('random_strength', 0, 100),
+        'bagging_temperature' : trial.suggest_float('bagging_temperature', 0.01, 100.00),
+        'learning_rate': trial.suggest_float('learning_rate', 1e-3, 1e-1),
+        'od_type': trial.suggest_categorical('od_type', ['IncToDec', 'Iter']),
+        'l2_leaf_reg':50,
+            'verbose': False}
+        elif key=='CatBoostRegressor':
+            return {
+        "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(0, 2000, 100)]),
+        'iterations' : trial.suggest_int('iterations', 50, 500),
+        'leaf_estimation_iterations':1,
+        'boosting_type':'Plain',
+        'depth' : trial.suggest_int('depth', 4, 26),
+        'random_strength' :trial.suggest_int('random_strength', 0, 100),
+        'bagging_temperature' : trial.suggest_float('bagging_temperature', 0.01, 100.00),
+        'learning_rate': trial.suggest_float('learning_rate', 1e-3, 1e-1),
+        'od_type': trial.suggest_categorical('od_type', ['IncToDec', 'Iter']),
+        'l2_leaf_reg':50,
+            'verbose': False}
+        elif key=='ElasticNet':
+            return {'alpha':trial.suggest_float('alpha', 0.03, 2),
+                    'l1_ratio':trial.suggest_float('l1_ratio', 0.1, 2)}
+        elif key=='Ridge':
+            return {'alpha':trial.suggest_float('alpha', 0.03, 2)}
+
+
 
     @staticmethod
     def _custom_evaluate(model, y, X, cv=None, scoring=None):
