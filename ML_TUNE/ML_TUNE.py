@@ -52,7 +52,7 @@ class Ml_Tune(Config_Utils):
 
             # Optimize using the partial function
             study = optuna.create_study(pruner=pruner, direction='maximize')
-            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=5)
+            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=200)
 
             def_objects=self._define_classes(model,transform,study)
 
@@ -247,6 +247,7 @@ class Ml_Tune(Config_Utils):
         "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(1, 2000, 100)]),
         'leaf_estimation_iterations':1,
         'boosting_type':'Plain',
+        'thread_count':-1,
         'depth' : trial.suggest_int('depth', 4, 16),
         'random_strength' :trial.suggest_int('random_strength', 0, 100),
         'bagging_temperature' : trial.suggest_float('bagging_temperature', 0.01, 100.00),
