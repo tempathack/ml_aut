@@ -76,11 +76,11 @@ class Ml_Tune(Config_Utils):
         model = model()
         transformer = transform()
         for key, value in params.best_params.items():
-            default_value = getattr(model, key, True)
-            if not default_value:
-                setattr(model, key, value)
-            default_value = getattr(transformer, key, True)
-            if not default_value:
+            default_value = getattr(model, key, False)
+            if not isinstance(default_value,bool):
+                setattr(transformer, key, value)
+            default_value = getattr(transformer, key, False)
+            if not isinstance(default_value,bool):
                 setattr(transformer, key, value)
         return model,transformer
 
