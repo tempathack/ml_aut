@@ -590,7 +590,7 @@ class Config_Utils():
             cmb = pd.concat([obj, obj_2], axis=1)
             cmb=cmb.assign(features_selections=res['processing']['features_selection']['method'])
 
-            collect['metrics_model'].append(cmb.assign(ID=idx).copy())
+            collect['metrics_model'].append(cmb.assign(ID=idx,Rank=None,Tuned=False).copy())
             collect['metrics_features'].append(pd.DataFrame(res['processing']['features_selection']['feat_metrics']).assign(ID=idx))
             collect['X'].append(res['X'].assign(ID=idx))
             collect['y'].append(res['y'].assign(ID=idx))

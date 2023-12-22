@@ -3,7 +3,7 @@ import optuna
 import pandas as pd
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error,log_loss
-from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
+from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,MultiScorer
 from functools import partial
 from imblearn.over_sampling import SMOTE
 from collections import defaultdict
@@ -17,7 +17,8 @@ class Ml_Tune(Config_Utils):
         self.res_dic=res_dic
         self.cv = self._define_cv(self.is_ts)
     def tune(self):
-        tune_results=dict()
+        tune_results=[]
+        tuned_ojects={}
 
         pruner = MedianPruner(n_startup_trials=5, n_warmup_steps=10)
 
@@ -48,17 +49,26 @@ class Ml_Tune(Config_Utils):
             # Create a partial function that includes the extra_args and the trial object
             X=X_train.query("ID==@i_d").drop(columns=['ID'])
             y=y_train.query("ID==@i_d").drop(columns=['ID'])
-            partial_objective = partial(self.objective_function, model, transform,X,y)
+            partial_objective = partial(self.objective_function, model, transform,X.copy(),y)
 
             # Optimize using the partial function
             study = optuna.create_study(pruner=pruner, direction='maximize')
-            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=200)
+            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=2)
 
-            def_objects=self._define_classes(model,transform,study)
+            model_obj,transformer_obj=self._define_classes(model,transform,study)
 
-            tune_results[model+'_'+transform+'_rank_'+i_d]={'Best_Params':study.best_params,'Best_Score':study.best_value
-                                                ,'Best_Model':def_objects[0],'Best_Transform':def_objects[1],'X':X,'y':y}
-        return tune_results
+            X = transformer_obj.fit_transform(X)
+
+            res_dic=self._cross_vals(model_obj, X, y)
+            tune_results.append(self._process_dic(res_dic).assign(Rank=i_d,Tuned=True,dim_red=None,transform=transform,model=model))
+
+            tuned_ojects[model+'_'+transform+'_'+i_d]={'model':model_obj,'transformer':transformer_obj,
+                                                       'best_score':study.best_value,'best_params':study.best_params,'X':X,'y':y}
+
+        return pd.concat(tune_results),tuned_ojects
+    @staticmethod
+    def _process_dic(res):
+        return pd.DataFrame(res).assign(CV=lambda df: np.arange(df.shape[0]) + 1)
     def _define_classes(self,model,transform,params):
         model = self.configs['models'][self.pred_method][model]['object']
         transform = self.configs['transforms'][transform]['object']
@@ -91,27 +101,32 @@ class Ml_Tune(Config_Utils):
 
         X=transformer.fit_transform(X)
 
+        results=self._cross_vals(model,X,y)
+
+        return -np.mean(results['log_loss'])
+
+
+    def optimize(self, partial_objective, trial):
+        return partial_objective(trial)
+    def _cross_vals(self,model,X,y,handle_imbalance=True):
+
         if self.is_ts:
 
             results = self._custom_evaluate(model=model,
                                         y=y,
                                         X=X,
                                         cv=self.cv,
-                                        scoring=log_loss  if self.pred_method == 'Classification' else mean_squared_error)
+                                        scoring=[val[0] if self.pred_method == 'Classification' else
+                                     val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method].items()])
         else:
-
+            self.metrics_scorer = MultiScorer(self.configs['metrics']['tab'][self.pred_method])
             if handle_imbalance and self.pred_method == 'Classification':
                 X,y = self._handle_imbalance(X,y)
 
-            results= cross_val_score(estimator=model, X=X, y=y,
-                                cv=self.cv, scoring='neg_log_loss'  if self.pred_method == 'Classification' else 'neg_mean_squared_error')
-            results=np.mean(results)
+            _= cross_val_score(estimator=model, X=X, y=y,
+                                cv=self.cv, scoring=self.metrics_scorer)
 
-
-        return  results
-
-    def optimize(self, partial_objective, trial):
-        return partial_objective(trial)
+        return self.metrics_scorer.get_results()
     def hyper_parameter_register(self, key, trial):
 
         if key == 'LogisticRegression':

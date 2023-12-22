@@ -71,10 +71,8 @@ if __name__ == '__main__':
                 obj = Ml_Main(X, y=target, transform=trans,#DWTTransformer#PartialAutoCorrelationTransformer
                           features_selection='LogisticRegressionCV',dim_reduction=dim_red
                               , n_jobs=1, ml_model=model).Process()
-                obj.get_feature_selections().to_csv(f"./Outputs/{trans+model+str(dim_red)}_feat_select.csv",index=None)
-                obj.get_model_metrics().to_csv(f"./Outputs/{trans + model + str(dim_red)}_model_metrics.csv", index=None)
                 obj.Tune()
-                obj.get_tuned_model_metrics().to_csv(f"./Outputs/{trans + model + str(dim_red)}_tuned_model_metrics.csv", index=None)
+
 
                 #obj.to_csv(f"./Outputs/{trans+model+str(dim_red)}.csv",index=None)
 
