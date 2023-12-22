@@ -1,0 +1,43 @@
+XGBClassifier_StandardScaler_rank_0
+"XGBClassifier(base_score=None, booster=None, callbacks=None,
+              colsample_bylevel=None, colsample_bynode=None,
+              colsample_bytree=0.7, device=None, early_stopping_rounds=None,
+              enable_categorical=False, eval_metric=None, feature_types=None,
+              gamma=None, grow_policy=None, importance_type=None,
+              interaction_constraints=None, learning_rate=0.025303099228486708,
+              max_bin=None, max_cat_threshold=None, max_cat_to_onehot=None,
+              max_delta_step=None, max_depth=5, max_leaves=None,
+              min_child_weight=6, missing=nan, monotone_constraints=None,
+              multi_strategy=None, n_estimators=401, n_jobs=None,
+              num_parallel_tree=None, random_state=2020, ...)"
+"{'lambda': 0.002506741836779186, 'alpha': 0.5223814101972515, 'colsample_bytree': 0.7, 'subsample': 0.4, 'learning_rate': 0.025303099228486708, 'n_estimators': 401, 'max_depth': 5, 'random_state': 2020, 'min_child_weight': 6}"
+-0.4389435157741519
+StandardScaler()
+"         LDA0
+0   -1.171971
+1    2.563249
+2    1.041730
+3    2.318467
+4   -1.344538
+..        ...
+886 -0.735110
+887  2.371547
+888  0.563173
+889  0.368155
+890 -1.179748
+
+[891 rows x 1 columns]"
+"     survived
+0           0
+1           1
+2           1
+3           1
+4           0
+..        ...
+886         0
+887         1
+888         0
+889         1
+890         0
+
+[891 rows x 1 columns]"
