@@ -97,7 +97,7 @@ class Ml_Process(Config_Utils):
             transformed_df = transformer.fit_transform(X)
         else:  # tabular transformations
             transformed_arr = transformer.fit_transform(X)
-            transformed_df=self._is_df(transformed_arr,prefix=str(transformer),idx=self.X.index)
+            transformed_df=self._is_df(transformed_arr,prefix=str(transformer).replace("()",""),idx=self.X.index)
 
         is_3d = self._validate_3d(transformed_df)
         contains_nulls = self._validate_null(transformed_df, is_3d)

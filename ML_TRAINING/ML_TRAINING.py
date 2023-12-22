@@ -89,9 +89,9 @@ class Ml_Train(Config_Utils):
         model = Models(model, self.pred_method, *args, **kwargs).get_model()
 
         if handle_imbalance and self.pred_method == 'Classification':
-            self.X, self.y = self._handle_imbalance(self.X, self.y)
+            X, y = self._handle_imbalance(self.X, self.y)
 
-        _ = cross_val_score(estimator=model, X=self.X, y=self.y,
+        _ = cross_val_score(estimator=model, X=X, y=y,
                             cv=self.cv, scoring=self.metrics_scorer)
 
         return self.metrics_scorer.get_results()

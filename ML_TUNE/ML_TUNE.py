@@ -53,7 +53,7 @@ class Ml_Tune(Config_Utils):
 
             # Optimize using the partial function
             study = optuna.create_study(pruner=pruner, direction='maximize')
-            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=2)
+            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=200)
 
             model_obj,transformer_obj=self._define_classes(model,transform,study)
 
@@ -163,6 +163,7 @@ class Ml_Tune(Config_Utils):
                 # this parameter means using the GPU when training our model to speedup the training process
                 'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
                 'alpha': trial.suggest_loguniform('alpha', 1e-3, 10.0),
+                'verbosity':0,
                 'colsample_bytree': trial.suggest_categorical('colsample_bytree',
                                                               [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
                 'subsample': trial.suggest_categorical('subsample', [0.4, 0.5, 0.6, 0.7, 0.8, 1.0]),
@@ -227,6 +228,7 @@ class Ml_Tune(Config_Utils):
                 # this parameter means using the GPU when training our model to speedup the training process
                 'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
                 'alpha': trial.suggest_loguniform('alpha', 1e-3, 10.0),
+                'verbose': 0,
                 'colsample_bytree': trial.suggest_categorical('colsample_bytree',
                                                               [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
                 'subsample': trial.suggest_categorical('subsample', [0.4, 0.5, 0.6, 0.7, 0.8, 1.0]),
@@ -239,7 +241,7 @@ class Ml_Tune(Config_Utils):
         elif key=='LGBMRegressor':
             return {
         "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(1,2000,100)]),
-        "verbosity": -1,
+        "verbose": 0,
         "bagging_freq": 1,
         "learning_rate": trial.suggest_float("learning_rate", 1e-3, 1.0, log=True),
         "num_leaves": trial.suggest_int("num_leaves", 2, 2**10),
@@ -250,7 +252,7 @@ class Ml_Tune(Config_Utils):
         elif key=='LGBMClassifier':
             return {
         "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(1,2000,100)]),
-        "verbosity": -1,
+                "verbose": 0,
         "bagging_freq": 1,
         "learning_rate": trial.suggest_float("learning_rate", 1e-3, 0.1, log=True),
         "num_leaves": trial.suggest_int("num_leaves", 2, 2**10),
@@ -263,6 +265,7 @@ class Ml_Tune(Config_Utils):
         'leaf_estimation_iterations':1,
         'boosting_type':'Plain',
         'thread_count':-1,
+                'silent': True,
         'depth' : trial.suggest_int('depth', 4, 16),
         'random_strength' :trial.suggest_int('random_strength', 0, 100),
         'bagging_temperature' : trial.suggest_float('bagging_temperature', 0.01, 100.00),
@@ -275,6 +278,7 @@ class Ml_Tune(Config_Utils):
         "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(1, 2000, 100)]),
         'leaf_estimation_iterations':1,
         'boosting_type':'Plain',
+                'silent': True,
         'depth' : trial.suggest_int('depth', 4, 16),
         'random_strength' :trial.suggest_int('random_strength', 0, 100),
         'bagging_temperature' : trial.suggest_float('bagging_temperature', 0.01, 100.00),

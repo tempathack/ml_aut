@@ -45,7 +45,7 @@ X,target=d.drop(columns=['survived']),d[['survived']]
 ct=0
 
 if __name__ == '__main__':
-
+    warnings.filterwarnings("ignore")
     def check_model_already_trained(model_name):
         # Read the text file containing the list of trained models
         with open('trained_models.txt', 'r') as file:
@@ -61,18 +61,17 @@ if __name__ == '__main__':
         # Save the model_name to the text file
         with open('trained_models.txt', 'a') as file:
             file.write(model_name + '\n')
-
-
     k=configs.get_models_available(is_ts=False, pred_med='Classification')
     k.remove('SVC')
-    for trans in configs.get_transforms_available(is_ts=False,pred_med='Classification'):
-        for model in k:
-            for dim_red in configs.get_dim_reductions_available()+[None]:
-                obj = Ml_Main(X, y=target, transform=trans,#DWTTransformer#PartialAutoCorrelationTransformer
-                          features_selection='LogisticRegressionCV',dim_reduction=dim_red
-                              , n_jobs=1, ml_model=model).Process()
-                obj.Tune()
 
+    obj = Ml_Main(X, y=target, transform=configs.get_transforms_available(is_ts=False,pred_med='Classification'),  # DWTTransformer#PartialAutoCorrelationTransformer
+                  features_selection='LogisticRegressionCV', dim_reduction=None
+                  , n_jobs=-1, ml_model=k).Process()
+
+
+    obj.Tune().get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
+
+#
 
                 #obj.to_csv(f"./Outputs/{trans+model+str(dim_red)}.csv",index=None)
 

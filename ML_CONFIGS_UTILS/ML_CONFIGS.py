@@ -488,7 +488,7 @@ class Config_Utils():
         if  obj.index.inferred_type == 'datetime64':
             return True
         else:
-            False
+            return False
     @staticmethod
     def _validate_obj(obj,task=None)-> bool:
         assert isinstance(obj, pd.DataFrame), "Invalid"
