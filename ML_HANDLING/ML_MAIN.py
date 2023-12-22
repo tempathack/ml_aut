@@ -37,6 +37,7 @@ class Ml_Main(Config_Utils):
         self.pred_method=self._class_or_reg(self.y)
         self.mode= 'seq' if n_jobs==1 else 'parallel'
         self.Logger=WrapStack()
+        self.is_processed=False
 
 
         if isinstance(self.transform, list):
@@ -55,7 +56,7 @@ class Ml_Main(Config_Utils):
         self.is_ml_select = hasattr(self, 'ml_select')
         self.is_ml_reduce = hasattr(self, 'ml_reduce')
 
-
+        self.is_tuned = False
 
         if self.mode == 'parallel':
             results=self._process_parallel(self.is_ml_select, self.is_ml_reduce)
@@ -133,7 +134,11 @@ class Ml_Main(Config_Utils):
                              self.pred_method,
                              self.is_ts,
                              k_best=k_best)
-        return  self.ml_tune.tune()
+        self.tuned_results=self.ml_tune.tune()
+        self.is_tuned=True
+
+
+        return self
     def get_feature_selections(self):
         if not self.is_processed:
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
@@ -144,8 +149,13 @@ class Ml_Main(Config_Utils):
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
         else:
             return pd.concat(self.unpacked_results['metrics_model'])
+    def get_tuned_model_metrics(self):
+        if not self.is_tuned:
+            raise MethodNotExecutedError("please make sure to execute Tune method beforehand")
+        else:
+            return pd.DataFrame(self.tuned_results)
     def get_train_data(self):
-        if not self.is_processed:
+        if not self.is_tuned:
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
         else:
             return (pd.concat(self.unpacked_results['X']),pd.concat(self.unpacked_results['y']))

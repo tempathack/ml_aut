@@ -37,9 +37,6 @@ configs=Config_Utils()
 X,target=data.drop(columns=['Label']),data[['Label']]
 
 
-msft = yf.Ticker("MSFT").history(start='1980-01-01').drop(columns=['Dividends', 'Stock Splits'])\
-    .assign(target=lambda df: np.where(df.Open.pct_change().shift(-10).gt(0),1,0) ).dropna()
-X,target=msft.drop(columns=['target']),msft[['target']]
 X,target=data.drop(columns=['Label']),data[['Label']]
 
 sns.load_dataset('titanic')
@@ -65,18 +62,20 @@ if __name__ == '__main__':
         with open('trained_models.txt', 'a') as file:
             file.write(model_name + '\n')
 
+
+    k=configs.get_models_available(is_ts=False, pred_med='Classification')
+    k.remove('SVC')
     for trans in configs.get_transforms_available(is_ts=False,pred_med='Classification'):
-        for model in ['XGBClassifier']:
+        for model in k:
             for dim_red in configs.get_dim_reductions_available()+[None]:
-                print(trans,model)
-                obj = Ml_Main(X, y=target, transform='StandardScaler',#DWTTransformer#PartialAutoCorrelationTransformer
+                obj = Ml_Main(X, y=target, transform=trans,#DWTTransformer#PartialAutoCorrelationTransformer
                           features_selection='LogisticRegressionCV',dim_reduction=dim_red
-                              , n_jobs=1, ml_model=model).Process(results_return=True)
-                print(pd.concat(obj['metrics_model'])['log_loss'].mean())
-                obj = Ml_Main(X, y=target, transform='StandardScaler',#DWTTransformer#PartialAutoCorrelationTransformer
-                          features_selection='LogisticRegressionCV',dim_reduction=dim_red
-                              , n_jobs=1, ml_model=model).Process().Tune()
-                print(obj)
+                              , n_jobs=1, ml_model=model).Process()
+                obj.get_feature_selections().to_csv(f"./Outputs/{trans+model+str(dim_red)}_feat_select.csv",index=None)
+                obj.get_model_metrics().to_csv(f"./Outputs/{trans + model + str(dim_red)}_model_metrics.csv", index=None)
+                obj.Tune()
+                obj.get_tuned_model_metrics().to_csv(f"./Outputs/{trans + model + str(dim_red)}_tuned_model_metrics.csv", index=None)
+
                 #obj.to_csv(f"./Outputs/{trans+model+str(dim_red)}.csv",index=None)
 
 

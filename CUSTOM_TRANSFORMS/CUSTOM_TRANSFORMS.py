@@ -25,7 +25,7 @@ class CustomMathTransformer(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None, **fit_params):
         return self.calculate_combinations(X,self.max_scale)
     def fit_transform(self, X, y=None, **fit_params):
-        self.transform(X)
+        return self.transform(X)
     @staticmethod
     def calculate_combinations(df,max_scale=50):
         combinations_list = list(combinations(df.columns, 2))  # Get all pairs of feature names
