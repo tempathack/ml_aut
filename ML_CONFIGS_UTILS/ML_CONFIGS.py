@@ -318,7 +318,7 @@ class Config_Utils():
         self.configs['dim_reduction']={'LDA': {'object':LDA,'default_kwargs':{}},
                                        'TSNE':{'object':TSNE,'default_kwargs':{}}, 'PCA': {'object':PCA,'default_kwargs':{}}, 'SE':{'object':SpectralEmbedding,'default_kwargs':{}},
                                        'UMAP': {'object':UMAP,'default_kwargs':{}}, 'LLE': {'object':LocallyLinearEmbedding,'default_kwargs':{}},
-                                       'MDS': {'object':MDS,'default_kwargs':{}}, 'ISOMAP': {'object':Isomap,'default_kwargs':{}}}
+                                       'MDS': {'object':MDS,'default_kwargs':{}}, 'ISOMAP': {'object':Isomap,'default_kwargs':{}}, None: {'object':None,'default_kwargs':{}}}
 
         self.configs['metrics']={'tab':{'Regression':{'mean_squared_error':(mean_squared_error,{}),
                                                'mean_absolute_error':(mean_absolute_error,{}),
@@ -627,7 +627,7 @@ class Config_Utils():
     def get_feat_selections_available(self,pred_med:str):
         return self.configs['feat_selections'][pred_med]
     def get_dim_reductions_available(self):
-        return self.configs['dim_reduction']
+        return list(self.configs['dim_reduction'].keys())
 
 
     def set_X_y(self,X=None,y=None):

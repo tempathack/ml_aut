@@ -74,7 +74,7 @@ class Ml_Tune(Config_Utils):
     def _define_classes(self,model,transformer,dim_reducer,params):
         model = self.configs['models'][self.pred_method][model]['object']
         transformer= self.configs['transforms'][transformer]['object']
-        if not isinstance(dim_reducer,bool):
+        if not dim_reducer is None:
             dim_reducer=self.configs['dim_reduction'][dim_reducer]['object']
         else:
             dim_reducer=None

@@ -55,13 +55,13 @@ class Ml_Main(Config_Utils):
 
     def Process(self, *args, **kwargs):
         self.is_ml_select = hasattr(self, 'ml_select')
-        self.is_ml_reduce = hasattr(self, 'ml_reduce')
+
 
 
         if self.mode == 'parallel':
-            results=self._process_parallel(self.is_ml_select, self.is_ml_reduce)
+            results=self._process_parallel(self.is_ml_select)
         elif self.mode == 'seq':
-            results=self._process_seq(self.is_ml_select, self.is_ml_reduce, *args, **kwargs)
+            results=self._process_seq(self.is_ml_select, *args, **kwargs)
 
 
 
@@ -69,14 +69,14 @@ class Ml_Main(Config_Utils):
 
         return self
     @WrapStack.FUNCTION_SCREEN
-    def _process_parallel(self, is_ml_select, is_ml_reduce,*args, **kwargs):
+    def _process_parallel(self, is_ml_select,*args, **kwargs):
         # Initialize Ray (ideally done outside this method)
         manager=Manager()
         shared_dict = manager.dict()
 
 
         results = Parallel(n_jobs=self.n_jobs)(delayed(self._define_generator)
-                                               (transform, model, is_ml_select, is_ml_reduce, dim_reduction,shared_dict, *args, **kwargs)
+                                               (transform, model, is_ml_select, dim_reduction,shared_dict, *args, **kwargs)
                                                 for model in self.model
                                                 for dim_reduction in self.dim_reduction
                                                 for transform in self.transform)
@@ -84,18 +84,17 @@ class Ml_Main(Config_Utils):
         return results
         # Shutdown Ray (ideally done outside this method)
     @WrapStack.FUNCTION_SCREEN
-    def _process_seq(self, is_ml_select, is_ml_reduce, *args, **kwargs):
+    def _process_seq(self, is_ml_select, *args, **kwargs):
         results=[]
         for transform in self.transform:
             for dim_reduction in self.dim_reduction:
                 for model in self.model:
-                    result = self._define_generator(transform, model, is_ml_select, is_ml_reduce,dim_reduction, *args, **kwargs)
+                    result = self._define_generator(transform, model, is_ml_select,dim_reduction, *args, **kwargs)
                     results.append(result)
         return results
     def _define_generator(self, transform,
                           model,
                           is_ml_select=False,
-                          is_ml_reduce=False,
                           dim_red=None,
                           shared_dict:managers.DictProxy=None,
                           *args, **kwargs):
@@ -120,7 +119,7 @@ class Ml_Main(Config_Utils):
             self.ml_select.set_X_y(X=X)
             X = self.ml_select.feature_selection(method=self.features_selection, *args, **kwargs)
 
-        if is_ml_reduce and not self._validate_3d(X):
+        if not dim_red is None and not self._validate_3d(X):
             self.ml_reduce.set_X_y(X=X)
             X = self.ml_reduce.dimensionality_reduction(method=dim_red, *args, **kwargs)
 
@@ -131,7 +130,7 @@ class Ml_Main(Config_Utils):
         return {'processing': {'transform': transform, 'features_selection':
                {'method':self.features_selection,'feat_metrics':self.ml_select.feat_metrics()
                if is_ml_select else False},
-                'dim_red': False if dim_red is None else dim_red, 'model': model},
+                'dim_red': dim_red, 'model': model},
                 'metrics': metrics,'X':X,'y':self.y}
 
     @WrapStack.FUNCTION_SCREEN

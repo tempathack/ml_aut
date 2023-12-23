@@ -24,7 +24,9 @@ class Reducers(Config_Utils):
 
     def get_dim_reducer(self):
         method = self.configs['dim_reduction'][self.dim_reducer]['object']
+
         return method(*self.args, **self.kwargs)
+
 
 
 
@@ -54,8 +56,7 @@ class Ml_Reduce(Config_Utils):
 
     @WrapStack.FUNCTION_SCREEN
     def dimensionality_reduction(self,method=None,upper_limit=20,*args,**kwargs):
-
-        if method is None or  method in self.configs['dim_reduction'] :
+        if not method in self.configs['dim_reduction'].keys() :
             raise KeyError("specify valid method first")
 
 
