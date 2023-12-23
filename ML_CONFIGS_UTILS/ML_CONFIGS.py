@@ -49,6 +49,14 @@ from CUSTOM_MODELS.CUSTOM_MODELS import  TimeSeriesToPanelData
 from CUSTOM_MODELS.MODEL_UTILS import UniToMultivariateWrapper
 from CUSTOM_TRANSFORMS.CUSTOM_TRANSFORMS import CustomDWTTransformer,CustomMathTransformer,CustomPartialAutoCorrelationTransformer,CustomAutoCorrelationTransformer
 import time
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.manifold import TSNE
+from sklearn.manifold import Isomap
+from sklearn.manifold import LocallyLinearEmbedding
+from sklearn.manifold import MDS
+from umap import UMAP
+from sklearn.manifold import SpectralEmbedding
 import threading
 from collections import defaultdict
 from sktime.datatypes import check_is_scitype
@@ -307,7 +315,10 @@ class Config_Utils():
         self.configs['feat_selections']={'Regression':['correlation', 'f_regression', 'DecisionTreeRegressor', 'RandomForestRegressor', 'mutual_info_regression', 'LassoCV','all'],
                               'Classification':['permutation importance', 'f_classif', 'chi2', 'DecisionTreeClassifier', 'RandomForestClassifier', 'mutual_info_classif', 'LogisticRegressionCV','all']}
 
-        self.configs['dim_reduction']=['method']
+        self.configs['dim_reduction']={'LDA': {'object':LDA,'default_kwargs':{}},
+                                       'TSNE':{'object':TSNE,'default_kwargs':{}}, 'PCA': {'object':PCA,'default_kwargs':{}}, 'SE':{'object':SpectralEmbedding,'default_kwargs':{}},
+                                       'UMAP': {'object':UMAP,'default_kwargs':{}}, 'LLE': {'object':LocallyLinearEmbedding,'default_kwargs':{}},
+                                       'MDS': {'object':MDS,'default_kwargs':{}}, 'ISOMAP': {'object':Isomap,'default_kwargs':{}}}
 
         self.configs['metrics']={'tab':{'Regression':{'mean_squared_error':(mean_squared_error,{}),
                                                'mean_absolute_error':(mean_absolute_error,{}),
@@ -372,8 +383,6 @@ class Config_Utils():
                                                   'ExtraTreesClassifier': {'object': ExtraTreesClassifier, 'ts_only': False,
                                                                      'req_3d': False,
                                                                      'is_sklearn': True, 'default_kwargs': {}},
-                                'SVC': {'object': SVC, 'ts_only': False, 'req_3d': False,
-                                                  'is_sklearn': True, 'default_kwargs': {}},
                                 'RandomForestClassifier': {'object': RandomForestClassifier, 'ts_only': False, 'req_3d': False,
                                         'is_sklearn': True, 'default_kwargs': {}},
                                 'DecisionTreeClassifier': {'object': DecisionTreeClassifier, 'ts_only': False,
@@ -618,7 +627,7 @@ class Config_Utils():
     def get_feat_selections_available(self,pred_med:str):
         return self.configs['feat_selections'][pred_med]
     def get_dim_reductions_available(self):
-        return ['LDA','TSNE','PCA','SE','UMAP','LLE','MDS','ISOMAP']
+        return self.configs['dim_reduction']
 
 
     def set_X_y(self,X=None,y=None):

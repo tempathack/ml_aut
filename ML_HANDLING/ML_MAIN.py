@@ -28,7 +28,7 @@ class Ml_Main(Config_Utils):
         self.y = self.eval_df(y)
         self.transform = transform if isinstance(transform, list) else [transform]
         self.features_selection = features_selection if features_selection is not None else False
-        self.dim_reduction = dim_reduction if isinstance(dim_reduction, str) else None
+        self.dim_reduction = dim_reduction if isinstance(dim_reduction, list) else [dim_reduction] if isinstance(dim_reduction,str) else [None]
         self.model = ml_model if isinstance(ml_model, list) else [ml_model]
         self.n_jobs=n_jobs
         self.ml_train = None
@@ -47,7 +47,7 @@ class Ml_Main(Config_Utils):
         if isinstance(self.features_selection, str):
             self.ml_select = Ml_Select(X=self.X.copy(), y=self.y.copy())
 
-        if isinstance(self.dim_reduction, str):
+        if self.dim_reduction[0] is not None:
             self.ml_reduce = Ml_Reduce(X=self.X.copy(), y=self.y.copy())
 
         self.ml_train = Ml_Train(X=self.X.copy(), y=self.y.copy())
@@ -76,8 +76,10 @@ class Ml_Main(Config_Utils):
 
 
         results = Parallel(n_jobs=self.n_jobs)(delayed(self._define_generator)
-                                               (transform, model, is_ml_select, is_ml_reduce, self.dim_reduction,shared_dict, *args, **kwargs)
-                                                for model in self.model for transform in self.transform)
+                                               (transform, model, is_ml_select, is_ml_reduce, dim_reduction,shared_dict, *args, **kwargs)
+                                                for model in self.model
+                                                for dim_reduction in self.dim_reduction
+                                                for transform in self.transform)
 
         return results
         # Shutdown Ray (ideally done outside this method)
@@ -85,8 +87,9 @@ class Ml_Main(Config_Utils):
     def _process_seq(self, is_ml_select, is_ml_reduce, *args, **kwargs):
         results=[]
         for transform in self.transform:
+            for dim_reduction in self.dim_reduction:
                 for model in self.model:
-                    result = self._define_generator(transform, model, is_ml_select, is_ml_reduce, self.dim_reduction, *args, **kwargs)
+                    result = self._define_generator(transform, model, is_ml_select, is_ml_reduce,dim_reduction, *args, **kwargs)
                     results.append(result)
         return results
     def _define_generator(self, transform,
@@ -158,11 +161,6 @@ class Ml_Main(Config_Utils):
             return pd.concat(self.unpacked_results['metrics_model'])
         else:
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
-    def get_train_data(self):
-        if not hasattr(self,'unpacked_results'):
-            raise MethodNotExecutedError("please make sure to execute Process method beforehand")
-        else:
-            return (pd.concat(self.unpacked_results['X']),pd.concat(self.unpacked_results['y']))
     def get_tuned_objects(self):
         if not hasattr(self,'tuned_results'):
             raise MethodNotExecutedError("please make sure to execute Tune method beforehand")

@@ -48,7 +48,7 @@ class Ml_Tune(Config_Utils):
 
 
 
-        for model, transform,i_d in zip(k_best_models['model'].tolist(), k_best_models['transform'].tolist(),k_best_models['ID'].tolist()):
+        for model, transform,dim_reducer,i_d in zip(k_best_models['model'].tolist(), k_best_models['transform'].tolist(),k_best_models['transform'].tolist(),k_best_models['ID'].tolist()):
             # Create a partial function that includes the extra_args and the trial object
             X=self.res_dic[f'X_{i_d}'][0]
             y=self.res_dic[f'y_{i_d}'][0]
@@ -59,29 +59,34 @@ class Ml_Tune(Config_Utils):
             study = optuna.create_study(pruner=pruner, direction='maximize')
             study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=200)
 
-            model_obj,transformer_obj=self._define_classes(model,transform,study)
+            model_obj,transformer_obj,dim_reducer_obj=self._define_classes(model,transform,dim_reducer,study)
 
             res_dic=self._cross_vals(model_obj, X, y)
             tune_results.append(self._process_dic(res_dic).assign(Rank=i_d,Tuned=True,dim_red=None,transform=transform,model=model))
 
-            tuned_ojects[model+'_'+transform+'_'+i_d]={'model':model_obj,'transformer':transformer_obj,
+            tuned_ojects[model+'_'+transform+'_'+i_d]={'model':model_obj,'transformer':transformer_obj,'dim_reducer':dim_reducer_obj,
                                                        'best_score':study.best_value,'best_params':study.best_params,'X':X,'y':y}
 
         return pd.concat(tune_results),tuned_ojects
     @staticmethod
     def _process_dic(res):
         return pd.DataFrame(res).assign(CV=lambda df: np.arange(df.shape[0]) + 1)
-    def _define_classes(self,model,transformer,params):
+    def _define_classes(self,model,transformer,dim_reducer,params):
         model = self.configs['models'][self.pred_method][model]['object']
         transformer= self.configs['transforms'][transformer]['object']
+        if not isinstance(dim_reducer,bool):
+            dim_reducer=self.configs['dim_reduction'][dim_reducer]['object']
+        else:
+            dim_reducer=None
 
         model = model()
         transformer=transformer()
+        dim_reducer=dim_reducer()
         for key, value in params.best_params.items():
             default_value = getattr(model, key, False)
             if not isinstance(default_value,bool):
                 setattr(model, key, value)
-        return model,transformer
+        return model,transformer,dim_reducer
 
     def objective_function(self, model,  X, y, trial):
         params_model = self.hyper_parameter_register(model, trial)
