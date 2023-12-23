@@ -44,6 +44,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from feature_engine.discretisation import DecisionTreeDiscretiser,ArbitraryDiscretiser,EqualWidthDiscretiser,GeometricWidthDiscretiser
 from sktime.forecasting.compose import DirectTabularRegressionForecaster
+from sklearn.neighbors import KNeighborsClassifier,KNeighborsRegressor,KNeighborsTransformer
 from sktime.datatypes._panel._convert import from_nested_to_2d_array
 from CUSTOM_MODELS.CUSTOM_MODELS import  TimeSeriesToPanelData
 from CUSTOM_MODELS.MODEL_UTILS import UniToMultivariateWrapper
@@ -304,7 +305,12 @@ class Config_Utils():
                                     'PolynomialFeatures':{'object': PolynomialFeatures,
                                                           'ts_only': False,
                                                           'req_3d': False,
-                                                          'default_kwargs': {}}}
+                                                          'default_kwargs': {}},
+                                    'KNeighborsTransformer': {'object': KNeighborsTransformer,
+                                                           'ts_only': False,
+                                                           'req_3d': False,
+                                                           'default_kwargs': {}}
+                                    }
 
         self.configs['is_sk_transform']=['RobustScaler', 'MinMaxScaler', 'KBinsDiscretizer', 'QuantileTransformer',
                            'StandardScaler', 'PowerTransformer','KernelCenterer']
@@ -347,6 +353,9 @@ class Config_Utils():
                                               'ExtraTreesRegressor': {'object': ExtraTreesRegressor, 'ts_only': False,
                                                                 'req_3d': False, 'is_sklearn': True,
                                                                 'default_kwargs': {}},
+                                              'KNeighborsRegressor': {'object': KNeighborsRegressor, 'ts_only': False,
+                                                                      'req_3d': False, 'is_sklearn': True,
+                                                                      'default_kwargs': {}},
                                               'RandomForestRegressor': {'object': RandomForestRegressor, 'ts_only': False,
                                                                 'req_3d': False, 'is_sklearn': True,
                                                                 'default_kwargs': {}},
@@ -385,6 +394,9 @@ class Config_Utils():
                                                                      'is_sklearn': True, 'default_kwargs': {}},
                                 'RandomForestClassifier': {'object': RandomForestClassifier, 'ts_only': False, 'req_3d': False,
                                         'is_sklearn': True, 'default_kwargs': {}},
+                                                  'KNeighborsClassifier': {'object':KNeighborsClassifier,
+                                                                             'ts_only': False, 'req_3d': False,
+                                                                             'is_sklearn': True, 'default_kwargs': {}},
                                 'DecisionTreeClassifier': {'object': DecisionTreeClassifier, 'ts_only': False,
                                                            'req_3d': False,
                                                            'is_sklearn': True, 'default_kwargs': {}},

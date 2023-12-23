@@ -303,6 +303,10 @@ class Ml_Tune(Config_Utils):
             return {}
         elif key=='PolynomialFeatures':
             return {'degree':trial.suggest_categorical('degree', [ i for i in range(1,4)])}
+        elif key=='KNeighborsClassifier':
+            return {'n_neighbors':trial.suggest_categorical('n_neighbors', [ i for i in range(1,8)])}
+        elif key=='KNeighborsRegressor':
+            return {'n_neighbors':trial.suggest_categorical('n_neighbors', [ i for i in range(1,8)])}
 
     @staticmethod
     def _custom_evaluate(model, y, X, cv=None, scoring=None):
