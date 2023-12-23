@@ -57,12 +57,13 @@ class Ml_Tune(Config_Utils):
 
             # Optimize using the partial function
             study = optuna.create_study(pruner=pruner, direction='maximize')
-            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=200)
+            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=2)
 
             model_obj,transformer_obj,dim_reducer_obj=self._define_classes(model,transform,dim_reducer,study)
 
             res_dic=self._cross_vals(model_obj, X, y)
-            tune_results.append(self._process_dic(res_dic).assign(Rank=i_d,Tuned=True,dim_red=None,transform=transform,model=model))
+
+            tune_results.append(self._process_dic(res_dic).assign(Rank=i_d,Tuned=True,dim_red=dim_reducer_obj,transform=transform,model=model))
 
             tuned_ojects[model+'_'+transform+'_'+i_d]={'model':model_obj,'transformer':transformer_obj,'dim_reducer':dim_reducer_obj,
                                                        'best_score':study.best_value,'best_params':study.best_params,'X':X,'y':y}
@@ -74,14 +75,15 @@ class Ml_Tune(Config_Utils):
     def _define_classes(self,model,transformer,dim_reducer,params):
         model = self.configs['models'][self.pred_method][model]['object']
         transformer= self.configs['transforms'][transformer]['object']
-        if not dim_reducer is None:
+        if not dim_reducer :
             dim_reducer=self.configs['dim_reduction'][dim_reducer]['object']
+            dim_reducer = dim_reducer()
         else:
-            dim_reducer=None
+            dim_reducer=False
 
         model = model()
         transformer=transformer()
-        dim_reducer=dim_reducer()
+
         for key, value in params.best_params.items():
             default_value = getattr(model, key, False)
             if not isinstance(default_value,bool):

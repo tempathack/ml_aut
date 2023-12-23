@@ -69,7 +69,7 @@ if __name__ == '__main__':
     #configs.get_transforms_available(is_ts=False,pred_med='Classification')
     obj = Ml_Main(X, y=target, transform=configs.get_transforms_available(is_ts=False,pred_med='Classification'),  # DWTTransformer#PartialAutoCorrelationTransformer
                   features_selection='LogisticRegressionCV', dim_reduction=configs.get_dim_reductions_available()
-                  , n_jobs=1, ml_model=configs.get_models_available(is_ts=False, pred_med='Classification')).Process()
+                  , n_jobs=1, ml_model=configs.get_models_available(is_ts=False, pred_med='Classification'),n_cvs=20).Process()
 
 
     obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)

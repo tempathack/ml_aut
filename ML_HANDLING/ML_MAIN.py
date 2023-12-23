@@ -130,7 +130,7 @@ class Ml_Main(Config_Utils):
         return {'processing': {'transform': transform, 'features_selection':
                {'method':self.features_selection,'feat_metrics':self.ml_select.feat_metrics()
                if is_ml_select else False},
-                'dim_red': dim_red, 'model': model},
+                'dim_red':False if  dim_red is None else dim_red, 'model': model},
                 'metrics': metrics,'X':X,'y':self.y}
 
     @WrapStack.FUNCTION_SCREEN

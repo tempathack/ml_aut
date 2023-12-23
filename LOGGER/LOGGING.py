@@ -21,12 +21,12 @@ class WrapStack(object):
             worker_id = multiprocessing.current_process().name
 
             start=datetime.now()
-            WrapStack.write_log(f'Started Execution of Function {Colors.CYAN}{func.__name__}{Colors.END}: kwargs[{str(kwargs)}]',message_type='task_normal' if worker_id =='MainProcess' else 'task_parallel',worker_id=worker_id)
+            WrapStack.write_log(f'Started Execution of Function {Colors.CYAN}{func.__name__.upper()}{Colors.END}: kwargs[{str(kwargs)}]',message_type='task_normal' if worker_id =='MainProcess' else 'task_parallel',worker_id=worker_id)
             res = func(self, *args, **kwargs)
             end=datetime.now()
-            WrapStack.write_log(f'Finished Execution of Function {Colors.CYAN}{func.__name__}{Colors.END}: kwargs[{str(kwargs)}]',message_type='task_normal' if worker_id =='MainProcess' else 'task_parallel',worker_id=worker_id)
+            WrapStack.write_log(f'Finished Execution of Function {Colors.CYAN}{func.__name__.upper()}{Colors.END}: kwargs[{str(kwargs)}]',message_type='task_normal' if worker_id =='MainProcess' else 'task_parallel',worker_id=worker_id)
             duration=end-start
-            WrapStack.write_log(f'{Colors.CYAN}{func.__name__}{Colors.END} Duration {duration.total_seconds()}: kwargs[{str(kwargs)}]',message_type='time',worker_id=worker_id)
+            WrapStack.write_log(f'{Colors.CYAN}{func.__name__.upper()}{Colors.END} Duration {duration.total_seconds()}: kwargs[{str(kwargs)}]',message_type='time',worker_id=worker_id)
 
             return res
 
