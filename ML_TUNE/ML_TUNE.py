@@ -45,19 +45,19 @@ class Ml_Tune(Config_Utils):
                             .sort_values(by=['log_loss' if self.pred_method=='Classification' else 'mean_squared_error'])
                             .reset_index())
 
-        X_train= pd.concat(self.res_dic['X'])
-        y_train= pd.concat(self.res_dic['y'])
+
 
 
         for model, transform,i_d in zip(k_best_models['model'].tolist(), k_best_models['transform'].tolist(),k_best_models['ID'].tolist()):
             # Create a partial function that includes the extra_args and the trial object
-            X=X_train.query("ID==@i_d").drop(columns=['ID'])
-            y=y_train.query("ID==@i_d").drop(columns=['ID'])
-            partial_objective = partial(self.objective_function, model, transform,X.copy(),y)
+            X=self.res_dic[f'X_{i_d}'][0]
+            y=self.res_dic[f'y_{i_d}'][0]
+            partial_objective = partial(self.objective_function, model,X,y)
+
 
             # Optimize using the partial function
             study = optuna.create_study(pruner=pruner, direction='maximize')
-            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=2)
+            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=200)
 
             model_obj,transformer_obj=self._define_classes(model,transform,study)
 
@@ -94,7 +94,6 @@ class Ml_Tune(Config_Utils):
         model=self.configs['models'][self.pred_method][model]['object']
 
 
-
         model = model(**params_model)
 
 
@@ -118,7 +117,6 @@ class Ml_Tune(Config_Utils):
                                      val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method].items()])
         else:
             self.metrics_scorer = MultiScorer(self.configs['metrics']['tab'][self.pred_method])
-
             _= cross_val_score(estimator=model, X=X, y=y,
                                 cv=self.cv, scoring=self.metrics_scorer)
 
@@ -268,7 +266,7 @@ class Ml_Tune(Config_Utils):
         'learning_rate': trial.suggest_float('learning_rate', 1e-3, 1e-1),
         'od_type': trial.suggest_categorical('od_type', ['IncToDec', 'Iter']),
         'l2_leaf_reg':50,
-            'verbose': False}
+            }
         elif key=='CatBoostRegressor':
             return {
         "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(1, 2000, 100)]),
@@ -280,8 +278,7 @@ class Ml_Tune(Config_Utils):
         'bagging_temperature' : trial.suggest_float('bagging_temperature', 0.01, 100.00),
         'learning_rate': trial.suggest_float('learning_rate', 1e-3, 1e-1),
         'od_type': trial.suggest_categorical('od_type', ['IncToDec', 'Iter']),
-        'l2_leaf_reg':50,
-            'verbose': False}
+        'l2_leaf_reg':50}
         elif key=='ElasticNet':
             return {'alpha':trial.suggest_float('alpha', 0.03, 2),
                     'l1_ratio':trial.suggest_float('l1_ratio', 0.1, 2)}

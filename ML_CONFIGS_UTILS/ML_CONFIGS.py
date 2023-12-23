@@ -368,7 +368,7 @@ class Config_Utils():
                                                 'XGBClassifier':{'object':XGBClassifier,'ts_only':False,'req_3d':False,'is_sklearn':True,'default_kwargs':{'verbosity':0}},
                                 'CatBoostClassifier': {'object': CatBoostClassifier, 'ts_only': False, 'req_3d': False,'is_sklearn': True, 'default_kwargs': {'silent':True}},
                                 'LGBMClassifier': {'object': LGBMClassifier, 'ts_only': False, 'req_3d': False,
-                                                  'is_sklearn': True, 'default_kwargs': {'verbosity':0}},
+                                                  'is_sklearn': True, 'default_kwargs': {'verbosity':-100}},
                                                   'ExtraTreesClassifier': {'object': ExtraTreesClassifier, 'ts_only': False,
                                                                      'req_3d': False,
                                                                      'is_sklearn': True, 'default_kwargs': {}},
@@ -592,8 +592,8 @@ class Config_Utils():
 
             collect['metrics_model'].append(cmb.assign(ID=idx,Rank=None,Tuned=False).copy())
             collect['metrics_features'].append(pd.DataFrame(res['processing']['features_selection']['feat_metrics']).assign(ID=idx))
-            collect['X'].append(res['X'].assign(ID=idx))
-            collect['y'].append(res['y'].assign(ID=idx))
+            collect[f'X_{idx}'].append(res['X'])
+            collect[f'y_{idx}'].append(res['y'])
 
         return collect
     @staticmethod

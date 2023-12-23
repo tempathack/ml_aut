@@ -83,7 +83,7 @@ class Ml_Process(Config_Utils):
         contains_nulls = self._validate_null(self.X,is_3d)
         contains_categorical = self._validate_categorical(self.X)
         is_ts = self.TS_check(self.X)
-        X = self.X
+        X = self.X.copy()
 
         if contains_categorical:
             X = self._handle_cat(X, handle_cat, *args, **kwargs)

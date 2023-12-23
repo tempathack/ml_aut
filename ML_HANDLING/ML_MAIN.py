@@ -65,7 +65,7 @@ class Ml_Main(Config_Utils):
 
 
 
-        self.unpacked_results=self._unpack_results(results.copy())
+        self.unpacked_results=self._unpack_results(results)
 
         return self
     @WrapStack.FUNCTION_SCREEN
