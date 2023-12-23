@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings("ignore")
 from collections import defaultdict
 from sktime.transformations.series.adapt import TabularToSeriesAdaptor
 import pandas as pd

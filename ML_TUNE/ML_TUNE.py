@@ -1,3 +1,7 @@
+import warnings
+
+# Ignore all warnings
+warnings.filterwarnings("ignore")
 import numpy as np
 import optuna
 import pandas as pd
@@ -16,7 +20,7 @@ class Ml_Tune(Config_Utils):
         self.is_ts=is_ts
         self.res_dic=res_dic
         self.cv = self._define_cv(self.is_ts)
-    def tune(self):
+    def tune(self,*args,**kwargs):
         tune_results=[]
         tuned_ojects={}
 
@@ -53,11 +57,9 @@ class Ml_Tune(Config_Utils):
 
             # Optimize using the partial function
             study = optuna.create_study(pruner=pruner, direction='maximize')
-            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=200)
+            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=2)
 
             model_obj,transformer_obj=self._define_classes(model,transform,study)
-
-            X = transformer_obj.fit_transform(X)
 
             res_dic=self._cross_vals(model_obj, X, y)
             tune_results.append(self._process_dic(res_dic).assign(Rank=i_d,Tuned=True,dim_red=None,transform=transform,model=model))
@@ -69,37 +71,33 @@ class Ml_Tune(Config_Utils):
     @staticmethod
     def _process_dic(res):
         return pd.DataFrame(res).assign(CV=lambda df: np.arange(df.shape[0]) + 1)
-    def _define_classes(self,model,transform,params):
+    def _define_classes(self,model,transformer,params):
         model = self.configs['models'][self.pred_method][model]['object']
-        transform = self.configs['transforms'][transform]['object']
+        transformer= self.configs['transforms'][transformer]['object']
 
         model = model()
-        transformer = transform()
+        transformer=transformer()
         for key, value in params.best_params.items():
             default_value = getattr(model, key, False)
             if not isinstance(default_value,bool):
-                setattr(transformer, key, value)
-            default_value = getattr(transformer, key, False)
-            if not isinstance(default_value,bool):
-                setattr(transformer, key, value)
+                setattr(model, key, value)
         return model,transformer
 
-    def objective_function(self, model, transform, X, y, trial,handle_imbalance=True):
+    def objective_function(self, model,  X, y, trial):
         params_model = self.hyper_parameter_register(model, trial)
-        params_transform= self.hyper_parameter_register(transform, trial)
+
 
         if not model in  self.configs['models'][self.pred_method]:
              KeyError("Model is not checked in ")
-        if not transform in self.configs['transforms']:
-            KeyError("Transform is not checked in ")
+
 
         model=self.configs['models'][self.pred_method][model]['object']
-        transformer=self.configs['transforms'][transform]['object']
 
-        transformer=transformer(**params_transform)
+
+
         model = model(**params_model)
 
-        X=transformer.fit_transform(X)
+
 
         results=self._cross_vals(model,X,y)
 
@@ -120,8 +118,6 @@ class Ml_Tune(Config_Utils):
                                      val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method].items()])
         else:
             self.metrics_scorer = MultiScorer(self.configs['metrics']['tab'][self.pred_method])
-            if handle_imbalance and self.pred_method == 'Classification':
-                X,y = self._handle_imbalance(X,y)
 
             _= cross_val_score(estimator=model, X=X, y=y,
                                 cv=self.cv, scoring=self.metrics_scorer)

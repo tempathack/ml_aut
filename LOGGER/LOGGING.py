@@ -40,7 +40,7 @@ class WrapStack(object):
             text_ =f"{color}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}|SEQUENTIAL]{end} "+text
         elif message_type=='task_parallel':
             color=Colors.MAGENTA
-            text_ =f"{color}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}|PARALLEL ({worker_id})]{end} "+text
+            text_ =f"{color}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}|PARALLEL({worker_id})]{end} "+text
         elif message_type=='time':
             color=Colors.BLUE
             text_ =f"{color}[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}|ELAPSED ({worker_id if worker_id is not None else 'Main'})]{end} "+text

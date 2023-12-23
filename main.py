@@ -1,3 +1,8 @@
+
+import warnings
+
+# Ignore all warnings
+warnings.filterwarnings("ignore")
 import seaborn as sns
 import pandas as pd
 import numpy as np
@@ -63,7 +68,7 @@ if __name__ == '__main__':
             file.write(model_name + '\n')
     k=configs.get_models_available(is_ts=False, pred_med='Classification')
     k.remove('SVC')
-
+    #configs.get_transforms_available(is_ts=False,pred_med='Classification')
     obj = Ml_Main(X, y=target, transform=configs.get_transforms_available(is_ts=False,pred_med='Classification'),  # DWTTransformer#PartialAutoCorrelationTransformer
                   features_selection='LogisticRegressionCV', dim_reduction=None
                   , n_jobs=-1, ml_model=k).Process()

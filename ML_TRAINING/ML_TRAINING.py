@@ -18,6 +18,7 @@ class Models(Config_Utils):
         if self._empty_dict(kwargs):
             self.kwargs =self.configs['models'][self.pred_method][self.model]['default_kwargs']
 
+
         else:
             self.kwargs = kwargs
 

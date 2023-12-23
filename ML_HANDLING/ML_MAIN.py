@@ -1,5 +1,6 @@
 import pandas as pd
-
+import warnings
+warnings.filterwarnings("ignore")
 from ML_CONFIGS_UTILS.ML_CONFIGS import  Config_Utils
 from ML_FEATURE_SELECTION.ML_FEATURE_SELECTION import Ml_Select
 from ML_TRAINING.ML_TRAINING import Ml_Train
@@ -10,16 +11,13 @@ from ML_CONFIGS_UTILS.Custom_Errors import MethodNotExecutedError
 from joblib import Parallel, delayed
 from LOGGER.LOGGING import WrapStack
 from multiprocessing import Manager,current_process,managers
-from functools import partial
-from sklearn.linear_model import LogisticRegression
-import numpy as np
-import optuna
 
 class Ml_Main(Config_Utils):
     def __init__(self, X, y, transform=None,
                  features_selection=None,
                  dim_reduction=None,
                  ml_model=None,
+                 n_cvs=None,
                  n_jobs=1):
 
         super().__init__()
@@ -38,10 +36,14 @@ class Ml_Main(Config_Utils):
         self.mode= 'seq' if n_jobs==1 else 'parallel'
         self.Logger=WrapStack()
 
+        if not n_cvs is None:
+            self.configs['n_cvs']=n_cvs
+
 
         if isinstance(self.transform, list):
             self.ml_process = Ml_Process(X=self.X.copy())
             self.is_ts=getattr(self.ml_process,'is_ts')
+
         if isinstance(self.features_selection, str):
             self.ml_select = Ml_Select(X=self.X.copy(), y=self.y.copy())
 
@@ -51,7 +53,7 @@ class Ml_Main(Config_Utils):
         self.ml_train = Ml_Train(X=self.X.copy(), y=self.y.copy())
 
 
-    def Process(self,results_return=False, *args, **kwargs):
+    def Process(self, *args, **kwargs):
         self.is_ml_select = hasattr(self, 'ml_select')
         self.is_ml_reduce = hasattr(self, 'ml_reduce')
 
@@ -64,10 +66,8 @@ class Ml_Main(Config_Utils):
 
 
         self.unpacked_results=self._unpack_results(results.copy())
-        if results_return:
-            return self.unpacked_results
-        else:
-            return self
+
+        return self
     @WrapStack.FUNCTION_SCREEN
     def _process_parallel(self, is_ml_select, is_ml_reduce,*args, **kwargs):
         # Initialize Ray (ideally done outside this method)
@@ -89,7 +89,13 @@ class Ml_Main(Config_Utils):
                     result = self._define_generator(transform, model, is_ml_select, is_ml_reduce, self.dim_reduction, *args, **kwargs)
                     results.append(result)
         return results
-    def _define_generator(self, transform, model, is_ml_select=False, is_ml_reduce=False, dim_red=None,shared_dict=None, *args, **kwargs):
+    def _define_generator(self, transform,
+                          model,
+                          is_ml_select=False,
+                          is_ml_reduce=False,
+                          dim_red=None,
+                          shared_dict:managers.DictProxy=None,
+                          *args, **kwargs):
 
         if isinstance(transform,list):
             transform_cap = transform.copy()
@@ -119,10 +125,13 @@ class Ml_Main(Config_Utils):
         self.ml_train.set_X_y(X=X)
         metrics = self.ml_train.train_model(model=model, *args, **kwargs)
 
-        return {'processing': {'transform': transform, 'features_selection': {'method':self.features_selection,'feat_metrics':self.ml_select.feat_metrics()
-        if is_ml_select else False},
-                               'dim_red': False if dim_red is None else dim_red, 'model': model},
+        return {'processing': {'transform': transform, 'features_selection':
+               {'method':self.features_selection,'feat_metrics':self.ml_select.feat_metrics()
+               if is_ml_select else False},
+                'dim_red': False if dim_red is None else dim_red, 'model': model},
                 'metrics': metrics,'X':X,'y':self.y}
+
+    @WrapStack.FUNCTION_SCREEN
     def Tune(self,k_best=3):
         if not hasattr(self,'unpacked_results'):
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
