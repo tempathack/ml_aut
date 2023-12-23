@@ -19,6 +19,7 @@ from sklearn.linear_model import LinearRegression,LogisticRegression,ElasticNet,
 from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor,AdaBoostClassifier,AdaBoostRegressor,ExtraTreesClassifier,ExtraTreesRegressor
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPRegressor,MLPClassifier
+from sklearn.kernel_approximation import RBFSampler,Nystroem
 from sklearn.svm import SVC,SVR
 from sklearn.pipeline import Pipeline
 from xgboost import XGBRegressor,XGBClassifier
@@ -309,11 +310,19 @@ class Config_Utils():
                                     'KNeighborsTransformer': {'object': KNeighborsTransformer,
                                                            'ts_only': False,
                                                            'req_3d': False,
-                                                           'default_kwargs': {}}
+                                                           'default_kwargs': {}},
+                                    'RBFSampler':{'object': RBFSampler,
+                                                           'ts_only': False,
+                                                           'req_3d': False,
+                                                           'default_kwargs': {}},
+                                    'Nystroem': {'object': Nystroem,
+                                                   'ts_only': False,
+                                                   'req_3d': False,
+                                                   'default_kwargs': {}},
                                     }
 
-        self.configs['is_sk_transform']=['RobustScaler', 'MinMaxScaler', 'KBinsDiscretizer', 'QuantileTransformer',
-                           'StandardScaler', 'PowerTransformer','KernelCenterer']
+        self.configs['is_sk_transform']=['RobustScaler', 'MinMaxScaler', 'QuantileTransformer',
+                           'StandardScaler', 'PowerTransformer']
 
         self.configs['imputers']={'KNNImputer': KNNImputer,
                     'SimpleImputer': SimpleImputer}
