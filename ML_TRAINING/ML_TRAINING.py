@@ -42,6 +42,8 @@ class Ml_Train(Config_Utils):
         self.kwargs = kwargs
         self.is_ts = self.TS_check(X)
         self.pred_method = self._class_or_reg(y)
+        if self.pred_method=='Classification':
+            self.classif_type=self._classif_type(y)
         self.cv = self._define_cv(self.is_ts)
     def __repr__(self):
         return  f"Ml_Train()"
@@ -63,8 +65,7 @@ class Ml_Train(Config_Utils):
 
 
         if results is None:
-            func_names = [val[0].__name__ if self.pred_method == 'Classification' else
-                          val[0]().__name__ for k, val in self.configs['metrics']['ts'][self.pred_method].items()]
+            func_names = [val.__name__ for k, val in self._get_scorings()]
             results = {f_name: ['timed_out' for _ in range(self.configs['n_cvs'])] for f_name in func_names}
 
         return results
@@ -75,17 +76,18 @@ class Ml_Train(Config_Utils):
         model = Models(model, self.pred_method, *args, **kwargs).get_model()
 
 
+
         results = self._custom_evaluate(model=model,
                             y=self.y,
                             X=self.X,
                             cv=self.cv,
-                            scoring=[val[0] if self.pred_method == 'Classification' else
-                                     val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method].items()])
+                            scoring=self._get_scorings())
 
 
         return results
     def _train_tab(self,model:str,handle_imbalance=True,*args,**kwargs):
-        self.metrics_scorer = MultiScorer(self.configs['metrics']['tab'][self.pred_method])
+
+        self.metrics_scorer=MultiScorer(self._get_scorings())
 
         model = Models(model, self.pred_method, *args, **kwargs).get_model()
 
@@ -96,6 +98,25 @@ class Ml_Train(Config_Utils):
                             cv=self.cv, scoring=self.metrics_scorer)
 
         return self.metrics_scorer.get_results()
+    def _get_scorings(self):
+        if self.is_ts:
+            if self.pred_method == 'Classification':
+                if self.classif_type=='binary':
+                    scoring=[val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
+                else:
+                    scoring = [val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
+            else:
+                scoring = [val[0] for k, val in self.configs['metrics']['ts'][self.pred_method].items()]
+
+        else:
+            if self.pred_method == 'Classification':
+                if self.classif_type=='binary':
+                    scoring = [ val[0] for k,val in self.configs['metrics']['tab'][self.pred_method][self.classif_type].items()]
+                else:
+                    scoring = [ val[0] for k,val in self.configs['metrics']['tab'][self.pred_method][self.classif_type].items()]
+            else:
+                scoring = [ val[0] for k,val in self.configs['metrics']['tab'][self.pred_method].items()]
+        return scoring
     @staticmethod
     def _handle_imbalance(X,y):
         smote = SMOTE(random_state=42)

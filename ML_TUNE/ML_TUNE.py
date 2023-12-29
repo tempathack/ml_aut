@@ -33,10 +33,12 @@ class Ml_Tune(Config_Utils):
             dic={'mean_squared_error': ['mean']}
 
         dim=self.res_dic['metrics_model'][0].shape[0]
+
+        model_metrics = pd.concat(self.res_dic['metrics_model'])
+        dim=model_metrics.shape[0]
         k_best=int(min(dim/self.configs['n_cvs'],self.k_best))
 
 
-        model_metrics=pd.concat(self.res_dic['metrics_model'])
         k_best_models=(model_metrics\
                             .groupby(['model','transform','dim_red','ID'])
                             .agg(dic)\
@@ -48,7 +50,7 @@ class Ml_Tune(Config_Utils):
 
 
 
-        for model, transform,dim_reducer,i_d in zip(k_best_models['model'].tolist(), k_best_models['transform'].tolist(),k_best_models['transform'].tolist(),k_best_models['ID'].tolist()):
+        for num,(model, transform,dim_reducer,i_d) in enumerate(zip(k_best_models['model'].tolist(), k_best_models['transform'].tolist(),k_best_models['transform'].tolist(),k_best_models['ID'].tolist())):
             # Create a partial function that includes the extra_args and the trial object
             X=self.res_dic[f'X_{i_d}'][0]
             y=self.res_dic[f'y_{i_d}'][0]
@@ -57,13 +59,13 @@ class Ml_Tune(Config_Utils):
 
             # Optimize using the partial function
             study = optuna.create_study(pruner=pruner, direction='maximize')
-            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=2)
+            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=200)
 
             model_obj,transformer_obj,dim_reducer_obj=self._define_classes(model,transform,dim_reducer,study)
 
             res_dic=self._cross_vals(model_obj, X, y)
 
-            tune_results.append(self._process_dic(res_dic).assign(Rank=i_d,Tuned=True,dim_red=dim_reducer_obj,transform=transform,model=model))
+            tune_results.append(self._process_dic(res_dic).assign(Rank=num,Tuned=True,dim_red=dim_reducer_obj,transform=transform,model=model))
 
             tuned_ojects[model+'_'+transform+'_'+i_d]={'model':model_obj,'transformer':transformer_obj,'dim_reducer':dim_reducer_obj,
                                                        'best_score':study.best_value,'best_params':study.best_params,'X':X,'y':y}
@@ -178,23 +180,23 @@ class Ml_Tune(Config_Utils):
             return  {
             'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
             'max_depth': trial.suggest_int('max_depth', 4, 30),
-            'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
-            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+            'min_samples_split': trial.suggest_int('min_samples_split', 2, 150),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 60),
         }
         elif key == 'ExtraTreesRegressor':
             return {
                 'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
                 'max_depth': trial.suggest_int('max_depth', 4, 30),
-                'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
-                'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+                'min_samples_split': trial.suggest_int('min_samples_split', 2, 150),
+                'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 60),
                 'warm_start': trial.suggest_categorical('warm_start', [True, False])
             }
         elif key == 'ExtraTreesClassifier':
             return {
                 'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
                 'max_depth': trial.suggest_int('max_depth', 4, 30),
-                'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
-                'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+                'min_samples_split': trial.suggest_int('min_samples_split', 2, 150),
+                'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 60),
                 'warm_start': trial.suggest_categorical('warm_start',[True,False])
             }
         elif key=='DecisionTreeClassifier':

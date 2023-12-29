@@ -307,10 +307,6 @@ class Config_Utils():
                                                           'ts_only': False,
                                                           'req_3d': False,
                                                           'default_kwargs': {}},
-                                    'KNeighborsTransformer': {'object': KNeighborsTransformer,
-                                                           'ts_only': False,
-                                                           'req_3d': False,
-                                                           'default_kwargs': {}},
                                     'RBFSampler':{'object': RBFSampler,
                                                            'ts_only': False,
                                                            'req_3d': False,
@@ -332,22 +328,22 @@ class Config_Utils():
 
         self.configs['dim_reduction']={'LDA': {'object':LDA,'default_kwargs':{}},
                                        'TSNE':{'object':TSNE,'default_kwargs':{}}, 'PCA': {'object':PCA,'default_kwargs':{}}, 'SE':{'object':SpectralEmbedding,'default_kwargs':{}},
-                                       'UMAP': {'object':UMAP,'default_kwargs':{}}, 'LLE': {'object':LocallyLinearEmbedding,'default_kwargs':{}},
+                                       'UMAP': {'object':UMAP,'default_kwargs':{}}, 'LLE': {'object':LocallyLinearEmbedding,'default_kwargs':{'eigen_solver':'dense'}},
                                        'MDS': {'object':MDS,'default_kwargs':{}}, 'ISOMAP': {'object':Isomap,'default_kwargs':{}}, None: {'object':None,'default_kwargs':{}}}
 
         self.configs['metrics']={'tab':{'Regression':{'mean_squared_error':(mean_squared_error,{}),
                                                'mean_absolute_error':(mean_absolute_error,{}),
                                                'r2_score':(r2_score,{}),'explained_variance_score':(explained_variance_score,{}),
                                                'mean_absolute_percentage_error':(mean_absolute_percentage_error,{})},
-                                 'Classification':{'log_loss':(log_loss,{}),'accuracy':(accuracy_score,{}),
-                                                               'f1':(f1_score,{}),'auc':(roc_auc_score,{}),'percision':(precision_score,{})}},
+                                 'Classification':{'binary':{'log_loss':(log_loss,{}),'accuracy':(accuracy_score,{}),
+                                                               'f1':(f1_score,{}),'auc':(roc_auc_score,{}),'percision':(precision_score,{}),'multiclass':{}}}},
                                 'ts' :{'Regression': {'mean_squared_error': (MedianSquaredError, {}),
                                                  'mean_absolute_error': (MeanAbsoluteError, {}),
                                                  'mean_absolute_percentage_error': (
                                                  MeanAbsolutePercentageError, {})},
-                                  'Classification': {'log_loss': (log_loss, {}), 'accuracy': (accuracy_score, {}),
+                                  'Classification': {'binary':{'log_loss': (log_loss, {}), 'accuracy': (accuracy_score, {}),
                                                      'f1': (f1_score, {}), 'auc': (roc_auc_score, {}),
-                                                     'percision': (precision_score, {})}}}
+                                                     'percision': (precision_score, {})},'multiclass':{}}}}
 
         self.configs['models']={'Regression':{'LinearRegression':{'object':LinearRegression,'ts_only':False,'req_3d':False,'is_sklearn':True,'default_kwargs':{}},
                                               'ElasticNet':{'object':ElasticNet,'ts_only':False,'req_3d':False,'is_sklearn':True,'default_kwargs':{}},
@@ -393,75 +389,75 @@ class Config_Utils():
                                                                'req_3d': False, 'is_sklearn': False,
                                                                'default_kwargs': {}},
                                               },
-                                'Classification':{'LogisticRegression':{'object':LogisticRegression,'ts_only':False,'req_3d':False,'is_sklearn':True,'default_kwargs':{}},
-                                                'XGBClassifier':{'object':XGBClassifier,'ts_only':False,'req_3d':False,'is_sklearn':True,'default_kwargs':{'verbosity':0}},
-                                'CatBoostClassifier': {'object': CatBoostClassifier, 'ts_only': False, 'req_3d': False,'is_sklearn': True, 'default_kwargs': {'silent':True}},
-                                'LGBMClassifier': {'object': LGBMClassifier, 'ts_only': False, 'req_3d': False,
+                                'Classification':{'LogisticRegression':{'object':LogisticRegression,'ts_only':False,'req_3d':False,'is_sklearn':True,'binary_only':False,'default_kwargs':{}},
+                                                'XGBClassifier':{'object':XGBClassifier,'ts_only':False,'req_3d':False,'binary_only':False,'is_sklearn':True,'default_kwargs':{'verbosity':0}},
+                                'CatBoostClassifier': {'object': CatBoostClassifier, 'ts_only': False, 'req_3d': False,'binary_only':False,'is_sklearn': True, 'default_kwargs': {'silent':True}},
+                                'LGBMClassifier': {'object': LGBMClassifier, 'ts_only': False,'binary_only':False, 'req_3d': False,
                                                   'is_sklearn': True, 'default_kwargs': {'verbosity':-100}},
-                                                  'ExtraTreesClassifier': {'object': ExtraTreesClassifier, 'ts_only': False,
+                                                  'ExtraTreesClassifier': {'object': ExtraTreesClassifier, 'ts_only': False,'binary_only':False,
                                                                      'req_3d': False,
                                                                      'is_sklearn': True, 'default_kwargs': {}},
-                                'RandomForestClassifier': {'object': RandomForestClassifier, 'ts_only': False, 'req_3d': False,
+                                'RandomForestClassifier': {'object': RandomForestClassifier, 'ts_only': False,'binary_only':False, 'req_3d': False,
                                         'is_sklearn': True, 'default_kwargs': {}},
-                                                  'KNeighborsClassifier': {'object':KNeighborsClassifier,
+                                                  'KNeighborsClassifier': {'object':KNeighborsClassifier,'binary_only':False,
                                                                              'ts_only': False, 'req_3d': False,
                                                                              'is_sklearn': True, 'default_kwargs': {}},
-                                'DecisionTreeClassifier': {'object': DecisionTreeClassifier, 'ts_only': False,
+                                'DecisionTreeClassifier': {'object': DecisionTreeClassifier, 'ts_only': False,'binary_only':False,
                                                            'req_3d': False,
                                                            'is_sklearn': True, 'default_kwargs': {}},
-                                'AdaBoostClassifier': {'object': AdaBoostClassifier, 'ts_only': False,
+                                'AdaBoostClassifier': {'object': AdaBoostClassifier, 'ts_only': False,'binary_only':False,
                                                        'req_3d': False,
                                                        'is_sklearn': True, 'default_kwargs': {}},
                                 'MLPClassifier': {'object': MLPClassifier,
                                                  'ts_only': False,
-                                                 'req_3d': False, 'is_sklearn': True,
+                                                 'req_3d': False, 'is_sklearn': True,'binary_only':False,
                                                  'default_kwargs': {}},
                                 'CNNClassifier': {'object': CNNClassifier,
                                                       'ts_only': True,
-                                                      'req_3d': True, 'is_sklearn': False,
+                                                      'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                       'default_kwargs': {}},
                                 'FCNClassifier': {'object': FCNClassifier,
                                                   'ts_only': True,
-                                                  'req_3d': True, 'is_sklearn': False,
+                                                  'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                   'default_kwargs': {}},
                                 'KNeighborsTimeSeriesClassifier': {'object': KNeighborsTimeSeriesClassifier,
                                                  'ts_only': True,
-                                                 'req_3d': True, 'is_sklearn': False,
+                                                 'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                  'default_kwargs': {}},
                                 'HIVECOTEV2': {'object': HIVECOTEV2,
                                                'ts_only': True,
-                                               'req_3d': True, 'is_sklearn': False,
+                                               'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                'default_kwargs': {}},
                                                   'HIVECOTEV1': {'object': UniToMultivariateWrapper(HIVECOTEV1),
                                                                  'ts_only': True,
-                                                                 'req_3d': True, 'is_sklearn': False,
+                                                                 'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                                  'default_kwargs': {}},
                                                   'MUSE': {'object': MUSE,
                                                                  'ts_only': True,
-                                                                 'req_3d': True, 'is_sklearn': False,
+                                                                 'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                                  'default_kwargs': {}},
                                                   'ContractableBOSS': {'object': UniToMultivariateWrapper(ContractableBOSS),
                                                            'ts_only': True,
-                                                           'req_3d': True, 'is_sklearn': False,
+                                                           'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                            'default_kwargs': {}},
                                 'RocketClassifier': {'object': RocketClassifier,
                                                'ts_only': True,
-                                               'req_3d': True, 'is_sklearn': False,
+                                               'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                'default_kwargs': {}},
                                                   'ElasticEnsemble': {'object': UniToMultivariateWrapper(ElasticEnsemble),
                                                                        'ts_only': True,
-                                                                       'req_3d': True, 'is_sklearn': False,
+                                                                       'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                                        'default_kwargs': {'proportion_of_param_options':0.1,
                                                                                           'proportion_train_for_test':0.1,
                                                                                           'distance_measures':['dtw','ddtw'],
                                                                                           'majority_vote':True}},
-                                'TimeSeriesSVC': {'object': TimeSeriesSVC,
+                                'TimeSeriesSVC': {'object': TimeSeriesSVC,'binary_only':False,
                                                'ts_only': True,
                                                'req_3d':True, 'is_sklearn': False,
                                                'default_kwargs': {}},
                                 'ShapeletTransformClassifier': {'object': UniToMultivariateWrapper(ShapeletTransformClassifier),
                                                'ts_only': True,
-                                               'req_3d': True, 'is_sklearn': False,
+                                               'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                'default_kwargs': {}},
                                                   'BOSSEnsemble': {
                                                       'object': UniToMultivariateWrapper(BOSSEnsemble),
@@ -471,27 +467,27 @@ class Config_Utils():
                                                   'IndividualBOSS': {
                                                       'object': UniToMultivariateWrapper(IndividualBOSS),
                                                       'ts_only': True,
-                                                      'req_3d': True, 'is_sklearn': False,
+                                                      'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                       'default_kwargs': {}},
                             'WEASEL': {'object':UniToMultivariateWrapper(WEASEL),
                                                  'ts_only': True,
-                                                'req_3d': True, 'is_sklearn': False,
+                                                'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                 'default_kwargs': {}},
                              'TimeSeriesForestClassifier': {'object': TimeSeriesForestClassifier,
                                           'ts_only': True,
-                                       'req_3d': True, 'is_sklearn': False,
+                                       'req_3d': True, 'is_sklearn': False,'binary_only':False,
                               'default_kwargs': {}},
                                 'TimeSeriesForestClassifier': {'object':  UniToMultivariateWrapper(SupervisedTimeSeriesForest),
                                                              'ts_only': True,
-                                                            'req_3d': True, 'is_sklearn': False,
+                                                            'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                             'default_kwargs': {}},
                                 'Arsenal': {'object':Arsenal,
                                                  'ts_only': True,
-                                                'req_3d': True, 'is_sklearn': False,
+                                                'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                             'default_kwargs': {}},
                                'RotationForest': {'object':RotationForest,
                                    'ts_only': True,
-                              'req_3d': False, 'is_sklearn': True,
+                              'req_3d': False, 'is_sklearn': True,'binary_only':False,
                               'default_kwargs': {}},
                                 }}
         self.configs['n_cvs']=10
@@ -519,6 +515,24 @@ class Config_Utils():
             return True
         else:
             return False
+
+    @staticmethod
+    def _classif_type(obj) -> str:
+        if not isinstance(obj, pd.DataFrame):
+            raise ValueError("Input must be a pandas DataFrame.")
+
+        if obj.shape[1] != 1:
+            raise ValueError("DataFrame must have only one column.")
+
+        unique_values = obj.iloc[:, 0].unique()
+
+        if len(unique_values) == 2:
+            return 'binary'
+        elif len(unique_values) > 2:
+            return 'multiclass'
+        else:
+            raise ValueError("DataFrame must have at least two unique values for classification.")
+
     @staticmethod
     def _validate_obj(obj,task=None)-> bool:
         assert isinstance(obj, pd.DataFrame), "Invalid"

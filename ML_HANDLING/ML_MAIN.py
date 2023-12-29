@@ -36,8 +36,10 @@ class Ml_Main(Config_Utils):
         self.mode= 'seq' if n_jobs==1 else 'parallel'
         self.Logger=WrapStack()
 
-        if not n_cvs is None:
+        if n_cvs is not  None:
             self.configs['n_cvs']=n_cvs
+
+
 
 
         if isinstance(self.transform, list):
@@ -77,8 +79,8 @@ class Ml_Main(Config_Utils):
 
         results = Parallel(n_jobs=self.n_jobs)(delayed(self._define_generator)
                                                (transform, model, is_ml_select, dim_reduction,shared_dict, *args, **kwargs)
+                                               for dim_reduction in self.dim_reduction
                                                 for model in self.model
-                                                for dim_reduction in self.dim_reduction
                                                 for transform in self.transform)
 
         return results
