@@ -55,14 +55,14 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
 # Load MNIST data
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+(train_images, train_labels), (test_images, test_labels) = mnist.load_data()[:1000]
 
 # Preprocess data: Flatten and scale
 train_images = train_images.reshape((train_images.shape[0], -1)) / 255.0
 test_images = test_images.reshape((test_images.shape[0], -1)) / 255.0
 
-X=pd.DataFrame(train_images)
-target=pd.DataFrame(train_labels)
+#X=pd.DataFrame(train_images)
+#target=pd.DataFrame(train_labels)
 
 
 ct=0
@@ -92,25 +92,4 @@ if __name__ == '__main__':
 
 
     obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
-
-#
-
-                #obj.to_csv(f"./Outputs/{trans+model+str(dim_red)}.csv",index=None)
-
-
-
-
-    for trans in configs.get_transforms_available(is_ts=False,pred_med='Classification'):
-        for model in configs.get_models_available(is_ts=False,pred_med='Classification'):
-            for dim_red in configs.get_dim_reductions_available()+[None]:
-                print(trans,model)
-                try:
-                    obj = Ml_Main(X, y=target, transform=trans,#DWTTransformer#PartialAutoCorrelationTransformer
-                          features_selection='LogisticRegressionCV',dim_reduction=dim_red, n_jobs=1, ml_model=model).Process(
-                results_return=True)
-                    obj.to_csv(f"./Outputs/{trans+model+str(dim_red)}.csv",index=None)
-                except:
-                    pass
-
-
 

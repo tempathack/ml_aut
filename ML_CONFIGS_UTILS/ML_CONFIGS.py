@@ -113,7 +113,7 @@ class MultiScorer():
 		'''
 
 		self.n_folds += 1
-		yPred = estimator.predict(X)
+		yPred = estimator.predict_proba(X)
 
 		for key in self.metrics.keys():
 			metric, kwargs = self.metrics[key]
@@ -336,7 +336,8 @@ class Config_Utils():
                                                'r2_score':(r2_score,{}),'explained_variance_score':(explained_variance_score,{}),
                                                'mean_absolute_percentage_error':(mean_absolute_percentage_error,{})},
                                  'Classification':{'binary':{'log_loss':(log_loss,{}),'accuracy':(accuracy_score,{}),
-                                                               'f1':(f1_score,{}),'auc':(roc_auc_score,{}),'percision':(precision_score,{}),'multiclass':{}}}},
+                                                               'f1':(f1_score,{}),'auc':(roc_auc_score,{}),'percision':(precision_score,{})}
+                                                   ,'multiclass':{'log_loss':(log_loss,{}),'accuracy':(accuracy_score,{})}}},
                                 'ts' :{'Regression': {'mean_squared_error': (MedianSquaredError, {}),
                                                  'mean_absolute_error': (MeanAbsoluteError, {}),
                                                  'mean_absolute_percentage_error': (

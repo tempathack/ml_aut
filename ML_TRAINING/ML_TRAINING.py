@@ -65,7 +65,8 @@ class Ml_Train(Config_Utils):
 
 
         if results is None:
-            func_names = [val.__name__ for k, val in self._get_scorings()]
+            scoring=self._get_scorings()
+            func_names = [val.__name__ for k, val in scoring]
             results = {f_name: ['timed_out' for _ in range(self.configs['n_cvs'])] for f_name in func_names}
 
         return results
@@ -87,17 +88,23 @@ class Ml_Train(Config_Utils):
         return results
     def _train_tab(self,model:str,handle_imbalance=True,*args,**kwargs):
 
-        self.metrics_scorer=MultiScorer(self._get_scorings())
+
 
         model = Models(model, self.pred_method, *args, **kwargs).get_model()
 
         if handle_imbalance and self.pred_method == 'Classification':
             X, y = self._handle_imbalance(self.X, self.y)
 
-        _ = cross_val_score(estimator=model, X=X, y=y,
-                            cv=self.cv, scoring=self.metrics_scorer)
+        if self.cv is None:
+            raise ValueError("Please handover cv and scoring")
 
-        return self.metrics_scorer.get_results()
+        results = self._custom_evaluate(model=model,
+                                        y=self.y,
+                                        X=self.X,
+                                        cv=self.cv,
+                                        scoring=self._get_scorings())
+
+        return results
     def _get_scorings(self):
         if self.is_ts:
             if self.pred_method == 'Classification':
@@ -132,10 +139,14 @@ class Ml_Train(Config_Utils):
 
         for i, (train_index, test_index) in enumerate(cv.split(X, y)):
             model.fit(X.iloc[train_index], y.iloc[train_index,0])
-            preds = model.predict(X.iloc[test_index])
+            preds_total = model.predict(X.iloc[test_index])
+            preds_proba = model.predict_proba(X.iloc[test_index])
             for metrics in scoring:
                 name = metrics.__name__
-                res = metrics(y.iloc[test_index], preds)
+                if name=='log_loss':
+                    res = metrics(y.iloc[test_index], preds_proba)
+                else:
+                    res = metrics(y.iloc[test_index], preds_total)
                 results[name].append(res)
 
         return results
