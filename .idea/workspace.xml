@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="69ee029f-42f4-40cf-9857-598f39b8e354" name="Changes" comment="expanded to multivariate Ts models">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ML_CONFIGS_UTILS/ML_CONFIGS.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_CONFIGS_UTILS/ML_CONFIGS.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ML_TRAINING/ML_TRAINING.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_TRAINING/ML_TRAINING.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-    </list>
+    <list default="true" id="69ee029f-42f4-40cf-9857-598f39b8e354" name="Changes" comment="expanded to multivariate metrics" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -155,7 +150,15 @@
       <option name="project" value="LOCAL" />
       <updated>1702488477891</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="expanded to multivariate metrics">
+      <option name="closed" value="true" />
+      <created>1703947809710</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1703947809711</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -177,6 +180,7 @@
     <MESSAGE value="started with simplelogger concept" />
     <MESSAGE value="finished multiworker logging" />
     <MESSAGE value="expanded to multivariate Ts models" />
-    <option name="LAST_COMMIT_MESSAGE" value="expanded to multivariate Ts models" />
+    <MESSAGE value="expanded to multivariate metrics" />
+    <option name="LAST_COMMIT_MESSAGE" value="expanded to multivariate metrics" />
   </component>
 </project>
