@@ -118,7 +118,7 @@ class Ml_Select(Config_Utils):
                                   'Columns': X.columns.tolist()})
 
     @WrapStack.FUNCTION_SCREEN
-    def feature_selection(self, method=None,k_best=15, *args, **kwargs):
+    def feature_selection(self, method=None,k_best=30, *args, **kwargs):
 
         k_best=min(k_best,self.feat_dim)
 
@@ -213,7 +213,7 @@ class Ml_Select(Config_Utils):
             if not  self._validate_3d(self.X):
                 raise MethodNotExecutedError('Execute featureselection method first')
             else:
-                return 'Feature Selection is not Available for 3D Datasets'
+                raise AttributeError('Feature Selection is not Available for 3D Datasets')
         else:
              return pd.concat([pd.DataFrame(data={'Ranks': self.track_feat_metrics[k]['Ranks'],
                                              'Columns': self.track_feat_metrics[k]['Columns'],

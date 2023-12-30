@@ -4,7 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="69ee029f-42f4-40cf-9857-598f39b8e354" name="Changes" comment="expanded to multivariate metrics" />
+    <list default="true" id="69ee029f-42f4-40cf-9857-598f39b8e354" name="Changes" comment="expanded on multiclass">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ML_DIMENSIONALITY_REDUCTION/ML_DIMENSIONALITY_REDUCTION.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_DIMENSIONALITY_REDUCTION/ML_DIMENSIONALITY_REDUCTION.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ML_FEATURE_SELECTION/ML_FEATURE_SELECTION.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_FEATURE_SELECTION/ML_FEATURE_SELECTION.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ML_HANDLING/ML_MAIN.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_HANDLING/ML_MAIN.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ML_TUNE/ML_TUNE.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_TUNE/ML_TUNE.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Outputs/Tuned_results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Outputs/Tuned_results.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catboost_info/catboost_training.json" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/catboost_training.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catboost_info/learn/events.out.tfevents" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/learn/events.out.tfevents" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catboost_info/learn_error.tsv" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/learn_error.tsv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/catboost_info/time_left.tsv" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/time_left.tsv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -158,7 +170,31 @@
       <option name="project" value="LOCAL" />
       <updated>1703947809711</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="expanded to multivariate metrics">
+      <option name="closed" value="true" />
+      <created>1703947828609</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1703947828609</updated>
+    </task>
+    <task id="LOCAL-00011" summary="expanded to multivariate metrics _">
+      <option name="closed" value="true" />
+      <created>1703949153354</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1703949153354</updated>
+    </task>
+    <task id="LOCAL-00012" summary="changed tuning">
+      <option name="closed" value="true" />
+      <created>1703951363809</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1703951363809</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -181,6 +217,9 @@
     <MESSAGE value="finished multiworker logging" />
     <MESSAGE value="expanded to multivariate Ts models" />
     <MESSAGE value="expanded to multivariate metrics" />
-    <option name="LAST_COMMIT_MESSAGE" value="expanded to multivariate metrics" />
+    <MESSAGE value="expanded to multivariate metrics _" />
+    <MESSAGE value="changed tuning" />
+    <MESSAGE value="expanded on multiclass" />
+    <option name="LAST_COMMIT_MESSAGE" value="expanded on multiclass" />
   </component>
 </project>

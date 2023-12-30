@@ -64,7 +64,9 @@ class Ml_Reduce(Config_Utils):
             raise AttributeError('Data can not be in 3D Shape for the purpose of reduction')
 
         if self.X.shape[1]>upper_limit:
-            self.X=self._reduce(self.X, self.y,method='PCA',*args,**kwargs.update({'n_components':upper_limit}))
+            pca_kwargs=kwargs.copy()
+            pca_kwargs.update({'n_components': upper_limit})
+            self.X=self._reduce(self.X, self.y,method='PCA',*args,**pca_kwargs)
 
         scaler=StandardScaler()
         self.X=scaler.fit_transform(self.X)

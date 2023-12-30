@@ -55,14 +55,20 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
 # Load MNIST data
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()[:1000]
+(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
 # Preprocess data: Flatten and scale
 train_images = train_images.reshape((train_images.shape[0], -1)) / 255.0
 test_images = test_images.reshape((test_images.shape[0], -1)) / 255.0
 
-#X=pd.DataFrame(train_images)
-#target=pd.DataFrame(train_labels)
+
+
+
+IDX=pd.DataFrame(train_images).sample(n=1000).index
+
+X=pd.DataFrame(train_images).loc[IDX]
+#X=pd.DataFrame(np.random.randn(len(train_images),34))
+target=pd.DataFrame(train_labels).loc[IDX]
 
 
 ct=0
@@ -88,7 +94,7 @@ if __name__ == '__main__':
     #configs.get_models_available(is_ts=False,pred_med='Classification')
     obj = Ml_Main(X, y=target, transform=configs.get_transforms_available(is_ts=False,pred_med='Classification'),  # DWTTransformer#PartialAutoCorrelationTransformer
                   features_selection='LogisticRegressionCV', dim_reduction=configs.get_dim_reductions_available()
-                  , n_jobs=1, ml_model=configs.get_models_available(is_ts=False,pred_med='Classification')).Process()
+                  , n_jobs=-1, ml_model=configs.get_models_available(is_ts=False,pred_med='Classification')).Process()
 
 
     obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)

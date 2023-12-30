@@ -13,10 +13,11 @@ from imblearn.over_sampling import SMOTE
 from collections import defaultdict
 from optuna.pruners import MedianPruner
 class Ml_Tune(Config_Utils):
-    def __init__(self,res_dic,pred_method,is_ts,k_best=3, *args, **kwargs):
+    def __init__(self,res_dic,pred_method,classif_type,is_ts,k_best=3, *args, **kwargs):
         super().__init__()
         self.k_best=k_best
         self.pred_method=pred_method
+        self.classif_type=classif_type
         self.is_ts=is_ts
         self.res_dic=res_dic
         self.cv = self._define_cv(self.is_ts)
@@ -47,14 +48,17 @@ class Ml_Tune(Config_Utils):
                             .sort_values(by=['log_loss' if self.pred_method=='Classification' else 'mean_squared_error'])
                             .reset_index())
 
-
+        if self.pred_method=='Classification':
+            target_metric='log_loss'
+        else:
+            target_metric='mean_squared_error'
 
 
         for num,(model, transform,dim_reducer,i_d) in enumerate(zip(k_best_models['model'].tolist(), k_best_models['transform'].tolist(),k_best_models['transform'].tolist(),k_best_models['ID'].tolist())):
             # Create a partial function that includes the extra_args and the trial object
             X=self.res_dic[f'X_{i_d}'][0]
             y=self.res_dic[f'y_{i_d}'][0]
-            partial_objective = partial(self.objective_function, model,X,y)
+            partial_objective = partial(self.objective_function, model,X,y,target_metric)
 
 
             # Optimize using the partial function
@@ -92,7 +96,7 @@ class Ml_Tune(Config_Utils):
                 setattr(model, key, value)
         return model,transformer,dim_reducer
 
-    def objective_function(self, model,  X, y, trial):
+    def objective_function(self, model,  X, y,target_metric, trial):
         params_model = self.hyper_parameter_register(model, trial)
 
 
@@ -109,27 +113,34 @@ class Ml_Tune(Config_Utils):
 
         results=self._cross_vals(model,X,y)
 
-        return -np.mean(results['log_loss'])
+        return -np.mean(results[target_metric])
 
 
     def optimize(self, partial_objective, trial):
         return partial_objective(trial)
     def _cross_vals(self,model,X,y,handle_imbalance=True):
 
+
+
         if self.is_ts:
 
-            results = self._custom_evaluate(model=model,
-                                        y=y,
-                                        X=X,
-                                        cv=self.cv,
-                                        scoring=[val[0] if self.pred_method == 'Classification' else
-                                     val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method].items()])
-        else:
-            self.metrics_scorer = MultiScorer(self.configs['metrics']['tab'][self.pred_method])
-            _= cross_val_score(estimator=model, X=X, y=y,
-                                cv=self.cv, scoring=self.metrics_scorer)
 
-        return self.metrics_scorer.get_results()
+            results = self._custom_evaluate(model=model,
+                            y=y,
+                            X=X,
+                            cv=self.cv,
+                            scoring=self._get_scorings())
+        else:
+            if handle_imbalance and self.pred_method == 'Classification':
+                X, y = self._handle_imbalance(X,y)
+
+            results = self._custom_evaluate(model=model,
+                            y=y,
+                            X=X,
+                            cv=self.cv,
+                            scoring=self._get_scorings())
+        return results
+
     def hyper_parameter_register(self, key, trial):
 
         if key == 'LogisticRegression':
@@ -322,13 +333,38 @@ class Ml_Tune(Config_Utils):
 
         for i, (train_index, test_index) in enumerate(cv.split(X, y)):
             model.fit(X.iloc[train_index], y.iloc[train_index,0])
-            preds = model.predict(X.iloc[test_index])
-            res = scoring(y.iloc[test_index], preds)
-            results[scoring.__name__].append(res)
+            preds_total = model.predict(X.iloc[test_index])
+            preds_proba = model.predict_proba(X.iloc[test_index])
+            for metrics in scoring:
+                name = metrics.__name__
+                if name=='log_loss':
+                    res = metrics(y.iloc[test_index], preds_proba)
+                else:
+                    res = metrics(y.iloc[test_index], preds_total)
+                results[name].append(res)
 
-        return -np.mean(results[scoring.__name__])
+        return results
     @staticmethod
     def _handle_imbalance(X,y):
         smote = SMOTE(random_state=42)
         X, y = smote.fit_resample(X,y)
         return X,y
+    def _get_scorings(self):
+        if self.is_ts:
+            if self.pred_method == 'Classification':
+                if self.classif_type=='binary':
+                    scoring=[val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
+                else:
+                    scoring = [val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
+            else:
+                scoring = [val[0] for k, val in self.configs['metrics']['ts'][self.pred_method].items()]
+
+        else:
+            if self.pred_method == 'Classification':
+                if self.classif_type=='binary':
+                    scoring = [ val[0] for k,val in self.configs['metrics']['tab'][self.pred_method][self.classif_type].items()]
+                else:
+                    scoring = [ val[0] for k,val in self.configs['metrics']['tab'][self.pred_method][self.classif_type].items()]
+            else:
+                scoring = [ val[0] for k,val in self.configs['metrics']['tab'][self.pred_method].items()]
+        return scoring

@@ -33,6 +33,8 @@ class Ml_Main(Config_Utils):
         self.n_jobs=n_jobs
         self.ml_train = None
         self.pred_method=self._class_or_reg(self.y)
+        if self.pred_method == 'Classification':
+            self.classif_type = self._classif_type(y)
         self.mode= 'seq' if n_jobs==1 else 'parallel'
         self.Logger=WrapStack()
 
@@ -142,6 +144,7 @@ class Ml_Main(Config_Utils):
 
         self.ml_tune=Ml_Tune(self.unpacked_results,
                              self.pred_method,
+                             self.classif_type,
                              self.is_ts,
                              k_best=k_best)
         self.tuned_results,self.tuned_objects=self.ml_tune.tune()
