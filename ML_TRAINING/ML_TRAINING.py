@@ -66,7 +66,7 @@ class Ml_Train(Config_Utils):
 
         if results is None:
             scoring=self._get_scorings()
-            func_names = [val.__name__ for k, val in scoring]
+            func_names = [val.__name__ for val in scoring]
             results = {f_name: ['timed_out' for _ in range(self.configs['n_cvs'])] for f_name in func_names}
 
         return results
@@ -140,10 +140,10 @@ class Ml_Train(Config_Utils):
         for i, (train_index, test_index) in enumerate(cv.split(X, y)):
             model.fit(X.iloc[train_index], y.iloc[train_index,0])
             preds_total = model.predict(X.iloc[test_index])
-            preds_proba = model.predict_proba(X.iloc[test_index])
             for metrics in scoring:
                 name = metrics.__name__
                 if name=='log_loss':
+                    preds_proba = model.predict_proba(X.iloc[test_index])
                     res = metrics(y.iloc[test_index], preds_proba)
                 else:
                     res = metrics(y.iloc[test_index], preds_total)

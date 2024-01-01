@@ -38,12 +38,13 @@ class Ml_Reduce(Config_Utils):
         self.y = self.eval_df(y)
         self.args = args
         self.kwargs = kwargs
+
     @staticmethod
     def _reduce(X, y=None,method=None, *args, **kwargs):
 
         dim_reducer=Reducers(method,*args,**kwargs).get_dim_reducer()
 
-        if method=='LDA':
+        if method=='LDA' :
             X_reduced = dim_reducer.fit_transform(X,y)
         else:
             X_reduced = dim_reducer.fit_transform(X)

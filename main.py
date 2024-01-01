@@ -71,6 +71,8 @@ X=pd.DataFrame(train_images).loc[IDX]
 target=pd.DataFrame(train_labels).loc[IDX]
 
 
+X=sns.load_dataset('diamonds').drop(columns=['carat'])
+target=sns.load_dataset('diamonds')[['carat']]
 ct=0
 
 if __name__ == '__main__':
@@ -92,10 +94,9 @@ if __name__ == '__main__':
             file.write(model_name + '\n')
     #configs.get_transforms_available(is_ts=False,pred_med='Classification')
     #configs.get_models_available(is_ts=False,pred_med='Classification')
-    obj = Ml_Main(X, y=target, transform=configs.get_transforms_available(is_ts=False,pred_med='Classification'),  # DWTTransformer#PartialAutoCorrelationTransformer
-                  features_selection='LogisticRegressionCV', dim_reduction=configs.get_dim_reductions_available()
-                  , n_jobs=-1, ml_model=configs.get_models_available(is_ts=False,pred_med='Classification')).Process()
-
+    obj = Ml_Main(X, y=target, transform=configs.get_transforms_available(is_ts=False,pred_med='Regression'),  # DWTTransformer#PartialAutoCorrelationTransformer
+                  features_selection='LassoCV', dim_reduction=configs.get_dim_reductions_available(pred_med='Regression')
+                  , n_jobs=1, ml_model=configs.get_models_available(is_ts=False,pred_med='Regression')).Process()
 
     obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
 

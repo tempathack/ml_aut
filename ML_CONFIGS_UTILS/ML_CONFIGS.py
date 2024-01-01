@@ -662,8 +662,13 @@ class Config_Utils():
             return [k for k in self.configs['transforms'].keys() if not self.configs['transforms'][k]['ts_only']]
     def get_feat_selections_available(self,pred_med:str):
         return self.configs['feat_selections'][pred_med]
-    def get_dim_reductions_available(self):
-        return list(self.configs['dim_reduction'].keys())
+    def get_dim_reductions_available(self,pred_med:str):
+        dim_reducts=list(self.configs['dim_reduction'].keys())
+        if pred_med!='Classification':
+            dim_reducts.remove('LDA')
+            return dim_reducts
+        else:
+            return dim_reducts
 
 
     def set_X_y(self,X=None,y=None):
