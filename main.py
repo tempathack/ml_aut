@@ -75,6 +75,30 @@ X=sns.load_dataset('diamonds').drop(columns=['carat'])
 target=sns.load_dataset('diamonds')[['carat']]
 ct=0
 
+import pandas as pd
+import numpy as np
+
+# Create a datetime index for one year with daily frequency
+datetime_index = pd.date_range(start='2011-01-01', end='2023-12-31', freq='D')
+
+# Generate two exogenous features with random data
+np.random.seed(0)  # For reproducibility
+feature_1 = np.random.rand(len(datetime_index))
+feature_2 = np.random.rand(len(datetime_index))
+
+# Combine into a DataFrame
+time_series_data = pd.DataFrame({
+    'Feature_1': feature_1,
+    'Feature_2': feature_2
+}, index=datetime_index)
+
+time_series_data['target'] =time_series_data['Feature_1'].shift(-10)
+
+time_series_data.dropna(inplace=True)
+
+X,target=time_series_data.drop(columns=['target']),time_series_data[['target']]
+
+print(X.isnull().sum().any(),target.isnull().sum().any())
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
     def check_model_already_trained(model_name):
@@ -92,11 +116,11 @@ if __name__ == '__main__':
         # Save the model_name to the text file
         with open('trained_models.txt', 'a') as file:
             file.write(model_name + '\n')
-    #configs.get_transforms_available(is_ts=False,pred_med='Classification')
-    #configs.get_models_available(is_ts=False,pred_med='Classification')
-    obj = Ml_Main(X, y=target, transform=configs.get_transforms_available(is_ts=False,pred_med='Regression'),  # DWTTransformer#PartialAutoCorrelationTransformer
-                  features_selection='LassoCV', dim_reduction=configs.get_dim_reductions_available(pred_med='Regression')
-                  , n_jobs=1, ml_model=configs.get_models_available(is_ts=False,pred_med='Regression')).Process()
+    #configs.get_models_available(is_ts=False,pred_med='Regression')
+    #configs.get_transforms_available(is_ts=False,pred_med='Regression')
+    obj = Ml_Main(X, y=target, transform=configs.get_transforms_available(is_ts=True,pred_med='Regression'),  # DWTTransformer#PartialAutoCorrelationTransformer
+                  features_selection='LassoCV', dim_reduction=None
+                  , n_jobs=1, ml_model=configs.get_models_available(is_ts=True,pred_med='Regression')).Process()
 
     obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
 

@@ -7,7 +7,7 @@ import optuna
 import pandas as pd
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error,log_loss
-from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,MultiScorer
+from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
 from functools import partial
 from imblearn.over_sampling import SMOTE
 from collections import defaultdict
@@ -153,6 +153,20 @@ class Ml_Tune(Config_Utils):
             return {}
         elif key=='LinearRegression':
             return {}
+        elif key=='HistGradientBoostingClassifier':
+            return  {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'max_depth': trial.suggest_int('max_depth', 4, 30),
+            'min_samples_split': trial.suggest_int('min_samples_split', 2, 150),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 60),
+        }
+        elif key=='HistGradientBoostingRegressor':
+            return  {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'max_depth': trial.suggest_int('max_depth', 4, 30),
+            'min_samples_split': trial.suggest_int('min_samples_split', 2, 150),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 60),
+        }
         elif key=='QuantileTransformer':
             return {'n_quantiles':trial.suggest_categorical('n_quantiles', [j for j in range(1,3000,500)]),
                     'output_distribution':trial.suggest_categorical('output_distribution',['uniform','normal'])}
@@ -334,10 +348,10 @@ class Ml_Tune(Config_Utils):
         for i, (train_index, test_index) in enumerate(cv.split(X, y)):
             model.fit(X.iloc[train_index], y.iloc[train_index,0])
             preds_total = model.predict(X.iloc[test_index])
-            preds_proba = model.predict_proba(X.iloc[test_index])
             for metrics in scoring:
                 name = metrics.__name__
                 if name=='log_loss':
+                    preds_proba = model.predict_proba(X.iloc[test_index])
                     res = metrics(y.iloc[test_index], preds_proba)
                 else:
                     res = metrics(y.iloc[test_index], preds_total)

@@ -144,7 +144,7 @@ class Ml_Main(Config_Utils):
 
         self.ml_tune=Ml_Tune(self.unpacked_results,
                              self.pred_method,
-                             self.classif_type,
+                             self.classif_type if hasattr(self, 'classif_type') else None,
                              self.is_ts,
                              k_best=k_best)
         self.tuned_results,self.tuned_objects=self.ml_tune.tune()

@@ -16,7 +16,7 @@ from sklearn.model_selection import KFold,StratifiedKFold
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import roc_auc_score,mean_absolute_percentage_error
 from sklearn.linear_model import LinearRegression,LogisticRegression,ElasticNet,Ridge
-from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor,AdaBoostClassifier,AdaBoostRegressor,ExtraTreesClassifier,ExtraTreesRegressor
+from sklearn.ensemble import RandomForestClassifier,RandomForestRegressor,AdaBoostClassifier,AdaBoostRegressor,ExtraTreesClassifier,ExtraTreesRegressor,HistGradientBoostingClassifier,HistGradientBoostingRegressor
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPRegressor,MLPClassifier
 from sklearn.kernel_approximation import RBFSampler,Nystroem
@@ -240,6 +240,8 @@ class Config_Utils():
 
         self.configs['models']={'Regression':{'LinearRegression':{'object':LinearRegression,'ts_only':False,'req_3d':False,'is_sklearn':True,'default_kwargs':{}},
                                               'ElasticNet':{'object':ElasticNet,'ts_only':False,'req_3d':False,'is_sklearn':True,'default_kwargs':{}},
+                                              'HistGradientBoostingRegressor': {'object':HistGradientBoostingRegressor , 'ts_only': False, 'req_3d': False,
+                                                             'is_sklearn': True, 'default_kwargs': {}},
                                               'Ridge':{'object':Ridge,'ts_only':False,'req_3d':False,'is_sklearn':True,'default_kwargs':{}},
                                               'XGBRegressor':{'object':XGBRegressor,'ts_only':False,'req_3d':False,'is_sklearn':True,'default_kwargs':{}},
                                               'CatBoostRegressor': {'object': CatBoostRegressor, 'ts_only': False,
@@ -287,6 +289,10 @@ class Config_Utils():
                                 'CatBoostClassifier': {'object': CatBoostClassifier, 'ts_only': False, 'req_3d': False,'binary_only':False,'is_sklearn': True, 'default_kwargs': {'silent':True}},
                                 'LGBMClassifier': {'object': LGBMClassifier, 'ts_only': False,'binary_only':False, 'req_3d': False,
                                                   'is_sklearn': True, 'default_kwargs': {'verbosity':-100}},
+                                                  'HistGradientBoostingClassifier': {
+                                                      'object': HistGradientBoostingClassifier, 'ts_only': False,
+                                                      'req_3d': False,
+                                                      'is_sklearn': True, 'default_kwargs': {}},
                                                   'ExtraTreesClassifier': {'object': ExtraTreesClassifier, 'ts_only': False,'binary_only':False,
                                                                      'req_3d': False,
                                                                      'is_sklearn': True, 'default_kwargs': {}},

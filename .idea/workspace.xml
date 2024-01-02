@@ -4,11 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="69ee029f-42f4-40cf-9857-598f39b8e354" name="Changes" comment="expanded on multiclass">
+    <list default="true" id="69ee029f-42f4-40cf-9857-598f39b8e354" name="Changes" comment="fixed tabular regression">
+      <change afterPath="$PROJECT_DIR$/catboost_info/tmp/cat_feature_index.5e310bbe-d6611a95-3275bd52-a911ff73.tmp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/catboost_info/tmp/cat_feature_index.8d7c889d-27056824-f3ff6cec-d98aaff2.tmp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/catboost_info/tmp/cat_feature_index.98e6a5f-777279db-7432f62d-7f837a24.tmp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ML_DIMENSIONALITY_REDUCTION/ML_DIMENSIONALITY_REDUCTION.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_DIMENSIONALITY_REDUCTION/ML_DIMENSIONALITY_REDUCTION.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ML_FEATURE_SELECTION/ML_FEATURE_SELECTION.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_FEATURE_SELECTION/ML_FEATURE_SELECTION.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ML_CONFIGS_UTILS/ML_CONFIGS.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_CONFIGS_UTILS/ML_CONFIGS.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ML_HANDLING/ML_MAIN.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_HANDLING/ML_MAIN.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ML_TRAINING/ML_TRAINING.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_TRAINING/ML_TRAINING.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ML_TUNE/ML_TUNE.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_TUNE/ML_TUNE.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Outputs/Tuned_results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Outputs/Tuned_results.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/catboost_info/catboost_training.json" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/catboost_training.json" afterDir="false" />
@@ -194,7 +197,31 @@
       <option name="project" value="LOCAL" />
       <updated>1703951363809</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="expanded on multiclass">
+      <option name="closed" value="true" />
+      <created>1703972641796</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1703972641796</updated>
+    </task>
+    <task id="LOCAL-00014" summary="expanded on multiclass">
+      <option name="closed" value="true" />
+      <created>1704141973366</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1704141973366</updated>
+    </task>
+    <task id="LOCAL-00015" summary="fixed tabular regression">
+      <option name="closed" value="true" />
+      <created>1704142513832</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1704142513832</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -220,6 +247,7 @@
     <MESSAGE value="expanded to multivariate metrics _" />
     <MESSAGE value="changed tuning" />
     <MESSAGE value="expanded on multiclass" />
-    <option name="LAST_COMMIT_MESSAGE" value="expanded on multiclass" />
+    <MESSAGE value="fixed tabular regression" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed tabular regression" />
   </component>
 </project>
