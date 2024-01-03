@@ -79,7 +79,7 @@ import pandas as pd
 import numpy as np
 
 # Create a datetime index for one year with daily frequency
-datetime_index = pd.date_range(start='2011-01-01', end='2023-12-31', freq='D')
+datetime_index = pd.date_range(start='2023-01-01', end='2023-12-31', freq='D')
 
 # Generate two exogenous features with random data
 np.random.seed(0)  # For reproducibility
@@ -98,7 +98,7 @@ time_series_data.dropna(inplace=True)
 
 X,target=time_series_data.drop(columns=['target']),time_series_data[['target']]
 
-print(X.isnull().sum().any(),target.isnull().sum().any())
+#print(X.isnull().sum().any(),target.isnull().sum().any())
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
     def check_model_already_trained(model_name):
@@ -119,8 +119,8 @@ if __name__ == '__main__':
     #configs.get_models_available(is_ts=False,pred_med='Regression')
     #configs.get_transforms_available(is_ts=False,pred_med='Regression')
     obj = Ml_Main(X, y=target, transform=configs.get_transforms_available(is_ts=True,pred_med='Regression'),  # DWTTransformer#PartialAutoCorrelationTransformer
-                  features_selection='LassoCV', dim_reduction=None
-                  , n_jobs=1, ml_model=configs.get_models_available(is_ts=True,pred_med='Regression')).Process()
+                  features_selection=None, dim_reduction=None
+                  , n_jobs=1, ml_model='KNeighborsTimeSeriesRegressor').Process()
 
     obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
 

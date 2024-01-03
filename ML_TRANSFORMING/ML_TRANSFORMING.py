@@ -104,7 +104,7 @@ class Ml_Process(Config_Utils):
         is_3d = self._validate_3d(transformed_df)
         contains_nulls = self._validate_null(transformed_df, is_3d)
         if contains_nulls:
-            X = self._impute(transformed_df, is_3d, *args, **kwargs)
+            transformed_df = self._impute(transformed_df, is_3d, *args, **kwargs)
 
         if isinstance(transformed_df, csr_matrix):
 

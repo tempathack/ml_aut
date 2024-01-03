@@ -10,14 +10,12 @@
       <change afterPath="$PROJECT_DIR$/catboost_info/tmp/cat_feature_index.98e6a5f-777279db-7432f62d-7f837a24.tmp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ML_CONFIGS_UTILS/ML_CONFIGS.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_CONFIGS_UTILS/ML_CONFIGS.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ML_HANDLING/ML_MAIN.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_HANDLING/ML_MAIN.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ML_TRAINING/ML_TRAINING.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_TRAINING/ML_TRAINING.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ML_TRANSFORMING/ML_TRANSFORMING.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_TRANSFORMING/ML_TRANSFORMING.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ML_TUNE/ML_TUNE.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_TUNE/ML_TUNE.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Outputs/Tuned_results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Outputs/Tuned_results.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/catboost_info/catboost_training.json" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/catboost_training.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/catboost_info/learn/events.out.tfevents" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/learn/events.out.tfevents" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/catboost_info/learn_error.tsv" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/learn_error.tsv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/catboost_info/time_left.tsv" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/time_left.tsv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -221,7 +219,15 @@
       <option name="project" value="LOCAL" />
       <updated>1704142513832</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="fixed tabular regression">
+      <option name="closed" value="true" />
+      <created>1704238393382</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1704238393382</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

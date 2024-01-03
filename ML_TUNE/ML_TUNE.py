@@ -276,7 +276,6 @@ class Ml_Tune(Config_Utils):
         "subsample": trial.suggest_float("subsample", 0.05, 1.0),
         "colsample_bytree": trial.suggest_float("colsample_bytree", 0.05, 1.0),
         "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 1, 100) }
-
         elif key=='LGBMClassifier':
             return {
         "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(1,2000,100)]),
@@ -336,6 +335,172 @@ class Ml_Tune(Config_Utils):
             return {'n_neighbors':trial.suggest_categorical('n_neighbors', [ i for i in range(1,8)])}
         elif key=='KNeighborsRegressor':
             return {'n_neighbors':trial.suggest_categorical('n_neighbors', [ i for i in range(1,8)])}
+        elif key=='TapNetRegressor':
+            return {
+                'n_epochs': trial.suggest_int("n_epochs", 100, 3000),
+                'batch_size': trial.suggest_categorical("batch_size", [8, 16, 32, 64]),
+                'dropout': trial.suggest_uniform("dropout", 0.0, 1.0),
+                'filter_sizes': trial.suggest_categorical("filter_sizes", [(256, 256, 128), (128, 128, 64)]),
+                'kernel_size': trial.suggest_categorical("kernel_size", [(8, 5, 3), (3, 3, 3)]),
+                'dilation': trial.suggest_int("dilation", 1, 10),
+                'layers': trial.suggest_categorical("layers", [(500, 300), (300, 100)]),
+                'activation': trial.suggest_categorical("activation", ["relu", "sigmoid", "tanh"]),
+                'loss': trial.suggest_categorical("loss", ["mean_squared_error", "mean_absolute_error"]),
+                'optimizer': trial.suggest_categorical("optimizer", ["Adam", "SGD", "RMSprop"]),
+                'use_bias': trial.suggest_categorical("use_bias", [True, False]),
+                'use_rp': trial.suggest_categorical("use_rp", [True, False]),
+                'use_att': trial.suggest_categorical("use_att", [True, False]),
+                'use_lstm': trial.suggest_categorical("use_lstm", [True, False]),
+                'use_cnn': trial.suggest_categorical("use_cnn", [True, False]),
+                'verbose': trial.suggest_categorical("verbose", [True, False]),
+                'random_state': trial.suggest_int("random_state", 0, 1000)
+            }
+        elif key=='KNeighborsTimeSeriesRegressor':
+            return {
+    'n_neighbors': trial.suggest_int("n_neighbors", 1, 20),
+    'weights': trial.suggest_categorical("weights", ["uniform", "distance"]),
+    'algorithm': trial.suggest_categorical("algorithm", ["auto", "ball_tree", "kd_tree", "brute"]),
+    'distance': trial.suggest_categorical("distance", ["euclidean", "squared", "dtw", "ddtw", "wdtw", "wddtw", "lcss", "edr", "erp", "msm"]),
+    'leaf_size': trial.suggest_int("leaf_size", 10, 100),
+    'n_jobs': trial.suggest_categorical("n_jobs", [None, -1, 1, 2, 4, 8])
+}
+        elif key=='CNNRegressor':
+            return {
+    'n_epochs': trial.suggest_int("n_epochs", 100, 3000),
+    'batch_size': trial.suggest_int("batch_size", 8, 64),
+    'kernel_size': trial.suggest_int("kernel_size", 2, 10),
+    'avg_pool_size': trial.suggest_int("avg_pool_size", 2, 10),
+    'n_conv_layers': trial.suggest_int("n_conv_layers", 1, 5),
+    'random_state': trial.suggest_int("random_state", 0, 100),
+    'verbose': trial.suggest_categorical("verbose", [True, False]),
+    'loss': trial.suggest_categorical("loss", ["mean_squared_error", "mean_absolute_error"]),
+    'activation': trial.suggest_categorical("activation", ["linear", "relu", "sigmoid"]),
+    'optimizer': trial.suggest_categorical("optimizer", ["Adam", "SGD", "RMSprop"]),
+    'use_bias': trial.suggest_categorical("use_bias", [True, False])
+}
+        elif key=='RocketRegressor':
+            return {
+    'num_kernels': trial.suggest_int("num_kernels", 5000,10000,15000, 20000),
+    # Add any other relevant hyperparameters here
+    'random_state': trial.suggest_int("random_state", 0, 100)
+}
+        elif  key == 'TimeSeriesForestClassifier':
+            return {
+            'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+            'max_depth': trial.suggest_int('max_depth', 1, 20),
+            'min_samples_split': trial.suggest_int('min_samples_split', 2, 10),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 10)
+                 }
+        elif key == 'KNeighborsTimeSeriesClassifier':
+            return {
+        'n_neighbors': trial.suggest_int('n_neighbors', 1, 20),
+        'weights': trial.suggest_categorical('weights', ['uniform', 'distance']),
+        'algorithm': trial.suggest_categorical('algorithm', ['brute', 'ball_tree', 'kd_tree', 'auto']),
+        'metric': trial.suggest_categorical('metric', ['dtw', 'ddtw', 'wdtw', 'lcss'])
+    }
+        elif key == 'ShapeletTransformClassifier':
+            return {
+    'min_shapelet_length': trial.suggest_int('min_shapelet_length', 3, 10),
+    'max_shapelet_length': trial.suggest_int('max_shapelet_length', 3, 10)
+}
+        elif key == 'TimeSeriesSVMClassifier':
+            return {
+    'C': trial.suggest_float('C', 0.1, 10.0),
+    'kernel': trial.suggest_categorical('kernel', ['linear', 'poly', 'rbf', 'sigmoid']),
+    'gamma': trial.suggest_categorical('gamma', ['scale', 'auto']),
+    'degree': trial.suggest_int('degree', 2, 5)
+}
+        elif key == 'RandomIntervalSpectralForest':
+            return {
+    'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+    'min_interval': trial.suggest_int('min_interval', 1, 10),
+    'max_interval': trial.suggest_int('max_interval', 1, 10)
+}
+        elif key == 'ROCKETClassifier':
+            return {
+    'num_kernels': trial.suggest_int('num_kernels', 1000, 10000)
+}
+        elif key == 'MrSEQLClassifier':
+            return {
+    'symrep': trial.suggest_categorical('symrep', ['sax', 'sfa']),
+    'seql_mode': trial.suggest_categorical('seql_mode', ['clf', 'fs'])
+}
+        elif key=='WEASEL':
+            return {
+    'anova': trial.suggest_categorical("anova", [True, False]),
+    'bigrams': trial.suggest_categorical("bigrams", [True, False]),
+    'binning_strategy': trial.suggest_categorical("binning_strategy", ["equi-depth", "equi-width", "information-gain"]),
+    'window_inc': trial.suggest_int("window_inc", 1, 10),
+    'p_threshold': trial.suggest_float("p_threshold", 0.01, 0.1),
+    'alphabet_size': trial.suggest_int("alphabet_size", 2, 10),
+    'feature_selection': trial.suggest_categorical("feature_selection", ["chi2", "none", "random"]),
+    'support_probabilities': trial.suggest_categorical("support_probabilities", [True, False]),
+    'random_state': trial.suggest_int("random_state", 0, 100)
+}
+        elif key == 'MUSE':
+            return {
+    'anova': trial.suggest_categorical("anova", [True, False]),
+    'variance': trial.suggest_categorical("variance", [True, False]),
+    'bigrams': trial.suggest_categorical("bigrams", [True, False]),
+    'window_inc': trial.suggest_int("window_inc", 1, 10),
+    'alphabet_size': trial.suggest_int("alphabet_size", 2, 10),
+    'p_threshold': trial.suggest_float("p_threshold", 0.01, 0.1),
+    'use_first_order_differences': trial.suggest_categorical("use_first_order_differences", [True, False]),
+    'support_probabilities': trial.suggest_categorical("support_probabilities", [True, False]),
+    'feature_selection': trial.suggest_categorical("feature_selection", ["chi2", "none", "random"]),
+    'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]), # 1 for single-threaded or -1 for using all processors
+    'random_state': trial.suggest_int("random_state", 0, 100)
+}
+        elif key=='Arsenal':
+            return {
+    'num_kernels': trial.suggest_int("num_kernels", 100, 5000),
+    'n_estimators': trial.suggest_int("n_estimators", 10, 100),
+    'rocket_transform': trial.suggest_categorical("rocket_transform", ["rocket", "minirocket", "multirocket"]),
+    'max_dilations_per_kernel': trial.suggest_int("max_dilations_per_kernel", 10, 100),
+    'n_features_per_kernel': trial.suggest_int("n_features_per_kernel", 1, 10),
+    'time_limit_in_minutes': trial.suggest_float("time_limit_in_minutes", 0.0, 60.0),
+    'contract_max_n_estimators': trial.suggest_int("contract_max_n_estimators", 10, 500),
+    'save_transformed_data': trial.suggest_categorical("save_transformed_data", [True, False]),
+    'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),  # 1 for single-threaded or -1 for using all processors
+    'random_state': trial.suggest_int("random_state", 0, 100)
+}
+        elif key=='IndividualBOSS':
+            return {
+    'window_size': trial.suggest_int("window_size", 5, 20),
+    'word_length': trial.suggest_int("word_length", 3, 16),
+    'norm': trial.suggest_categorical("norm", [True, False]),
+    'alphabet_size': trial.suggest_int("alphabet_size", 2, 10),
+    'save_words': trial.suggest_categorical("save_words", [True, False]),
+    'use_boss_distance': trial.suggest_categorical("use_boss_distance", [True, False]),
+    'feature_selection': trial.suggest_categorical("feature_selection", ['none', 'entropy', 'gini']),
+    'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),  # 1 for single-threaded or -1 for using all processors
+    'random_state': trial.suggest_int("random_state", 0, 100)
+}
+        elif key=='BOSSEnsemble':
+            return {
+            'threshold': trial.suggest_float("threshold", 0.8, 1.0),
+             'max_ensemble_size': trial.suggest_int("max_ensemble_size", 100, 1000),
+             'max_win_len_prop': trial.suggest_float("max_win_len_prop", 0.5, 1.0),
+             'min_window': trial.suggest_int("min_window", 5, 20),
+            'save_train_predictions': trial.suggest_categorical("save_train_predictions", [True, False]),
+            'alphabet_size': trial.suggest_int("alphabet_size", 2, 6),
+            'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),  # 1 for single-threaded or -1 for using all processors
+            'use_boss_distance': trial.suggest_categorical("use_boss_distance", [True, False]),
+         'feature_selection': trial.suggest_categorical("feature_selection", ["chi2", "none", "random"]),
+            'random_state': trial.suggest_int("random_state", 0, 100)}
+        elif key=='ContractableBOSS':
+            return {
+    'n_parameter_samples': trial.suggest_int("n_parameter_samples", 100, 500),
+    'max_ensemble_size': trial.suggest_int("max_ensemble_size", 10, 100),
+    'max_win_len_prop': trial.suggest_float("max_win_len_prop", 0.1, 1.0),
+    'min_window': trial.suggest_int("min_window", 5, 20),
+    'time_limit_in_minutes': trial.suggest_float("time_limit_in_minutes", 0.0, 60.0),
+    'contract_max_n_parameter_samples': trial.suggest_int("contract_max_n_parameter_samples", 100, 1000),
+    'save_train_predictions': trial.suggest_categorical("save_train_predictions", [True, False]),
+    'feature_selection': trial.suggest_categorical("feature_selection", ["chi2", "none", "random"]),
+    'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),  # 1 for single-threaded or -1 for using all processors
+    'random_state': trial.suggest_int("random_state", 0, 100)
+}
 
     @staticmethod
     def _custom_evaluate(model, y, X, cv=None, scoring=None):
