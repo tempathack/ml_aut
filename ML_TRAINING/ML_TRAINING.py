@@ -111,9 +111,9 @@ class Ml_Train(Config_Utils):
         if self.is_ts:
             if self.pred_method == 'Classification':
                 if self.classif_type=='binary':
-                    scoring=[val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
+                    scoring=[val[0] for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
                 else:
-                    scoring = [val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
+                    scoring = [val[0] for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
             else:
                 scoring = [val[0] for k, val in self.configs['metrics']['ts'][self.pred_method].items()]
 

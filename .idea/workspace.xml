@@ -4,26 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="69ee029f-42f4-40cf-9857-598f39b8e354" name="Changes" comment="extended hyperparameters">
-      <change afterPath="$PROJECT_DIR$/CUSTOM_MODELS/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CUSTOM_TRANSFORMS/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML_CONFIGS_UTILS/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML_DIMENSIONALITY_REDUCTION/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML_FEATURE_SELECTION/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML_HANDLING/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML_TARGET_TRANSFORMS/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML_TRAINING/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML_TRANSFORMING/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML_TUNE/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/catboost_info/tmp/cat_feature_index.5e310bbe-d6611a95-3275bd52-a911ff73.tmp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/catboost_info/tmp/cat_feature_index.8d7c889d-27056824-f3ff6cec-d98aaff2.tmp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/catboost_info/tmp/cat_feature_index.98e6a5f-777279db-7432f62d-7f837a24.tmp" afterDir="false" />
+    <list default="true" id="69ee029f-42f4-40cf-9857-598f39b8e354" name="Changes" comment="updated setup .py added py__init">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/catboost_info/catboost_training.json" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/catboost_training.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/catboost_info/learn/events.out.tfevents" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/learn/events.out.tfevents" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/catboost_info/learn_error.tsv" beforeDir="false" afterPath="$PROJECT_DIR$/catboost_info/learn_error.tsv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ML_CONFIGS_UTILS/ML_CONFIGS.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_CONFIGS_UTILS/ML_CONFIGS.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ML_HANDLING/ML_MAIN.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_HANDLING/ML_MAIN.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ML_TRAINING/ML_TRAINING.py" beforeDir="false" afterPath="$PROJECT_DIR$/ML_TRAINING/ML_TRAINING.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -251,7 +237,15 @@
       <option name="project" value="LOCAL" />
       <updated>1704324852218</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="updated setup .py added py__init">
+      <option name="closed" value="true" />
+      <created>1704326394957</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1704326394957</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -279,6 +273,7 @@
     <MESSAGE value="expanded on multiclass" />
     <MESSAGE value="fixed tabular regression" />
     <MESSAGE value="extended hyperparameters" />
-    <option name="LAST_COMMIT_MESSAGE" value="extended hyperparameters" />
+    <MESSAGE value="updated setup .py added py__init" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated setup .py added py__init" />
   </component>
 </project>

@@ -152,10 +152,10 @@ class Ml_Main(Config_Utils):
 
         return self
     def get_feature_selections(self):
-        if  hasattr(self,'unpacked_results'):
+        if  hasattr(self,'unpacked_results') and hasattr(self, 'ml_select'):
             return pd.concat(self.unpacked_results['metrics_features'])
         else:
-            raise MethodNotExecutedError("please make sure to execute Process method beforehand")
+            raise MethodNotExecutedError("please make sure to execute Process method beforehand and use some features_selection method")
     def get_model_metrics(self):
 
         if hasattr(self,'tuned_results'):

@@ -165,7 +165,8 @@ class Config_Utils():
                                     'Lag': {'object': Lag,
                                                           'ts_only': True,
                                                           'req_3d': False,
-                                                          'default_kwargs': {'lags':[1,3,5,10]}},
+                                                          'default_kwargs': {'lags':[1,3,5,10],
+                                                                            'index_out':'original'}},
                                     'StandardScaler': {'object': StandardScaler,
                                                         'ts_only':False,
                                                         'req_3d': False,
@@ -535,7 +536,9 @@ class Config_Utils():
             cmb=cmb.assign(features_selections=res['processing']['features_selection']['method'])
 
             collect['metrics_model'].append(cmb.assign(ID=idx,Rank=None,Tuned=False).copy())
-            collect['metrics_features'].append(pd.DataFrame(res['processing']['features_selection']['feat_metrics']).assign(ID=idx))
+            feat_met=res['processing']['features_selection']['feat_metrics']
+            if not isinstance(feat_met,bool):
+                collect['metrics_features'].append(pd.DataFrame(feat_met).assign(ID=idx))
             collect[f'X_{idx}'].append(res['X'])
             collect[f'y_{idx}'].append(res['y'])
 

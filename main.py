@@ -42,61 +42,61 @@ configs=Config_Utils()
 X,target=data.drop(columns=['Label']),data[['Label']]
 
 
-X,target=data.drop(columns=['Label']),data[['Label']]
+#X,target=data.drop(columns=['Label']),data[['Label']]
 
-sns.load_dataset('titanic')
-d=sns.load_dataset('titanic').drop(columns=['alive'])
-k=sns.load_dataset('iris')
-k['species']=k['species'].map({'setosa':1,'versicolor':0,'virginica':2})
-X,target=k.drop(columns=['species']),k[['species']]
-from keras.datasets import mnist
+#sns.load_dataset('titanic')
+#d=sns.load_dataset('titanic').drop(columns=['alive'])
+#k=sns.load_dataset('iris')
+#k['species']=k['species'].map({'setosa':1,'versicolor':0,'virginica':2})
+#X,target=k.drop(columns=['species']),k[['species']]
+#from keras.datasets import mnist
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
 # Load MNIST data
-(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+#(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
 # Preprocess data: Flatten and scale
-train_images = train_images.reshape((train_images.shape[0], -1)) / 255.0
-test_images = test_images.reshape((test_images.shape[0], -1)) / 255.0
+#train_images = train_images.reshape((train_images.shape[0], -1)) / 255.0
+#test_images = test_images.reshape((test_images.shape[0], -1)) / 255.0
 
 
 
 
-IDX=pd.DataFrame(train_images).sample(n=1000).index
+#IDX=pd.DataFrame(train_images).sample(n=1000).index
 
-X=pd.DataFrame(train_images).loc[IDX]
+#X=pd.DataFrame(train_images).loc[IDX]
 #X=pd.DataFrame(np.random.randn(len(train_images),34))
-target=pd.DataFrame(train_labels).loc[IDX]
+#target=pd.DataFrame(train_labels).loc[IDX]
 
 
-X=sns.load_dataset('diamonds').drop(columns=['carat'])
-target=sns.load_dataset('diamonds')[['carat']]
-ct=0
+#X=sns.load_dataset('diamonds').drop(columns=['carat'])
+#target=sns.load_dataset('diamonds')[['carat']]
+#ct=0
 
 import pandas as pd
 import numpy as np
 
 # Create a datetime index for one year with daily frequency
-datetime_index = pd.date_range(start='2023-01-01', end='2023-12-31', freq='D')
+#datetime_index = pd.date_range(start='2023-01-01', end='2023-12-31', freq='D')
 
 # Generate two exogenous features with random data
-np.random.seed(0)  # For reproducibility
-feature_1 = np.random.rand(len(datetime_index))
-feature_2 = np.random.rand(len(datetime_index))
+#np.random.seed(0)  # For reproducibility
+#feature_1 = np.random.rand(len(datetime_index))
+#feature_2 = np.random.rand(len(datetime_index))
 
 # Combine into a DataFrame
-time_series_data = pd.DataFrame({
-    'Feature_1': feature_1,
-    'Feature_2': feature_2
-}, index=datetime_index)
+#time_series_data = pd.DataFrame({
+ #   'Feature_1': feature_1,
+  #  'Feature_2': feature_2
+#}, index=datetime_index)
 
-time_series_data['target'] =time_series_data['Feature_1'].shift(-10)
+#time_series_data['target'] =time_series_data['Feature_1'].shift(-10)
 
-time_series_data.dropna(inplace=True)
+#time_series_data.dropna(inplace=True)
 
-X,target=time_series_data.drop(columns=['target']),time_series_data[['target']]
+#X,target=time_series_data.drop(columns=['target']),time_series_data[['target']]
 
 #print(X.isnull().sum().any(),target.isnull().sum().any())
 if __name__ == '__main__':
@@ -118,9 +118,13 @@ if __name__ == '__main__':
             file.write(model_name + '\n')
     #configs.get_models_available(is_ts=False,pred_med='Regression')
     #configs.get_transforms_available(is_ts=False,pred_med='Regression')
-    obj = Ml_Main(X, y=target, transform=configs.get_transforms_available(is_ts=True,pred_med='Regression'),  # DWTTransformer#PartialAutoCorrelationTransformer
+    l=configs.get_transforms_available(is_ts=True,pred_med='Classification')
+    l.remove('Rocket')
+    l.remove('MiniRocketMultivariate')
+    l.remove('TSFreshFeatureExtractor')
+    obj = Ml_Main(X, y=target, transform=['MinMaxScaler','StandardScaler'],  # DWTTransformer#PartialAutoCorrelationTransformer
                   features_selection=None, dim_reduction=None
-                  , n_jobs=1, ml_model='KNeighborsTimeSeriesRegressor').Process()
+                  , n_jobs=1, ml_model='KNeighborsTimeSeriesClassifier').Process()
 
     obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
 
