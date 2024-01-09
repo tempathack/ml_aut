@@ -374,7 +374,7 @@ class Config_Utils():
                                                  'ts_only': True,
                                                 'req_3d': True, 'is_sklearn': False,'binary_only':False,
                                                 'default_kwargs': {}},
-                             'TimeSeriesForestClassifier': {'object': TimeSeriesForestClassifier,
+                             'TimeSeriesForestClassifier': {'object': UniToMultivariateWrapper(TimeSeriesForestClassifier),
                                           'ts_only': True,
                                        'req_3d': True, 'is_sklearn': False,'binary_only':False,
                               'default_kwargs': {}},

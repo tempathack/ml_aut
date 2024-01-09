@@ -116,15 +116,24 @@ if __name__ == '__main__':
         # Save the model_name to the text file
         with open('trained_models.txt', 'a') as file:
             file.write(model_name + '\n')
-    #configs.get_models_available(is_ts=False,pred_med='Regression')
+    #configs.get_models_available(is_ts=True,pred_med='Classification')
     #configs.get_transforms_available(is_ts=False,pred_med='Regression')
     l=configs.get_transforms_available(is_ts=True,pred_med='Classification')
     l.remove('Rocket')
     l.remove('MiniRocketMultivariate')
     l.remove('TSFreshFeatureExtractor')
-    obj = Ml_Main(X, y=target, transform=['MinMaxScaler','StandardScaler'],  # DWTTransformer#PartialAutoCorrelationTransformer
-                  features_selection=None, dim_reduction=None
-                  , n_jobs=1, ml_model='KNeighborsTimeSeriesClassifier').Process()
+    res={}
+    for mod in configs.get_models_available(is_ts=True,pred_med='Classification'):
+        if mod in ['HIVECOTEV2','HIVECOTEV1','Arsenal']:
+            continue
 
-    obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
+        try:
+            obj = Ml_Main(X, y=target, transform=['MinMaxScaler','StandardScaler'],  # DWTTransformer#PartialAutoCorrelationTransformer
+                  features_selection=None, dim_reduction=None
+                  , n_jobs=1, ml_model=mod).Process()
+
+            obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
+        except Exception as e:
+            res[mod]=e
+    print(res)
 

@@ -29,6 +29,11 @@ class UniToMultivariateWrapper(BaseEstimator):
            raise AssertionError("Model needs to be fitted first")
        X_new = self._pca_transform(X)
        return self.model.predict(X_new)
+   def predict_proba(self, X):
+       if not  self._is_fitted:
+           raise AssertionError("Model needs to be fitted first")
+       X_new = self._pca_transform(X)
+       return self.model.predict_proba(X_new)
    def _pca_fit_transform(self, X):
        X_new = self.pipe.fit_transform(X)
        return X_new

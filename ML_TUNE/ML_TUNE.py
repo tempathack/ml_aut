@@ -33,7 +33,6 @@ class Ml_Tune(Config_Utils):
         else:
             dic={'mean_squared_error': ['mean']}
 
-        dim=self.res_dic['metrics_model'][0].shape[0]
 
         model_metrics = pd.concat(self.res_dic['metrics_model'])
         dim=model_metrics.shape[0]
@@ -58,14 +57,15 @@ class Ml_Tune(Config_Utils):
             # Create a partial function that includes the extra_args and the trial object
             X=self.res_dic[f'X_{i_d}'][0]
             y=self.res_dic[f'y_{i_d}'][0]
-            partial_objective = partial(self.objective_function, model,X,y,target_metric)
+            self.model=model
+            partial_objective = partial(self.objective_function, self.model,X,y,target_metric)
 
 
             # Optimize using the partial function
             study = optuna.create_study(pruner=pruner, direction='maximize')
-            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=200)
+            study.optimize(lambda trial: self.optimize(partial_objective,trial), n_trials=2)
 
-            model_obj,transformer_obj,dim_reducer_obj=self._define_classes(model,transform,dim_reducer,study)
+            model_obj,transformer_obj,dim_reducer_obj=self._define_classes(self.model,transform,dim_reducer,study)
 
             res_dic=self._cross_vals(model_obj, X, y)
 
@@ -123,6 +123,9 @@ class Ml_Tune(Config_Utils):
 
 
         if self.is_ts:
+
+            if self.configs['models'][self.pred_method][self.model]['req_3d'] and not self._validate_3d(X):
+               X = self.to_panel(X, window_size=14)
 
 
             results = self._custom_evaluate(model=model,
@@ -395,8 +398,8 @@ class Ml_Tune(Config_Utils):
             return {
         'n_neighbors': trial.suggest_int('n_neighbors', 1, 20),
         'weights': trial.suggest_categorical('weights', ['uniform', 'distance']),
-        'algorithm': trial.suggest_categorical('algorithm', ['brute', 'ball_tree', 'kd_tree', 'auto']),
-        'metric': trial.suggest_categorical('metric', ['dtw', 'ddtw', 'wdtw', 'lcss'])
+        'algorithm': trial.suggest_categorical('algorithm', ['brute', 'auto']),
+        'distance': trial.suggest_categorical('distance', ['dtw', 'ddtw', 'wdtw', 'lcss'])
     }
         elif key == 'ShapeletTransformClassifier':
             return {
@@ -416,7 +419,7 @@ class Ml_Tune(Config_Utils):
     'min_interval': trial.suggest_int('min_interval', 1, 10),
     'max_interval': trial.suggest_int('max_interval', 1, 10)
 }
-        elif key == 'ROCKETClassifier':
+        elif key == 'RocketClassifier':
             return {
     'num_kernels': trial.suggest_int('num_kernels', 1000, 10000)
 }
@@ -446,7 +449,7 @@ class Ml_Tune(Config_Utils):
     'alphabet_size': trial.suggest_int("alphabet_size", 2, 10),
     'p_threshold': trial.suggest_float("p_threshold", 0.01, 0.1),
     'use_first_order_differences': trial.suggest_categorical("use_first_order_differences", [True, False]),
-    'support_probabilities': trial.suggest_categorical("support_probabilities", [True, False]),
+    'support_probabilities': trial.suggest_categorical("support_probabilities", [True]),
     'feature_selection': trial.suggest_categorical("feature_selection", ["chi2", "none", "random"]),
     'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]), # 1 for single-threaded or -1 for using all processors
     'random_state': trial.suggest_int("random_state", 0, 100)
@@ -501,6 +504,36 @@ class Ml_Tune(Config_Utils):
     'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),  # 1 for single-threaded or -1 for using all processors
     'random_state': trial.suggest_int("random_state", 0, 100)
 }
+        elif key=='CNNClassifier':
+            return {
+        'n_epochs': trial.suggest_int("n_epochs", 100, 2000),  # 100 to 2000
+        'batch_size': trial.suggest_int("batch_size", 8, 64),  # 8 to 64
+        'kernel_size': trial.suggest_int("kernel_size", 3, 7),  # 3 to 7
+        'avg_pool_size': trial.suggest_int("avg_pool_size", 2, 5),  # 2 to 5
+        'n_conv_layers': trial.suggest_int("n_conv_layers", 1, 5),  # 1 to 5
+        'filter_sizes': trial.suggest_categorical("filter_sizes", [[6, 12], [8, 16, 32], [10, 20]]),  # example filter sizes
+        'random_state': trial.suggest_int("random_state", 0, 100),  # 0 to 100
+        'verbose': trial.suggest_categorical("verbose", [True, False]),
+        'loss': trial.suggest_categorical("loss", ["mean_squared_error", "categorical_crossentropy", "binary_crossentropy"]),
+        'metrics': trial.suggest_categorical("metrics", [["accuracy"], ["precision", "recall"]]),
+        'activation': trial.suggest_categorical("activation", ["relu", "sigmoid", "tanh"]),
+        'use_bias': trial.suggest_categorical("use_bias", [True, False]),
+        'optimizer': trial.suggest_categorical("optimizer", ["Adam", "SGD", "RMSprop"]),
+        'learning_rate': trial.suggest_float("learning_rate", 0.001, 0.1) }
+        elif key=='RotationForest':
+            return {
+                'n_estimators': trial.suggest_int("n_estimators", 100, 500),  # 100 to 500
+                'min_group': trial.suggest_int("min_group", 1, 5),  # 1 to 5
+                'max_group': trial.suggest_int("max_group", 3, 10),  # 3 to 10
+                'remove_proportion': trial.suggest_float("remove_proportion", 0.1, 1.0),  # 0.1 to 1.0
+                'base_estimator': trial.suggest_categorical("base_estimator", ["DecisionTree", "RandomForest", None]),
+                'time_limit_in_minutes': trial.suggest_float("time_limit_in_minutes", 0.0, 60.0),  # 0.0 to 60.0 minutes
+                'contract_max_n_estimators': trial.suggest_int("contract_max_n_estimators", 100, 1000),  # 100 to 1000
+                'save_transformed_data': trial.suggest_categorical("save_transformed_data", [True, False]),
+                'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),
+                # 1 for single-threaded or -1 for using all processors
+                'random_state': trial.suggest_int("random_state", 0, 100)  # 0 to 100
+            }
 
     @staticmethod
     def _custom_evaluate(model, y, X, cv=None, scoring=None):
@@ -532,9 +565,9 @@ class Ml_Tune(Config_Utils):
         if self.is_ts:
             if self.pred_method == 'Classification':
                 if self.classif_type=='binary':
-                    scoring=[val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
+                    scoring=[val[0] for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
                 else:
-                    scoring = [val[0]() for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
+                    scoring = [val[0] for k, val in self.configs['metrics']['ts'][self.pred_method][self.classif_type].items()]
             else:
                 scoring = [val[0] for k, val in self.configs['metrics']['ts'][self.pred_method].items()]
 
