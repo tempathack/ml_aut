@@ -511,7 +511,6 @@ class Ml_Tune(Config_Utils):
         'kernel_size': trial.suggest_int("kernel_size", 3, 7),  # 3 to 7
         'avg_pool_size': trial.suggest_int("avg_pool_size", 2, 5),  # 2 to 5
         'n_conv_layers': trial.suggest_int("n_conv_layers", 1, 5),  # 1 to 5
-        'filter_sizes': trial.suggest_categorical("filter_sizes", [[6, 12], [8, 16, 32], [10, 20]]),  # example filter sizes
         'random_state': trial.suggest_int("random_state", 0, 100),  # 0 to 100
         'verbose': trial.suggest_categorical("verbose", [True, False]),
         'loss': trial.suggest_categorical("loss", ["mean_squared_error", "categorical_crossentropy", "binary_crossentropy"]),
