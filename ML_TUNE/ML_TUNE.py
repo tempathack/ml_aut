@@ -390,7 +390,6 @@ class Ml_Tune(Config_Utils):
         elif  key == 'TimeSeriesForestClassifier':
             return {
             'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
-            'max_depth': trial.suggest_int('max_depth', 1, 20),
             'min_samples_split': trial.suggest_int('min_samples_split', 2, 10),
             'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 10)
                  }
@@ -437,7 +436,7 @@ class Ml_Tune(Config_Utils):
     'p_threshold': trial.suggest_float("p_threshold", 0.01, 0.1),
     'alphabet_size': trial.suggest_int("alphabet_size", 2, 10),
     'feature_selection': trial.suggest_categorical("feature_selection", ["chi2", "none", "random"]),
-    'support_probabilities': trial.suggest_categorical("support_probabilities", [True, False]),
+    'support_probabilities': trial.suggest_categorical("support_probabilities", [True]),
     'random_state': trial.suggest_int("random_state", 0, 100)
 }
         elif key == 'MUSE':
@@ -496,7 +495,6 @@ class Ml_Tune(Config_Utils):
     'n_parameter_samples': trial.suggest_int("n_parameter_samples", 100, 500),
     'max_ensemble_size': trial.suggest_int("max_ensemble_size", 10, 100),
     'max_win_len_prop': trial.suggest_float("max_win_len_prop", 0.1, 1.0),
-    'min_window': trial.suggest_int("min_window", 5, 20),
     'time_limit_in_minutes': trial.suggest_float("time_limit_in_minutes", 0.0, 60.0),
     'contract_max_n_parameter_samples': trial.suggest_int("contract_max_n_parameter_samples", 100, 1000),
     'save_train_predictions': trial.suggest_categorical("save_train_predictions", [True, False]),
@@ -525,7 +523,6 @@ class Ml_Tune(Config_Utils):
                 'min_group': trial.suggest_int("min_group", 1, 5),  # 1 to 5
                 'max_group': trial.suggest_int("max_group", 3, 10),  # 3 to 10
                 'remove_proportion': trial.suggest_float("remove_proportion", 0.1, 1.0),  # 0.1 to 1.0
-                'base_estimator': trial.suggest_categorical("base_estimator", ["DecisionTree", "RandomForest", None]),
                 'time_limit_in_minutes': trial.suggest_float("time_limit_in_minutes", 0.0, 60.0),  # 0.0 to 60.0 minutes
                 'contract_max_n_estimators': trial.suggest_int("contract_max_n_estimators", 100, 1000),  # 100 to 1000
                 'save_transformed_data': trial.suggest_categorical("save_transformed_data", [True, False]),

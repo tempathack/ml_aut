@@ -124,7 +124,7 @@ if __name__ == '__main__':
     l.remove('TSFreshFeatureExtractor')
     res={}
     for mod in configs.get_models_available(is_ts=True,pred_med='Classification'):
-        if mod in ['HIVECOTEV2','HIVECOTEV1','Arsenal']:
+        if mod in ['HIVECOTEV2','HIVECOTEV1','Arsenal','ElasticEnsemble','RocketClassifier']:
             continue
 
         try:
