@@ -506,8 +506,7 @@ class Ml_Tune(Config_Utils):
             return {
         'n_epochs': trial.suggest_int("n_epochs", 100, 2000),  # 100 to 2000
         'batch_size': trial.suggest_int("batch_size", 8, 64),  # 8 to 64
-        'kernel_size': trial.suggest_int("kernel_size", 3, 7),  # 3 to 7
-        'avg_pool_size': trial.suggest_int("avg_pool_size", 2, 5),  # 2 to 5
+
         'n_conv_layers': trial.suggest_int("n_conv_layers", 1, 5),  # 1 to 5
         'random_state': trial.suggest_int("random_state", 0, 100),  # 0 to 100
         'verbose': trial.suggest_categorical("verbose", [True, False]),
@@ -515,8 +514,7 @@ class Ml_Tune(Config_Utils):
         'metrics': trial.suggest_categorical("metrics", [["accuracy"], ["precision", "recall"]]),
         'activation': trial.suggest_categorical("activation", ["relu", "sigmoid", "tanh"]),
         'use_bias': trial.suggest_categorical("use_bias", [True, False]),
-        'optimizer': trial.suggest_categorical("optimizer", ["Adam", "SGD", "RMSprop"]),
-        'learning_rate': trial.suggest_float("learning_rate", 0.001, 0.1) }
+        'optimizer': trial.suggest_categorical("optimizer", ["Adam", "SGD", "RMSprop"]) }
         elif key=='RotationForest':
             return {
                 'n_estimators': trial.suggest_int("n_estimators", 100, 500),  # 100 to 500
