@@ -528,6 +528,29 @@ class Ml_Tune(Config_Utils):
                 # 1 for single-threaded or -1 for using all processors
                 'random_state': trial.suggest_int("random_state", 0, 100)  # 0 to 100
             }
+        elif=='FCNClassifier':
+            return {
+                'n_epochs': trial.suggest_categorical('n_epochs', [2000]),
+                # Since default is 2000, you might want to add more options
+                'batch_size': trial.suggest_categorical('batch_size', [16, 32, 64, 128]),
+                # Examples of different batch sizes
+                'random_state': trial.suggest_categorical('random_state', [None, 42, 2023]),
+                # None or specific random states
+                'verbose': trial.suggest_categorical('verbose', [False, True]),
+                'loss': trial.suggest_categorical('loss', ['categorical_crossentropy', 'mean_squared_error',
+                                                           'binary_crossentropy']),  # Add more losses as needed
+                'optimizer': trial.suggest_categorical('optimizer', ['Adam', 'SGD', 'RMSprop']),
+                # You might need to define learning rates separately
+                'metrics': trial.suggest_categorical('metrics', [['accuracy'], ['mse']]),
+                # Add more metric combinations as needed
+                'activation': trial.suggest_categorical('activation', ['sigmoid', 'relu', 'tanh']),
+                # Other activation functions
+                'use_bias': trial.suggest_categorical('use_bias', [True, False])
+                # If learning rate needs to be optimized, it should be separate for each optimizer type
+                # 'learning_rate': trial.suggest_loguniform('learning_rate', 1e-5, 1e-1)
+            }
+
+            # Note: The optimizer's learning rate (if variable) needs special handling depending on the chosen optimizer.
 
     @staticmethod
     def _custom_evaluate(model, y, X, cv=None, scoring=None):
