@@ -12,8 +12,31 @@ from functools import partial
 from imblearn.over_sampling import SMOTE
 from collections import defaultdict
 from optuna.pruners import MedianPruner
+from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any,B
+
+
 class Ml_Tune(Config_Utils):
-    def __init__(self,res_dic,pred_method,classif_type,is_ts,k_best=3, *args, **kwargs):
+    '''
+    class to steer hyperparameter optimisation
+    '''
+    def __init__(self,
+                 res_dic:Dict[str,Any],
+                 pred_method:Literal['classification','regression'],
+                 classif_type:Literal['binary','multiclass'],
+                 is_ts:bool,
+                 k_best:int=3,
+                 *args,
+                 **kwargs):
+        '''
+
+        :param res_dic: Dict[str,Any] containing the results of cross-validation
+        :param pred_method: Literal['classification','regression'] prediction method
+        :param classif_type: Literal['binary','multiclass'] if classification than this handles the sort of classification
+        :param is_ts: bool flag informs about timeseries or not
+        :param k_best: int integer that chooses K best estimators
+        :param args:
+        :param kwargs:
+        '''
         super().__init__()
         self.k_best=k_best
         self.pred_method=pred_method
@@ -21,7 +44,13 @@ class Ml_Tune(Config_Utils):
         self.is_ts=is_ts
         self.res_dic=res_dic
         self.cv = self._define_cv(self.is_ts)
-    def tune(self,*args,**kwargs):
+    def tune(self,*args,**kwargs)->Tuple[pd.DataFrame,Dict[str,Dict[str:Any]]]:
+        '''
+
+        :param args:
+        :param kwargs:
+        :return: Tuple[pd.DataFrame,Dict[str,Dict[str:Any]]] detailed results of hyperparameter tuning
+        '''
         tune_results=[]
         tuned_ojects={}
 
@@ -76,9 +105,20 @@ class Ml_Tune(Config_Utils):
 
         return pd.concat(tune_results),tuned_ojects
     @staticmethod
-    def _process_dic(res):
+    def _process_dic(res:Dict[str:List[float]])->pd.DataFrame:
+        'helper function'
         return pd.DataFrame(res).assign(CV=lambda df: np.arange(df.shape[0]) + 1)
-    def _define_classes(self,model,transformer,dim_reducer,params):
+    def _define_classes(self,model:str,transformer:str,dim_reducer:str,params:Any[dict[str:Any]])->Tuple[Any,Any,Any]:
+        '''
+        method to define set the best  hyperparameter retrieved of the tune
+
+        :param model: stringrepresention of model
+        :param transformer: stringrepresention of transformer
+        :param dim_reducer: stringrepresention of dimensionality reduer
+        :param params: Any[dict[str:Any]] containig all ideal hyperparameters
+        :return: all the above objects
+        '''
+
         model = self.configs['models'][self.pred_method][model]['object']
         transformer= self.configs['transforms'][transformer]['object']
         if not dim_reducer :
@@ -94,9 +134,20 @@ class Ml_Tune(Config_Utils):
             default_value = getattr(model, key, False)
             if not isinstance(default_value,bool):
                 setattr(model, key, value)
+
         return model,transformer,dim_reducer
 
-    def objective_function(self, model,  X, y,target_metric, trial):
+    def objective_function(self, model:Any,  X:pd.DataFrame, y:pd.DataFrame,target_metric:str, trial:Any)->float:
+        '''
+        objective function for optuna to perform optimization
+
+        :param model: model object
+        :param X: pd.DataFrame with training data
+        :param y: pd.DataFrame with target data
+        :param target_metric: str that holds metric to perform tune on
+        :param trial: optuna hypers
+        :return: float target metric
+        '''
         params_model = self.hyper_parameter_register(model, trial)
 
 
@@ -117,10 +168,22 @@ class Ml_Tune(Config_Utils):
 
 
     def optimize(self, partial_objective, trial):
+        '''
+        helper function to perform optuna optimization
+        :param partial_objective:
+        :param trial:
+        :return:
+        '''
         return partial_objective(trial)
-    def _cross_vals(self,model,X,y,handle_imbalance=True):
+    def _cross_vals(self,model:Any,X:pd.DataFrame,y:pd.DataFrame,handle_imbalance:Optional[bool] = True)->Dict[str,float]:
+        '''
 
-
+        :param model: model object
+        :param X: pd.DataFrame
+        :param y: pd.DataFrame
+        :param handle_imbalance: bool True if imbalnce is handled
+        :return: Dict[str,float] results of optimization metrics_name and value
+        '''
 
         if self.is_ts:
 
@@ -144,7 +207,13 @@ class Ml_Tune(Config_Utils):
                             scoring=self._get_scorings())
         return results
 
-    def hyper_parameter_register(self, key, trial):
+    def hyper_parameter_register(self, key:str, trial:Any)->Dict[str:Any]:
+        '''
+
+        :param key: name of the model
+        :param trial: optuna hyperparamterlist
+        :return: Dict[str:Any] containing hyperpara searchspace
+        '''
 
         if key == 'LogisticRegression':
             return  {'penalty': trial.suggest_categorical('penalty', [ 'l2']),
@@ -551,7 +620,17 @@ class Ml_Tune(Config_Utils):
             # Note: The optimizer's learning rate (if variable) needs special handling depending on the chosen optimizer.
 
     @staticmethod
-    def _custom_evaluate(model, y, X, cv=None, scoring=None):
+    def _custom_evaluate(model:Any, y:pd.DataFrame, X:pd.DataFrame, cv:Any=None, scoring:List[Callable]=None)->Dict[str,List[float]]:
+        '''
+        function to customly evaluate // hypertune
+
+        :param model: model object
+        :param y: pd.DataFrame target data
+        :param X: pd.DataFrame trainings data
+        :param cv: Any Cross Fold Split
+        :param scoring: List[Callable]=None
+        :return: Dict[str,List[float]] containing all metrics and corresponding crossfold results
+        '''
 
         if cv is None or scoring is None:
             raise ValueError("Please handover cv and scoring")
@@ -572,11 +651,19 @@ class Ml_Tune(Config_Utils):
 
         return results
     @staticmethod
-    def _handle_imbalance(X,y):
+    def _handle_imbalance(X:pd.DataFrame,y:pd.DataFrame)->Tuple[pd.DataFrame,pd.DataFrame]:
+        '''
+        account for imblancedness
+        :param X: pd.DataFrame train data
+        :param y: pd.DataFrame traget data
+        :return: Tuple[pd.DataFrame,pd.DataFrame] updated trainingsdata
+        '''
+
         smote = SMOTE(random_state=42)
         X, y = smote.fit_resample(X,y)
         return X,y
-    def _get_scorings(self):
+    def _get_scorings(self)->List[Callable]:
+        ''' return >List[Callable] all problem specific metrics functions'''
         if self.is_ts:
             if self.pred_method == 'Classification':
                 if self.classif_type=='binary':
