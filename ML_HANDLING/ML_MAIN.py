@@ -11,14 +11,27 @@ from ML_CONFIGS_UTILS.Custom_Errors import MethodNotExecutedError
 from joblib import Parallel, delayed
 from LOGGER.LOGGING import WrapStack
 from multiprocessing import Manager,current_process,managers
-
+from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any
 class Ml_Main(Config_Utils):
-    def __init__(self, X, y, transform=None,
-                 features_selection=None,
-                 dim_reduction=None,
-                 ml_model=None,
-                 n_cvs=None,
-                 n_jobs=1):
+    '''
+    Main Class to handle all subclasses of config interchangable
+    '''
+    def __init__(self, X:pd.DataFrame, y:pd.DataFrame, transform:Union[str,List[str]],ml_model:Union[str,List[str]],
+                 features_selection:Optional[str]=None,
+                 dim_reduction:Optional[str,List[str]]=None,
+                 n_cvs:Optional[int]=None,
+                 n_jobs:Optional[int]=1):
+        '''
+
+        :param X: :pd.DataFrame training data
+        :param y: :pd.DataFrame traget data
+        :param transform: Union[str,List[str]] transform string representation(s)
+        :param ml_model: Union[str,List[str]] model string representation(s)
+        :param features_selection: features selection string representation
+        :param dim_reduction: Optional[str,List[str]] dimensionaliy reduction string representation(s)
+        :param n_cvs: Optional[int] n_splits for crossfold validation
+        :param n_jobs: Optional[int] amount of parallel jobs to run default ==> sequenctial validation
+        '''
 
         super().__init__()
         if transform is None or ml_model is None:
@@ -58,6 +71,12 @@ class Ml_Main(Config_Utils):
 
 
     def Process(self, *args, **kwargs):
+        '''
+
+        :param args:
+        :param kwargs:
+        :return: self
+        '''
         self.is_ml_select = hasattr(self, 'ml_select')
 
 
@@ -73,7 +92,14 @@ class Ml_Main(Config_Utils):
 
         return self
     @WrapStack.FUNCTION_SCREEN
-    def _process_parallel(self, is_ml_select,*args, **kwargs):
+    def _process_parallel(self, is_ml_select:bool,*args, **kwargs)->List[Dict[str,Any]]:
+        '''
+        function to process parallel handle entire procedure
+        :param is_ml_select: bool if feature selection is on
+        :param args:
+        :param kwargs:
+        :return: List[Dict[str,Any]] list of all results
+        '''
         # Initialize Ray (ideally done outside this method)
         manager=Manager()
         shared_dict = manager.dict()
@@ -88,7 +114,14 @@ class Ml_Main(Config_Utils):
         return results
         # Shutdown Ray (ideally done outside this method)
     @WrapStack.FUNCTION_SCREEN
-    def _process_seq(self, is_ml_select, *args, **kwargs):
+    def _process_seq(self, is_ml_select:bool, *args, **kwargs)->List[Dict[str,Any]]:
+        '''
+        function to handle procedure sequentially
+        :param is_ml_select: boolean flag indicating whether feat select is needed
+        :param args:
+        :param kwargs:
+        :return: ->List[Dict[str,Any]]
+        '''
         results=[]
         for transform in self.transform:
             for dim_reduction in self.dim_reduction:
@@ -96,12 +129,24 @@ class Ml_Main(Config_Utils):
                     result = self._define_generator(transform, model, is_ml_select,dim_reduction, *args, **kwargs)
                     results.append(result)
         return results
-    def _define_generator(self, transform,
-                          model,
-                          is_ml_select=False,
-                          dim_red=None,
+    def _define_generator(self, transform:str,
+                          model:str,
+                          is_ml_select:Optional[bool]=False,
+                          dim_red:Optional[str]=None,
                           shared_dict:managers.DictProxy=None,
-                          *args, **kwargs):
+                          *args, **kwargs)->Dict[str,Any]:
+        '''
+        main handling function for ml procedure sequences
+
+        :param transform: str string representation of transformer
+        :param model: str string representation of model
+        :param is_ml_select: Optional[bool] bool flg if feat select is needed
+        :param dim_red: Optional[str] optional dimensionality reduciton
+        :param shared_dict: managers.DictProxy Multiprocessing Shared Manager to avoid redundant transformations in parallel mode
+        :param args:
+        :param kwargs:
+        :return: ->Dict[str,Any] results dictionary
+        '''
 
         if isinstance(transform,list):
             transform_cap = transform.copy()
@@ -138,7 +183,13 @@ class Ml_Main(Config_Utils):
                 'metrics': metrics,'X':X,'y':self.y}
 
     @WrapStack.FUNCTION_SCREEN
-    def Tune(self,k_best=3):
+    def Tune(self,k_best:Optional[int]=3):
+        '''
+        hyperparameter tuning method
+
+        :param k_best: Optional[int] number of best Estimators for hyperparameter tuning
+        :return: self
+        '''
         if not hasattr(self,'unpacked_results'):
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
 
@@ -151,12 +202,15 @@ class Ml_Main(Config_Utils):
 
 
         return self
-    def get_feature_selections(self):
+    def get_feature_selections(self)->pd.DataFrame:
+        ''' return pd.DataFrame with feature selections results'''
+
         if  hasattr(self,'unpacked_results') and hasattr(self, 'ml_select'):
             return pd.concat(self.unpacked_results['metrics_features'])
         else:
             raise MethodNotExecutedError("please make sure to execute Process method beforehand and use some features_selection method")
-    def get_model_metrics(self):
+    def get_model_metrics(self)->pd.DataFrame:
+        ''' return pd.DataFrame with model metrics results'''
 
         if hasattr(self,'tuned_results'):
             return pd.concat([pd.concat(self.unpacked_results['metrics_model']),self.tuned_results]).drop(columns=['ID'])
@@ -165,7 +219,8 @@ class Ml_Main(Config_Utils):
             return pd.concat(self.unpacked_results['metrics_model'])
         else:
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
-    def get_tuned_objects(self):
+    def get_tuned_objects(self)->Dict[str:Any]:
+        ''' return DICT with best params best predictor/hyperparameters'''
         if not hasattr(self,'tuned_results'):
             raise MethodNotExecutedError("please make sure to execute Tune method beforehand")
         else:

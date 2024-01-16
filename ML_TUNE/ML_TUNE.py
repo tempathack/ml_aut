@@ -12,7 +12,7 @@ from functools import partial
 from imblearn.over_sampling import SMOTE
 from collections import defaultdict
 from optuna.pruners import MedianPruner
-from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any,B
+from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any
 
 
 class Ml_Tune(Config_Utils):
