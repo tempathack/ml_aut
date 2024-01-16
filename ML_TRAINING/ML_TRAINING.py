@@ -1,4 +1,6 @@
 from collections import defaultdict
+
+import pandas as pd
 from sklearn.model_selection import cross_val_score
 from tqdm import tqdm
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,FunctionTimer
@@ -6,11 +8,12 @@ from LOGGER.LOGGING import WrapStack
 from imblearn.over_sampling import SMOTE
 from sktime.classification.base import BaseClassifier
 from sktime.datatypes import check_is_scitype
+from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any
 
 
 
 class Models(Config_Utils):
-    def __init__(self, model ,pred_method ,*args ,**kwargs):
+    def __init__(self, model:str,pred_method :str ,*args ,**kwargs):
         super(Models ,self).__init__()
         self.model = model
         self.args = args
@@ -34,7 +37,14 @@ class Models(Config_Utils):
 
 
 class Ml_Train(Config_Utils):
-    def __init__(self, X, y, *args, **kwargs):
+    def __init__(self, X :pd.DataFrame, y :pd.DataFrame, *args, **kwargs):
+        '''
+        :param X: the trainingdata
+        :param y: the trainingtargets
+        :param *args:
+        :param **kwargs:
+        '''
+
         super().__init__()
         self.X = X
         self.y = self.eval_df(y)
@@ -48,7 +58,14 @@ class Ml_Train(Config_Utils):
     def __repr__(self):
         return  f"Ml_Train()"
     @WrapStack.FUNCTION_SCREEN
-    def train_model(self,model,timeout:int=30000, *args, **kwargs):
+    def train_model(self,model:str,timeout:int=30000, *args, **kwargs) -> Union[Dict[str,float],Dict[str,str]]:
+        '''
+        :param model: string representing of the trained model
+        :param timeout: int specifying maximum number of seconds training is allowed
+        :param args:
+        :param kwargs:
+        :return:
+        '''
 
         if model is None or (not model in self.configs['models'][self.pred_method]):
             raise KeyError(f'model is either not specified or not part of {self.configs["models"][self.pred_method].keys()}')
@@ -71,7 +88,15 @@ class Ml_Train(Config_Utils):
 
         return results
 
-    def _train_ts(self,model:str,*args,**kwargs):
+    def _train_ts(self,model:str,*args,**kwargs)-> Dict [str,float]:
+        '''
+        training timeseries
+
+        :param model: string representation of corresponding TS model
+        :param args:
+        :param kwargs:
+        :return: results Dict [str,float] including metrics_name and values
+        '''
 
 
         if self.configs['models'][self.pred_method][model]['req_3d'] and not self._validate_3d(self.X):
@@ -88,8 +113,16 @@ class Ml_Train(Config_Utils):
 
 
         return results
-    def _train_tab(self,model:str,handle_imbalance=True,*args,**kwargs):
+    def _train_tab(self,model:str,handle_imbalance=True,*args,**kwargs)-> Dict [str,float]:
+        '''
+        method to train ml model on tabular data
 
+        :param model: string representation of model
+        :param handle_imbalance: bool Flag indicating whether to adjust for imbalance
+        :param args:
+        :param kwargs:
+        :return: Dict [str,float] corresponding Results dictionary metrcs_name,metics_value
+        '''
 
 
         model = Models(model, self.pred_method, *args, **kwargs).get_model()
@@ -107,7 +140,12 @@ class Ml_Train(Config_Utils):
                                         scoring=self._get_scorings())
 
         return results
-    def _get_scorings(self):
+    def _get_scorings(self)->List[Callable]:
+        '''
+
+        :return: List including all needed metrics functions
+        '''
+
         if self.is_ts:
             if self.pred_method == 'Classification':
                 if self.classif_type=='binary':
@@ -127,12 +165,29 @@ class Ml_Train(Config_Utils):
                 scoring = [ val[0] for k,val in self.configs['metrics']['tab'][self.pred_method].items()]
         return scoring
     @staticmethod
-    def _handle_imbalance(X,y):
+    def _handle_imbalance(X:pd.DataFrame,y:pd.DataFrame)-> Tuple[pd.DataFrame,pd.DataFrame]:
+        '''
+        ut function to account for imbalance
+
+        :param X: pd.DataFrame Training Data
+        :param y: pd.DataFrame Traget Data
+        :return: Tuple[pd.DataFrame,pd.DataFrame] prozessed training data
+        '''
         smote = SMOTE(random_state=42)
         X, y = smote.fit_resample(X,y)
         return X,y
     @staticmethod
-    def _custom_evaluate(model, y, X, cv=None, scoring=None):
+    def _custom_evaluate(model, y:pd.DataFrame, X:pd.DataFrame, cv:Any=None, scoring: List[Callable]=None)-> Dict [str,float]:
+        '''
+        evalue function to perform ts and tab crosssplit
+
+        :param model: Model Class
+        :param y: pd.DataFrame
+        :param X: pd.DataFrame
+        :param cv: Any Crossfold Split
+        :param scoring: List[Callable] list of metrics
+        :return:Dict [str,float] output metrics names/values
+        '''
 
         if cv is None or scoring is None:
             raise ValueError("Please handover cv and scoring")
