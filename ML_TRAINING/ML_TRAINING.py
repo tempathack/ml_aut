@@ -6,27 +6,39 @@ from tqdm import tqdm
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils,FunctionTimer
 from LOGGER.LOGGING import WrapStack
 from imblearn.over_sampling import SMOTE
-from sktime.classification.base import BaseClassifier
+from sktime.classification.base import BaseEstimator as BaseEstimator_time
+from sktime.base import BaseEstimator as BaseEstimator_learn
 from sktime.datatypes import check_is_scitype
 from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any
 
 
 
 class Models(Config_Utils):
-    def __init__(self, model:str,pred_method :str ,*args ,**kwargs):
+    '''
+    class to handle model objects and corresponding kwargs
+    '''
+    def __init__(self, model:str,pred_method :Literal['classification','regression'] ,*args ,**kwargs):
+        '''
+        :param model: string representation of the model
+        :param pred_method: corresponding prediction method
+        :param args:
+        :param kwargs:
+        '''
         super(Models ,self).__init__()
         self.model = model
         self.args = args
         self.pred_method =pred_method
         if self._empty_dict(kwargs):
             self.kwargs =self.configs['models'][self.pred_method][self.model]['default_kwargs']
-
-
         else:
             self.kwargs = kwargs
 
 
-    def get_model(self):
+    def get_model(self)->Union[BaseEstimator_learn,BaseEstimator_time]:
+        '''
+        :return: Returns either Sktime or Sklearn Estimator Object
+        '''
+
         if self.model in self.checked_in_models(self.pred_method):
             method =self.configs['models'][self.pred_method][self.model]['object']
 
@@ -37,6 +49,9 @@ class Models(Config_Utils):
 
 
 class Ml_Train(Config_Utils):
+    '''
+    class to train all kinds of models
+    '''
     def __init__(self, X :pd.DataFrame, y :pd.DataFrame, *args, **kwargs):
         '''
         :param X: the trainingdata
