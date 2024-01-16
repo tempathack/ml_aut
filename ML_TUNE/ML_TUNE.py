@@ -390,7 +390,6 @@ class Ml_Tune(Config_Utils):
         elif  key == 'TimeSeriesForestClassifier':
             return {
             'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
-            'min_samples_split': trial.suggest_int('min_samples_split', 2, 10),
             'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 10)
                  }
         elif key == 'KNeighborsTimeSeriesClassifier':
@@ -402,7 +401,6 @@ class Ml_Tune(Config_Utils):
     }
         elif key == 'ShapeletTransformClassifier':
             return {
-    'min_shapelet_length': trial.suggest_int('min_shapelet_length', 3, 10),
     'max_shapelet_length': trial.suggest_int('max_shapelet_length', 3, 10)
 }
         elif key == 'TimeSeriesSVMClassifier':
@@ -528,7 +526,7 @@ class Ml_Tune(Config_Utils):
                 # 1 for single-threaded or -1 for using all processors
                 'random_state': trial.suggest_int("random_state", 0, 100)  # 0 to 100
             }
-        elif=='FCNClassifier':
+        elif key=='FCNClassifier':
             return {
                 'n_epochs': trial.suggest_categorical('n_epochs', [2000]),
                 # Since default is 2000, you might want to add more options
