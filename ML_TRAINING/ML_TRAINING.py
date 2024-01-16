@@ -64,7 +64,7 @@ class Ml_Train(Config_Utils):
         :param timeout: int specifying maximum number of seconds training is allowed
         :param args:
         :param kwargs:
-        :return:
+        :return: Union[Dict[str,float],Dict[str,str]] names,values modeltype
         '''
 
         if model is None or (not model in self.configs['models'][self.pred_method]):
@@ -142,6 +142,7 @@ class Ml_Train(Config_Utils):
         return results
     def _get_scorings(self)->List[Callable]:
         '''
+        function to handover usescase based scoring
 
         :return: List including all needed metrics functions
         '''
