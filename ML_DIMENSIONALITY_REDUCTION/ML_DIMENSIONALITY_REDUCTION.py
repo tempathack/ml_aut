@@ -32,7 +32,8 @@ class Reducers(Config_Utils):
 
 
 class Ml_Reduce(Config_Utils):
-    def __init__(self, X,y, *args, **kwargs):
+    'Main Class to reduce trainings data '
+    def __init__(self, X:pd.DataFrame,y:pd.DataFrame, *args, **kwargs):
         super().__init__()
         self.X = X
         self.y = self.eval_df(y)
@@ -56,7 +57,15 @@ class Ml_Reduce(Config_Utils):
             return X_reduced
 
     @WrapStack.FUNCTION_SCREEN
-    def dimensionality_reduction(self,method=None,upper_limit=20,*args,**kwargs):
+    def dimensionality_reduction(self,method=None,upper_limit_dim:int=20,*args,**kwargs):
+        '''
+        Main function to reduce dimensionality
+        :param method: string representing of dimensionality reduction
+        :param upper_limit: int  max dims before dim reduction
+        :param args:
+        :param kwargs:
+        :return: pd.DataFrame of dimensionality reduction
+        '''
         if not method in self.configs['dim_reduction'].keys() :
             raise KeyError("specify valid method first")
 
@@ -64,9 +73,9 @@ class Ml_Reduce(Config_Utils):
         if  self._validate_3d(self.X):
             raise AttributeError('Data can not be in 3D Shape for the purpose of reduction')
 
-        if self.X.shape[1]>upper_limit:
+        if self.X.shape[1]>upper_limit_dim:
             pca_kwargs=kwargs.copy()
-            pca_kwargs.update({'n_components': upper_limit})
+            pca_kwargs.update({'n_components': upper_limit_dim})
             self.X=self._reduce(self.X, self.y,method='PCA',*args,**pca_kwargs)
 
         scaler=StandardScaler()
