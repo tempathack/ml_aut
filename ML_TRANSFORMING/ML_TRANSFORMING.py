@@ -58,22 +58,22 @@ class Ml_Process(Config_Utils):
         else:
             return obj.drop(columns=cat_cols)
 
-    def _impute(self,obj:pd.DataFrame,is_3d:bool,how:str='SimpleImputer',*args,**kwargs)->pd.DataFrame:
+    def _impute(self,obj:pd.DataFrame,is_3d:bool,how_impute:str='SimpleImputer',*args,**kwargs)->pd.DataFrame:
 
-        if not how in self.configs['imputers']:
+        if not how_impute in self.configs['imputers']:
             raise KeyError(f"Not a possible imputer chose one of {self.configs.keys()}")
 
 
         if is_3d:
-            imputer=TabularToSeriesAdaptor( self.configs['imputers'][how](*args, **kwargs) )
+            imputer=TabularToSeriesAdaptor( self.configs['imputers'][how_impute](*args, **kwargs) )
         else:
-            imputer=self.configs['imputers'][how](*args, **kwargs)
+            imputer=self.configs['imputers'][how_impute](*args, **kwargs)
 
 
         X =imputer.fit_transform(obj)
 
         if not isinstance(X,pd.DataFrame):
-            return pd.DataFrame(X).add_prefix(f'{how}_imputed')
+            return pd.DataFrame(X).add_prefix(f'{how_impute}_imputed')
         else:
             return X
 

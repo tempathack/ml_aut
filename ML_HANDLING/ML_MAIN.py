@@ -146,6 +146,11 @@ class Ml_Main(Config_Utils):
         :param args:
         :param kwargs:
         :return: ->Dict[str,Any] results dictionary
+
+        kwargs:
+        k_feat:number of features to select based on feature selection
+        upper_limit_dim:number of features to reduce via pca before dim reduction
+        how_impute: str on how to impute
         '''
 
         if isinstance(transform,list):
