@@ -11,6 +11,8 @@ import plotly.express as px
 from LOGGER.LOGGING import WrapStack
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
 from ML_CONFIGS_UTILS.Custom_Errors import MethodNotExecutedError
+from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any
+
 
 class Ml_Select(Config_Utils):
 
@@ -28,7 +30,7 @@ class Ml_Select(Config_Utils):
     def feat_dim(self) -> int:
         return self.X.shape[1]
     @staticmethod
-    def _calc_permutation_importance(X, y, n_repeats=10, *args, **kwargs) -> pd.DataFrame:
+    def _calc_permutation_importance(X:pd.DataFrame, y:pd.DataFrame, n_repeats:Optional[int]=10, *args, **kwargs) -> pd.DataFrame:
         clf = LogisticRegression()  # use logistic regression as sort of benachmark
         res = permutation_importance(clf.fit(X.values, y.values.reshape(-1)), X.values, y.values.reshape(-1),
                                      n_repeats=n_repeats, random_state=0, *args, **kwargs)
@@ -37,46 +39,46 @@ class Ml_Select(Config_Utils):
                                   'Ranks': res.importances_mean.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_f_classif(X, y, *args, **kwargs) -> pd.DataFrame:
+    def _calc_f_classif(X:pd.DataFrame, y:pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         f_statistics = f_classif(X.values, y.values.reshape(-1), *args, **kwargs)[0]
         return pd.DataFrame(data={'raw_metric': f_statistics,
                                   'Ranks': f_statistics.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_f_regression(X, y, *args, **kwargs) -> pd.DataFrame:
+    def _calc_f_regression(X:pd.DataFrame, y:pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         f_statistics = f_regression(X.values, y.values.reshape(-1), *args, **kwargs)[0]
         return pd.DataFrame(data={'raw_metric': f_statistics,
                                   'Ranks': f_statistics.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_chi2(X, y, *args, **kwargs) -> pd.DataFrame:
+    def _calc_chi2(X:pd.DataFrame, y:pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         ch2_statistics = chi2(X.values, y.values.reshape(-1), *args, **kwargs)[0]
         return pd.DataFrame(data={'raw_metric': ch2_statistics,
                                   'Ranks': ch2_statistics.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_DecisionTreeClassifier(X, y, max_depth=15, *args, **kwargs) -> pd.DataFrame:
+    def _calc_DecisionTreeClassifier(X:pd.DataFrame, y:pd.DataFrame, max_depth=15, *args, **kwargs) -> pd.DataFrame:
         clf = DecisionTreeClassifier(max_depth=max_depth, random_state=0, *args, **kwargs)
         clf.fit(X.values, y.values.reshape(-1))
         return pd.DataFrame(data={'raw_metric': clf.feature_importances_,
                                   'Ranks': clf.feature_importances_.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_DecisionTreeRegressor(X, y, max_depth=15, *args, **kwargs) -> pd.DataFrame:
+    def _calc_DecisionTreeRegressor(X:pd.DataFrame, y:pd.DataFrame, max_depth=15, *args, **kwargs) -> pd.DataFrame:
         reg = DecisionTreeRegressor(max_depth=max_depth, random_state=0, *args, **kwargs)
         reg.fit(X.values, y.values.reshape(-1))
         return pd.DataFrame(data={'raw_metric': reg.feature_importances_,
                                   'Ranks': reg.feature_importances_.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_RandomForestRegressor(X, y, max_depth=15, n_estimators=100, *args, **kwargs) -> pd.DataFrame:
+    def _calc_RandomForestRegressor(X:pd.DataFrame, y:pd.DataFrame, max_depth=15, n_estimators=100, *args, **kwargs) -> pd.DataFrame:
         reg = RandomForestRegressor(max_depth=max_depth, random_state=0, n_estimators=n_estimators, *args, **kwargs)
         reg.fit(X.values, y.values.reshape(-1))
         return pd.DataFrame(data={'raw_metric': reg.feature_importances_,
                                   'Ranks': reg.feature_importances_.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_LogisticRegressionCV(X, y, cv, *args, **kwargs) -> pd.DataFrame:
+    def _calc_LogisticRegressionCV(X:pd.DataFrame, y:pd.DataFrame, cv, *args, **kwargs) -> pd.DataFrame:
         clf = LogisticRegressionCV(cv=cv, *args, **kwargs)
         clf.fit(X.values, y.values.reshape(-1))
         feats = (clf.coef_ ** 2).sum(axis=0)
@@ -84,14 +86,14 @@ class Ml_Select(Config_Utils):
                                   'Ranks': feats.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_LassoCV(X, y, *args, **kwargs) -> pd.DataFrame:
+    def _calc_LassoCV(X:pd.DataFrame, y:pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         reg = LassoCV(cv=5, random_state=5)
         reg.fit(X.values, y.values.reshape(-1))
         return pd.DataFrame(data={'raw_metric': np.abs(reg.coef_),
                                   'Ranks': np.abs(reg.coef_).argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_RandomForestClassifier(X, y, max_depth=15, n_estimators=100, *args, **kwargs) -> pd.DataFrame:
+    def _calc_RandomForestClassifier(X:pd.DataFrame, y:pd.DataFrame, max_depth=15, n_estimators=100, *args, **kwargs) -> pd.DataFrame:
         clf = RandomForestClassifier(max_depth=max_depth, n_estimators=n_estimators, random_state=0, *args,
                                      **kwargs)
         clf.fit(X.values, y.values.reshape(-1))
@@ -99,28 +101,37 @@ class Ml_Select(Config_Utils):
                                   'Ranks': clf.feature_importances_.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_mutual_info_classif(X, y, *args, **kwargs) -> pd.DataFrame:
+    def _calc_mutual_info_classif(X:pd.DataFrame, y:pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         mutual_info = mutual_info_classif(X.values, y.values.reshape(-1))
         return pd.DataFrame(data={'raw_metric': mutual_info,
                                   'Ranks': mutual_info.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_mutual_info_regression(X, y, *args, **kwargs) -> pd.DataFrame:
+    def _calc_mutual_info_regression(X:pd.DataFrame, y:pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         mutual_info = mutual_info_regression(X.values, y.values.reshape(-1))
         return pd.DataFrame(data={'raw_metric': mutual_info,
                                   'Ranks': mutual_info.argsort().argsort(),
                                   'Columns': X.columns.tolist()})
     @staticmethod
-    def _calc_correlation(X, y, *args, **kwargs) -> pd.DataFrame:
+    def _calc_correlation(X:pd.DataFrame, y:pd.DataFrame, *args, **kwargs) -> pd.DataFrame:
         corr_info = X.join(y).corr(**kwargs).loc[:, y.columns.tolist()[0]].values
         return pd.DataFrame(data={'raw_metric': corr_info[:-1],
                                   'Ranks': corr_info[:-1].argsort().argsort(),
                                   'Columns': X.columns.tolist()})
 
     @WrapStack.FUNCTION_SCREEN
-    def feature_selection(self, method=None,k_best=30, *args, **kwargs):
+    def feature_selection(self, method:str,k_feat:int=30, *args, **kwargs)->pd.DataFrame:
+        '''
+        main function  to handle feature selection
 
-        k_best=min(k_best,self.feat_dim)
+        :param method: str corresponding to feature selection
+        :param k: number of freatures to reduce by feature selection
+        :param args:
+        :param kwargs:
+        :return: reduced Dataframe
+        '''
+
+        k_best=min(k_feat,self.feat_dim)
 
         if (method is None) or  (method not in self.configs['feat_selections'][self.pred_method]) :
             raise KeyError(f"method must be one of {self.configs['feat_selections'][self.pred_method]}  ")
@@ -208,7 +219,12 @@ class Ml_Select(Config_Utils):
                 method='RandomForestRegressor' if method=='all' else method
 
         return self.X.loc[:,self.feat_metrics().query(f"Selection_Method==@method").nlargest(k_best, columns=['Ranks']).Columns.tolist()]
-    def feat_metrics(self):
+    def feat_metrics(self)->pd.DataFrame:
+        '''
+
+        :return: pd.DataFrame including feature_selection results
+        '''
+
         if  self.track_feat_metrics == {} :
             if not  self._validate_3d(self.X):
                 raise MethodNotExecutedError('Execute featureselection method first')
