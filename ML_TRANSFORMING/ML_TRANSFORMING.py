@@ -9,6 +9,7 @@ from LOGGER.LOGGING import WrapStack
 from functools import lru_cache
 
 class Transformers(Config_Utils):
+    '''Main class to handover Transformers form dic'''
     def __init__(self, transform, *args, **kwargs):
         super(Transformers, self).__init__()
 
@@ -33,7 +34,8 @@ class Transformers(Config_Utils):
 
 
 class Ml_Process(Config_Utils):
-    def __init__(self, X):
+    'Main Class to hanlde Data Preprocessing'
+    def __init__(self, X:pd.DataFrame):
         super().__init__()
         self._validate_obj(X)
         self.X = X
@@ -42,7 +44,7 @@ class Ml_Process(Config_Utils):
         self.global_transform_track = defaultdict(list)
 
     @staticmethod
-    def _handle_cat(obj, handle_cat) -> pd.DataFrame:
+    def _handle_cat(obj:pd.DataFrame, handle_cat:bool) -> pd.DataFrame:
         cat_cols = obj.select_dtypes(exclude=['float', 'integer']).columns
         if handle_cat:
 
@@ -56,7 +58,7 @@ class Ml_Process(Config_Utils):
         else:
             return obj.drop(columns=cat_cols)
 
-    def _impute(self,obj:pd.DataFrame,is_3d:bool,how:str='SimpleImputer',*args,**kwargs):
+    def _impute(self,obj:pd.DataFrame,is_3d:bool,how:str='SimpleImputer',*args,**kwargs)->pd.DataFrame:
 
         if not how in self.configs['imputers']:
             raise KeyError(f"Not a possible imputer chose one of {self.configs.keys()}")
@@ -76,7 +78,17 @@ class Ml_Process(Config_Utils):
             return X
 
     @WrapStack.FUNCTION_SCREEN
-    def main_transform(self, transform, handle_cat=True, *args, **kwargs) -> pd.DataFrame:
+    def main_transform(self, transform:str, handle_cat=True, *args, **kwargs) -> pd.DataFrame:
+        '''
+        main function to transform the given trainingsdata
+
+        :param transform: :str representation of Transformer
+        :param handle_cat: bool whether to handle or ignore categorical data
+        :param args:
+        :param kwargs:
+        :return: transformed Dataframe
+        '''
+
         transformer = Transformers(transform, *args, **kwargs).get_transform()
 
         is_3d = self._validate_3d(self.X)

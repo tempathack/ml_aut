@@ -15,8 +15,8 @@ from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any
 
 
 class Ml_Select(Config_Utils):
-
-    def __init__(self, X,y, *args, **kwargs):
+    'main feature selection class to ensure the right features'
+    def __init__(self, X:pd.DataFrame,y:pd.DataFrame, *args, **kwargs):
         super().__init__()
         self.X =X
         self.y = self.eval_df(y)
