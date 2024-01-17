@@ -63,6 +63,7 @@ from sklearn.manifold import SpectralEmbedding
 import threading
 from collections import defaultdict
 from sktime.datatypes import check_is_scitype
+from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any
 
 def unpack_args(func):
     from functools import wraps
@@ -393,32 +394,32 @@ class Config_Utils():
                                 }}
         self.configs['n_cvs']=10
 
-    def checked_in_models(self,pred_med):
+    def checked_in_models(self,pred_med:Literal['Classification','Regression'])->List[str]:
         return self.configs['models'][pred_med].keys()
     @property
-    def checked_in_transforms(self):
+    def checked_in_transforms(self)->List[str]:
         return self.configs['transforms'].keys()
     @property
-    def possible_transforms(self) -> dict:
+    def possible_transforms(self) -> List[str]:
         return self.configs['transforms'].keys()
     @property
-    def possible_imputation(self) -> dict:
+    def possible_imputation(self) ->List[str]:
         return self.configs['imputers'].keys()
     @staticmethod
-    def _val_task(task)-> str:
+    def _val_task(task:Literal['TAB','TS'])-> str:
         if not(  task == 'TAB' or task == 'TS'):
             raise ValueError('expecting either TAB for Tabular task or TS for Timeseries task')
         else :
             return task
     @staticmethod
-    def TS_check(obj)-> bool:
+    def TS_check(obj:pd.DataFrame)-> bool:
         if  obj.index.inferred_type == 'datetime64':
             return True
         else:
             return False
 
     @staticmethod
-    def _classif_type(obj) -> str:
+    def _classif_type(obj:pd.DataFrame) -> Literal['binary','multiclass']:
         if not isinstance(obj, pd.DataFrame):
             raise ValueError("Input must be a pandas DataFrame.")
 
@@ -435,12 +436,12 @@ class Config_Utils():
             raise ValueError("DataFrame must have at least two unique values for classification.")
 
     @staticmethod
-    def _validate_obj(obj,task=None)-> bool:
+    def _validate_obj(obj:pd.DataFrame,task=None)-> bool:
         assert isinstance(obj, pd.DataFrame), "Invalid"
         if task=='TS':
             assert obj.index.inferred_type == 'datetime64', "must have a datetime index for Timeseries Mode"
     @staticmethod
-    def _validate_3d(obj) -> bool:
+    def _validate_3d(obj:pd.DataFrame) -> bool:
         valid=check_is_scitype(
             obj, scitype="Panel")
         if valid:
@@ -448,7 +449,9 @@ class Config_Utils():
         else:
             return False
     @staticmethod
-    def _is_df(obj,prefix:str="trans",idx=None) -> pd.DataFrame:
+    def _is_df(obj:Union[pd.DataFrame,np.ndarray,pd.Series],
+               prefix:str="trans",
+               idx:Optional[List[Any]]=None) -> pd.DataFrame:
         if isinstance(obj,pd.DataFrame):
             return obj
         elif isinstance(obj,np.ndarray) or isinstance(obj,pd.Series):
@@ -456,14 +459,14 @@ class Config_Utils():
         else:
             raise AttributeError("Nno convertible type needsto be Series ndarray or Dataframe")
     @staticmethod
-    def _validate_categorical(obj) -> bool:
+    def _validate_categorical(obj:pd.DataFrame) -> bool:
         cat_cols = obj.select_dtypes(exclude=['float', 'integer']).columns
         if len(cat_cols) == 0:
             return False
         else:
             return True
     @staticmethod
-    def _validate_null(obj,is_3d) -> bool:
+    def _validate_null(obj:pd.DataFrame,is_3d:bool) -> bool:
         if is_3d:
             res=[]
             for col in obj.columns:
@@ -474,18 +477,18 @@ class Config_Utils():
 
             return obj.isnull().any().any()
     @staticmethod
-    def eval_df(obj) -> bool:
+    def eval_df(obj:pd.DataFrame) -> bool:
         assert isinstance(obj, pd.DataFrame), 'invalid needs to be DataFrame'
         assert obj.isnull().any().any() == False, 'no null/NA values allowed'
         return obj
     @staticmethod
-    def is_2d(obj) -> bool:
+    def is_2d(obj:pd.DataFrame) -> bool:
         if isinstance(obj.iat[0, 0], float) or isinstance(obj.iat[0, 0], int):
             return True
         else:
             False
     @staticmethod
-    def to_panel(obj, window_size=None) -> pd.DataFrame:
+    def to_panel(obj:pd.DataFrame, window_size:Optional[int]=None) -> pd.DataFrame:
         if window_size is None or obj.shape[0] < window_size:
             raise AttributeError("window can not be None or bigger than df.shape[0]")
 
@@ -502,28 +505,28 @@ class Config_Utils():
 
         return pd.concat(res, axis=1)
     @staticmethod
-    def _class_or_reg(obj):
+    def _class_or_reg(obj:pd.DataFrame)->Literal['Regression','Classification']:
             if ('float' in str(obj.apply(pd.to_numeric, downcast='integer').iloc[:, 0].dtypes))\
                     or  obj.apply(pd.to_numeric, downcast='integer').iloc[:, 0].nunique()>10:
                 return 'Regression'
             else:
                 return 'Classification'
     @staticmethod
-    def _empty_dict(dic):
+    def _empty_dict(dic:Dict[Any])->bool:
 
         if dic=={}:
             return True
         else:
             False
 
-    def _define_cv(self,is_ts):
+    def _define_cv(self,is_ts:bool)->Union[KFold,TimeSeriesSplit]:
         if not is_ts:
             cv = KFold(n_splits=self.configs['n_cvs'], shuffle=True, random_state=42)
         else:
             cv = TimeSeriesSplit(n_splits=self.configs['n_cvs'])
         return cv
     @staticmethod
-    def _unpack_results(results : list ):
+    def _unpack_results(results :List[Dict[str:Any]])->Dict[str,List[Any]]:
 
         if not ((isinstance(results,list)) and  len(results)>0):
             raise AttributeError('Must be a list and can not be empty')
@@ -544,16 +547,16 @@ class Config_Utils():
 
         return collect
     @staticmethod
-    def _check_none_negative(obj):
+    def _check_none_negative(obj:pd.DataFrame)->bool:
         return obj.gt(0).all().all()
-    def get_models_available(self,is_ts:bool,pred_med:str):
+    def get_models_available(self,is_ts:bool,pred_med:str)->List[Any]:
         if not isinstance(is_ts,bool):
             raise AttributeError(" is_ts must be boolean either True or False")
         if pred_med!='Classification' and pred_med!='Regression':
             raise ValueError("specify prediction method either ==> Classification or Regression")
 
         return [ k for k in self.configs['models'][pred_med].keys() if is_ts== self.configs['models'][pred_med][k]['ts_only']]
-    def get_transforms_available(self,is_ts:bool,pred_med:str):
+    def get_transforms_available(self,is_ts:bool,pred_med:Literal['Classification','Regression'])->List[Any]:
         if not isinstance(is_ts,bool):
             raise AttributeError(f" is_ts must be boolean either True or False not {type(is_ts)}")
         if pred_med!='Classification' and pred_med!='Regression':
@@ -562,9 +565,9 @@ class Config_Utils():
             return [ k for k in self.configs['transforms'].keys() ]
         else:
             return [k for k in self.configs['transforms'].keys() if not self.configs['transforms'][k]['ts_only']]
-    def get_feat_selections_available(self,pred_med:str):
+    def get_feat_selections_available(self,pred_med:Literal['Classification','Regression'])->List[Any]:
         return self.configs['feat_selections'][pred_med]
-    def get_dim_reductions_available(self,pred_med:str):
+    def get_dim_reductions_available(self,pred_med:Literal['Classification','Regression']):
         dim_reducts=list(self.configs['dim_reduction'].keys())
         if pred_med!='Classification':
             dim_reducts.remove('LDA')
@@ -573,7 +576,7 @@ class Config_Utils():
             return dim_reducts
 
 
-    def set_X_y(self,X=None,y=None):
+    def set_X_y(self,X:Optional[pd.DataFrame]=None,y:Optional[pd.DataFrame]=None):
         if not  y is  None:
             self.y=y
         if not X is None:
