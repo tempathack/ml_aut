@@ -44,7 +44,7 @@ class Ml_Tune(Config_Utils):
         self.is_ts=is_ts
         self.res_dic=res_dic
         self.cv = self._define_cv(self.is_ts)
-    def tune(self,*args,**kwargs)->Tuple[pd.DataFrame,Dict[str,Dict[str:Any]]]:
+    def tune(self,*args,**kwargs)->Tuple[pd.DataFrame,Dict[str,Dict[str,Any]]]:
         '''
 
         :param args:
@@ -105,10 +105,10 @@ class Ml_Tune(Config_Utils):
 
         return pd.concat(tune_results),tuned_ojects
     @staticmethod
-    def _process_dic(res:Dict[str:List[float]])->pd.DataFrame:
+    def _process_dic(res:Dict[str,List[float]])->pd.DataFrame:
         'helper function'
         return pd.DataFrame(res).assign(CV=lambda df: np.arange(df.shape[0]) + 1)
-    def _define_classes(self,model:str,transformer:str,dim_reducer:str,params:Any[dict[str:Any]])->Tuple[Any,Any,Any]:
+    def _define_classes(self,model:str,transformer:str,dim_reducer:str,params:Any)->Tuple[Any,Any,Any]:
         '''
         method to define set the best  hyperparameter retrieved of the tune
 
@@ -207,7 +207,7 @@ class Ml_Tune(Config_Utils):
                             scoring=self._get_scorings())
         return results
 
-    def hyper_parameter_register(self, key:str, trial:Any)->Dict[str:Any]:
+    def hyper_parameter_register(self, key:str, trial:Any)->Dict[str,Any]:
         '''
 
         :param key: name of the model

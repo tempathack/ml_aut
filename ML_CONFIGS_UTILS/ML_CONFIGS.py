@@ -512,7 +512,7 @@ class Config_Utils():
             else:
                 return 'Classification'
     @staticmethod
-    def _empty_dict(dic:Dict[Any])->bool:
+    def _empty_dict(dic:Dict[Any,Any])->bool:
 
         if dic=={}:
             return True
@@ -526,7 +526,7 @@ class Config_Utils():
             cv = TimeSeriesSplit(n_splits=self.configs['n_cvs'])
         return cv
     @staticmethod
-    def _unpack_results(results :List[Dict[str:Any]])->Dict[str,List[Any]]:
+    def _unpack_results(results :List[Dict[str,Any]])->Dict[str,List[Any]]:
 
         if not ((isinstance(results,list)) and  len(results)>0):
             raise AttributeError('Must be a list and can not be empty')

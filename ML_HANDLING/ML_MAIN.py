@@ -18,7 +18,7 @@ class Ml_Main(Config_Utils):
     '''
     def __init__(self, X:pd.DataFrame, y:pd.DataFrame, transform:Union[str,List[str]],ml_model:Union[str,List[str]],
                  features_selection:Optional[str]=None,
-                 dim_reduction:Optional[str,List[str]]=None,
+                 dim_reduction:Union[str,List[str]]=None,
                  n_cvs:Optional[int]=None,
                  n_jobs:Optional[int]=1):
         '''
@@ -224,7 +224,7 @@ class Ml_Main(Config_Utils):
             return pd.concat(self.unpacked_results['metrics_model'])
         else:
             raise MethodNotExecutedError("please make sure to execute Process method beforehand")
-    def get_tuned_objects(self)->Dict[str:Any]:
+    def get_tuned_objects(self)->Dict[str,Any]:
         ''' return DICT with best params best predictor/hyperparameters'''
         if not hasattr(self,'tuned_results'):
             raise MethodNotExecutedError("please make sure to execute Tune method beforehand")
