@@ -47,7 +47,7 @@ class Ml_Main(Config_Utils):
         self.ml_train = None
         self.pred_method=self._class_or_reg(self.y)
         if self.pred_method == 'Classification':
-            self.classif_type = self._classif_type(y)
+            self.classif_type = self._classif_type(y) 
         self.mode= 'seq' if n_jobs==1 else 'parallel'
         self.Logger=WrapStack()
 

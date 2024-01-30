@@ -633,7 +633,7 @@ class Ml_Tune(Config_Utils):
         '''
 
         if cv is None or scoring is None:
-            raise ValueError("Please handover cv and scoring")
+            raise AttributeError("Please handover cv and scoring")
 
         results = defaultdict(list)
 
