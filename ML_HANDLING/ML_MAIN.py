@@ -113,6 +113,27 @@ class Ml_Main(Config_Utils):
 
         return results
         # Shutdown Ray (ideally done outside this method)
+    def __getattr__(self,key):
+
+        if key=='Ml_Process':
+            for trans in self.transforms:
+                setattr(self.ml_process,'transform',trans)
+                yield self.ml_process.main_transform(*self.args,**self.kwargs)
+        elif key=='Ml_Select' and hasattr(self, 'ml_select'):
+            setattr(self.ml_select,'method',self.features_selection)
+            yield self.ml_select.feature_selection(*self.args,**self.kwargs)
+        elif key=='Ml_Reduce' and hasattr(self,'ml_reduce'):
+            for dim_red in self.dim_reduction:
+                setattr(self.ml_reduce, 'method', dim_red)
+                yield self.ml_reduce.dimensionality_reduction(*self.args,**self.kwargs)
+        elif key=='Ml_Train':
+            for model in self.model:
+                setattr(self.ml_reduce, 'model', model)
+                yield self.ml_train.train_model(*self.args,**self.kwargs)
+        else:
+            raise AttributeError(f"{key} is not an procedure object used in {self.__class__.__name__}")
+
+
     @WrapStack.FUNCTION_SCREEN
     def _process_seq(self, is_ml_select:bool, *args, **kwargs)->List[Dict[str,Any]]:
         '''

@@ -73,7 +73,7 @@ class Ml_Train(Config_Utils):
     def __repr__(self):
         return  f"Ml_Train()"
     @WrapStack.FUNCTION_SCREEN
-    def train_model(self,model:str,timeout:int=30000, *args, **kwargs) -> Union[Dict[str,float],Dict[str,str]]:
+    def train_model(self,model:Optional[str]=None,timeout:Optional[int]=30000, *args, **kwargs) -> Union[Dict[str,float],Dict[str,str]]:
         '''
         :param model: string representing of the trained model
         :param timeout: int specifying maximum number of seconds training is allowed
@@ -81,6 +81,13 @@ class Ml_Train(Config_Utils):
         :param kwargs:
         :return: Union[Dict[str,float],Dict[str,str]] names,values modeltype
         '''
+
+        if model is None:
+            if hasattr(self, 'model'):
+                # get transform from  class level
+                model = self.model
+            else:
+                raise ValueError("model must eiter be given to train_model or set on class level")
 
         if model is None or (not model in self.configs['models'][self.pred_method]):
             raise KeyError(f'model is either not specified or not part of {self.configs["models"][self.pred_method].keys()}')

@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from LOGGER.LOGGING import WrapStack
 from umap import UMAP
+from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any
 
 
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
@@ -57,7 +58,7 @@ class Ml_Reduce(Config_Utils):
             return X_reduced
 
     @WrapStack.FUNCTION_SCREEN
-    def dimensionality_reduction(self,method=None,upper_limit_dim:int=20,*args,**kwargs):
+    def dimensionality_reduction(self,method:Optional[str]=None,upper_limit_dim:Optional[int]=20,*args,**kwargs):
         '''
         Main function to reduce dimensionality
         :param method: string representing of dimensionality reduction
@@ -66,6 +67,13 @@ class Ml_Reduce(Config_Utils):
         :param kwargs:
         :return: pd.DataFrame of dimensionality reduction
         '''
+        if method is None:
+            if hasattr(self,'method'):
+                method=self.method
+            else:
+                raise ValueError("method must eiter be given to dimensionality_reduction or set on class level")
+
+
         if not method in self.configs['dim_reduction'].keys() :
             raise KeyError("specify valid method first")
 

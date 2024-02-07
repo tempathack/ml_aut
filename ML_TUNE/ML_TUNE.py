@@ -152,7 +152,7 @@ class Ml_Tune(Config_Utils):
 
 
         if not model in  self.configs['models'][self.pred_method]:
-             KeyError("Model is not checked in ")
+             raise KeyError("Model is not checked in ")
 
 
         model=self.configs['models'][self.pred_method][model]['object']

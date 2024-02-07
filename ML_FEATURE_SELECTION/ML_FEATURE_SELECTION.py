@@ -120,7 +120,7 @@ class Ml_Select(Config_Utils):
                                   'Columns': X.columns.tolist()})
 
     @WrapStack.FUNCTION_SCREEN
-    def feature_selection(self, method:str,k_feat:int=30, *args, **kwargs)->pd.DataFrame:
+    def feature_selection(self, method:Optional[str]=None,k_feat:int=30, *args, **kwargs)->pd.DataFrame:
         '''
         main function  to handle feature selection
 
@@ -130,6 +130,13 @@ class Ml_Select(Config_Utils):
         :param kwargs:
         :return: reduced Dataframe
         '''
+        if method is None:
+            if hasattr(self, 'method'):
+                method = self.method
+            else:
+                raise ValueError("mehtod must eiter be given to feature_selection or set on class level")
+
+
 
         k_best=min(k_feat,self.feat_dim)
 

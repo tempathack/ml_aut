@@ -6,6 +6,7 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 from ML_CONFIGS_UTILS.ML_CONFIGS import Config_Utils
 from LOGGER.LOGGING import WrapStack
+from typing import Optional,Dict,List,Literal,Set,Tuple,Union,Callable,Any
 from functools import lru_cache
 
 class Transformers(Config_Utils):
@@ -78,7 +79,7 @@ class Ml_Process(Config_Utils):
             return X
 
     @WrapStack.FUNCTION_SCREEN
-    def main_transform(self, transform:str, handle_cat=True, *args, **kwargs) -> pd.DataFrame:
+    def main_transform(self, transform:Optional[str]=None ,handle_cat:Optional[bool]=True, *args, **kwargs) -> pd.DataFrame:
         '''
         main function to transform the given trainingsdata
 
@@ -88,6 +89,17 @@ class Ml_Process(Config_Utils):
         :param kwargs:
         :return: transformed Dataframe
         '''
+
+        if transform is None:
+            if hasattr(self, 'transform'):
+                # get transform from  class level
+                transform = self.transform
+            else:
+                raise ValueError("transform must eiter be given to main_transform or set on class level")
+
+        if not transform in self.configs['transforms']:
+            raise KeyError(f"Transform is not supported use one of {self.configs['transforms'].keys()}")
+
 
         transformer = Transformers(transform, *args, **kwargs).get_transform()
 
