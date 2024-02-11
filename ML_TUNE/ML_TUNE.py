@@ -207,7 +207,7 @@ class Ml_Tune(Config_Utils):
                             scoring=self._get_scorings())
         return results
 
-    def hyper_parameter_register(self, key:str)->Dict[str,Any]:
+    def hyper_parameter_register(self, key:str,trial)->Dict[str,Any]:
         '''
 
         :param key: name of the model
@@ -215,12 +215,337 @@ class Ml_Tune(Config_Utils):
         :return: Dict[str:Any] containing hyperpara searchspace
         '''
 
-        if key in self.configs['hyperparamters']:
-            return self.configs['hyperparamters'][key]
-        else:
-            KeyError(f"hyperparameter tuning is not available for {key}")
             # Note: The optimizer's learning rate (if variable) needs special handling depending on the chosen optimizer.
 
+        store={'LogisticRegression': {'penalty': trial.suggest_categorical('penalty', ['l2']),
+                                'C': trial.suggest_float("C", 0.5, 1.5),
+                                'max_iter': trial.suggest_categorical('max_iter', [100, 200, 300]),
+                                'solver': trial.suggest_categorical('solver', ['lbfgs', 'liblinear', 'newton-cg'
+                                    , 'newton-cholesky', 'sag', 'saga'])},
+         'LinearRegression': {},
+         'HistGradientBoostingClassifier': {
+             'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+             'max_depth': trial.suggest_int('max_depth', 4, 30),
+             'min_samples_split': trial.suggest_int('min_samples_split', 2, 150),
+             'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 60),
+         }, 'HistGradientBoostingRegressor': {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'max_depth': trial.suggest_int('max_depth', 4, 30),
+            'min_samples_split': trial.suggest_int('min_samples_split', 2, 150),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 60),
+        }, 'SVC': {}, 'SVR': {'C': trial.suggest_float("C", 0.5, 1.5),
+                              'kernel': trial.suggest_categorical('kernel',
+                                                                  ['linear', 'poly', 'rbf', 'sigmoid']),
+
+                              }, 'XGBClassifier': {
+            # this parameter means using the GPU when training our model to speedup the training process
+            'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
+            'alpha': trial.suggest_loguniform('alpha', 1e-3, 10.0),
+            'verbosity': 0,
+            'colsample_bytree': trial.suggest_categorical('colsample_bytree',
+                                                          [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
+            'subsample': trial.suggest_categorical('subsample', [0.4, 0.5, 0.6, 0.7, 0.8, 1.0]),
+            'learning_rate': trial.suggest_float("learning_rate", 1e-3, 1.0, log=True),
+            'n_estimators': trial.suggest_categorical('n_estimators', [i for i in range(1, 2000, 100)]),
+            'max_depth': trial.suggest_categorical('max_depth', [5, 7, 9, 11, 13, 15, 17, 20]),
+            'random_state': trial.suggest_categorical('random_state', [2020]),
+            'min_child_weight': trial.suggest_int('min_child_weight', 1, 300),
+        }, 'RandomForestClassifier': {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'max_depth': trial.suggest_int('max_depth', 4, 30),
+            'min_samples_split': trial.suggest_int('min_samples_split', 2, 150),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 60),
+        }, 'ExtraTreesRegressor': {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'max_depth': trial.suggest_int('max_depth', 4, 30),
+            'min_samples_split': trial.suggest_int('min_samples_split', 2, 150),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 60),
+            'warm_start': trial.suggest_categorical('warm_start', [True, False])
+        }, 'ExtraTreesClassifier': {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'max_depth': trial.suggest_int('max_depth', 4, 30),
+            'min_samples_split': trial.suggest_int('min_samples_split', 2, 150),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 2, 60),
+            'warm_start': trial.suggest_categorical('warm_start', [True, False])
+        }, 'DecisionTreeClassifier': {'max_depth': trial.suggest_int('max_depth', 4, 30),
+                                      'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
+                                      'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+                                      }, 'DecisionTreeRegressor': {'max_depth': trial.suggest_int('max_depth', 4, 30),
+                                                                   'min_samples_split': trial.suggest_int(
+                                                                       'min_samples_split', 1, 150),
+                                                                   'min_samples_leaf': trial.suggest_int(
+                                                                       'min_samples_leaf', 1, 60),
+                                                                   }, 'AdaBoostClassifier': {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'learning_rate': trial.suggest_float("learning_rate", 1e-3, 1.0, log=True)
+        }, 'AdaBoostRegressor': {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'learning_rate': trial.suggest_float("learning_rate", 1e-3, 1.0, log=True),
+        }, 'RandomForestRegressor': {
+            'n_estimators': trial.suggest_int('n_estimators', 50, 1000),
+            'max_depth': trial.suggest_int('max_depth', 4, 30),
+            'min_samples_split': trial.suggest_int('min_samples_split', 1, 150),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 60),
+        }, 'XGBRegressor': {
+            # this parameter means using the GPU when training our model to speedup the training process
+            'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
+            'alpha': trial.suggest_loguniform('alpha', 1e-3, 10.0),
+            'verbose': 0,
+            'colsample_bytree': trial.suggest_categorical('colsample_bytree',
+                                                          [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
+            'subsample': trial.suggest_categorical('subsample', [0.4, 0.5, 0.6, 0.7, 0.8, 1.0]),
+            'learning_rate': trial.suggest_float("learning_rate", 1e-3, 1.0, log=True),
+            'n_estimators': trial.suggest_categorical('n_estimators', [i for i in range(1, 2000, 100)]),
+            'max_depth': trial.suggest_categorical('max_depth', [5, 7, 9, 11, 13, 15, 17, 20]),
+            'random_state': trial.suggest_categorical('random_state', [2020]),
+            'min_child_weight': trial.suggest_int('min_child_weight', 1, 300),
+        }, 'LGBMRegressor': {
+            "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(1, 2000, 100)]),
+            "verbose": 0,
+            "bagging_freq": 1,
+            "learning_rate": trial.suggest_float("learning_rate", 1e-3, 1.0, log=True),
+            "num_leaves": trial.suggest_int("num_leaves", 2, 2 ** 10),
+            "subsample": trial.suggest_float("subsample", 0.05, 1.0),
+            "colsample_bytree": trial.suggest_float("colsample_bytree", 0.05, 1.0),
+            "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 1, 100)},
+         'LGBMClassifier': {
+             "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(1, 2000, 100)]),
+             "verbose": 0,
+             "bagging_freq": 1,
+             "learning_rate": trial.suggest_float("learning_rate", 1e-3, 0.1, log=True),
+             "num_leaves": trial.suggest_int("num_leaves", 2, 2 ** 10),
+             "subsample": trial.suggest_float("subsample", 0.05, 1.0),
+             "colsample_bytree": trial.suggest_float("colsample_bytree", 0.05, 1.0),
+             "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 1, 100)},
+         'CatBoostClassifier': {
+             "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(1, 2000, 100)]),
+             'leaf_estimation_iterations': 1,
+             'boosting_type': 'Plain',
+             'thread_count': -1,
+             'silent': True,
+             'depth': trial.suggest_int('depth', 4, 16),
+             'random_strength': trial.suggest_int('random_strength', 0, 100),
+             'bagging_temperature': trial.suggest_float('bagging_temperature', 0.01, 100.00),
+             'learning_rate': trial.suggest_float('learning_rate', 1e-3, 1e-1),
+             'od_type': trial.suggest_categorical('od_type', ['IncToDec', 'Iter']),
+             'l2_leaf_reg': 50,
+         }, 'CatBoostRegressor': {
+            "n_estimators": trial.suggest_categorical('n_estimators', [i for i in range(1, 2000, 100)]),
+            'leaf_estimation_iterations': 1,
+            'boosting_type': 'Plain',
+            'silent': True,
+            'depth': trial.suggest_int('depth', 4, 16),
+            'random_strength': trial.suggest_int('random_strength', 0, 100),
+            'bagging_temperature': trial.suggest_float('bagging_temperature', 0.01, 100.00),
+            'learning_rate': trial.suggest_float('learning_rate', 1e-3, 1e-1),
+            'od_type': trial.suggest_categorical('od_type', ['IncToDec', 'Iter']),
+            'l2_leaf_reg': 50}, 'ElasticNet': {'alpha': trial.suggest_float('alpha', 0.03, 2),
+                                               'l1_ratio': trial.suggest_float('l1_ratio', 0.1, 2)},
+         'Ridge': {'alpha': trial.suggest_float('alpha', 0.03, 2)},
+         'MLPClassifier': {
+             'hidden_layer_sizes': trial.suggest_categorical('hidden_layer_sizes', [(100,), (300,), (500,)]),
+             'activation': trial.suggest_categorical('activation', ['logistic', 'relu', 'tanh'])},
+         'MLPRegressor': {
+             'hidden_layer_sizes': trial.suggest_categorical('hidden_layer_sizes', [(100,), (300,), (500,)]),
+             'activation': trial.suggest_categorical('activation', ['logistic', 'relu', 'tanh'])},
+         'KNeighborsClassifier':
+             {'n_neighbors': trial.suggest_categorical('n_neighbors',
+                                                       [i for i in range(1, 8)])}, 'KNeighborsRegressor':
+             {'n_neighbors': trial.suggest_categorical('n_neighbors',
+                                                       [i for i in range(1, 8)])}, 'TapNetRegressor': {
+            'n_epochs': trial.suggest_int("n_epochs", 100, 3000),
+            'batch_size': trial.suggest_categorical("batch_size", [8, 16, 32, 64]),
+            'dropout': trial.suggest_uniform("dropout", 0.0, 1.0),
+            'filter_sizes': trial.suggest_categorical("filter_sizes", [(256, 256, 128), (128, 128, 64)]),
+            'kernel_size': trial.suggest_categorical("kernel_size", [(8, 5, 3), (3, 3, 3)]),
+            'dilation': trial.suggest_int("dilation", 1, 10),
+            'layers': trial.suggest_categorical("layers", [(500, 300), (300, 100)]),
+            'activation': trial.suggest_categorical("activation", ["relu", "sigmoid", "tanh"]),
+            'loss': trial.suggest_categorical("loss", ["mean_squared_error", "mean_absolute_error"]),
+            'optimizer': trial.suggest_categorical("optimizer", ["Adam", "SGD", "RMSprop"]),
+            'use_bias': trial.suggest_categorical("use_bias", [True, False]),
+            'use_rp': trial.suggest_categorical("use_rp", [True, False]),
+            'use_att': trial.suggest_categorical("use_att", [True, False]),
+            'use_lstm': trial.suggest_categorical("use_lstm", [True, False]),
+            'use_cnn': trial.suggest_categorical("use_cnn", [True, False]),
+            'verbose': trial.suggest_categorical("verbose", [True, False]),
+            'random_state': trial.suggest_int("random_state", 0, 1000)
+        }, 'KNeighborsTimeSeriesRegressor': {
+            'n_neighbors': trial.suggest_int("n_neighbors", 1, 20),
+            'weights': trial.suggest_categorical("weights", ["uniform", "distance"]),
+            'algorithm': trial.suggest_categorical("algorithm", ["auto", "ball_tree", "kd_tree", "brute"]),
+            'distance': trial.suggest_categorical("distance",
+                                                  ["euclidean", "squared", "dtw", "ddtw", "wdtw", "wddtw", "lcss",
+                                                   "edr", "erp", "msm"]),
+            'leaf_size': trial.suggest_int("leaf_size", 10, 100),
+            'n_jobs': trial.suggest_categorical("n_jobs", [None, -1, 1, 2, 4, 8])
+        }, 'CNNRegressor': {
+            'n_epochs': trial.suggest_int("n_epochs", 100, 3000),
+            'batch_size': trial.suggest_int("batch_size", 8, 64),
+            'kernel_size': trial.suggest_int("kernel_size", 2, 10),
+            'avg_pool_size': trial.suggest_int("avg_pool_size", 2, 10),
+            'n_conv_layers': trial.suggest_int("n_conv_layers", 1, 5),
+            'random_state': trial.suggest_int("random_state", 0, 100),
+            'verbose': trial.suggest_categorical("verbose", [True, False]),
+            'loss': trial.suggest_categorical("loss", ["mean_squared_error", "mean_absolute_error"]),
+            'activation': trial.suggest_categorical("activation", ["linear", "relu", "sigmoid"]),
+            'optimizer': trial.suggest_categorical("optimizer", ["Adam", "SGD", "RMSprop"]),
+            'use_bias': trial.suggest_categorical("use_bias", [True, False])
+        }, 'RocketRegressor': {
+            'num_kernels': trial.suggest_int("num_kernels", 5000, 10000, 15000, 20000),
+            # Add any other relevant hyperparameters here
+            'random_state': trial.suggest_int("random_state", 0, 100)
+        }, 'TimeSeriesForestClassifier': {
+            'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+            'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 10)
+        }, 'KNeighborsTimeSeriesClassifier':
+             {
+                 'n_neighbors': trial.suggest_int('n_neighbors', 1, 20),
+                 'weights': trial.suggest_categorical('weights',
+                                                      ['uniform', 'distance']),
+                 'algorithm': trial.suggest_categorical('algorithm', ['brute', 'auto']),
+                 'distance': trial.suggest_categorical('distance',
+                                                       ['dtw', 'ddtw', 'wdtw', 'lcss'])
+             }, 'ShapeletTransformClassifier': {
+            'max_shapelet_length': trial.suggest_int('max_shapelet_length', 3, 10)
+        }, 'TimeSeriesSVMClassifier': {
+            'C': trial.suggest_float('C', 0.1, 10.0),
+            'kernel': trial.suggest_categorical('kernel', ['linear', 'poly', 'rbf', 'sigmoid']),
+            'gamma': trial.suggest_categorical('gamma', ['scale', 'auto']),
+            'degree': trial.suggest_int('degree', 2, 5)
+        }, 'RandomIntervalSpectralForest': {
+            'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+            'min_interval': trial.suggest_int('min_interval', 1, 10),
+            'max_interval': trial.suggest_int('max_interval', 1, 10)
+        }, 'RocketClassifier': {
+            'num_kernels': trial.suggest_int('num_kernels', 1000, 10000)
+        }, 'MrSEQLClassifier': {
+            'symrep': trial.suggest_categorical('symrep', ['sax', 'sfa']),
+            'seql_mode': trial.suggest_categorical('seql_mode', ['clf', 'fs'])
+        }, 'WEASEL': {
+            'anova': trial.suggest_categorical("anova", [True, False]),
+            'bigrams': trial.suggest_categorical("bigrams", [True, False]),
+            'binning_strategy': trial.suggest_categorical("binning_strategy",
+                                                          ["equi-depth", "equi-width", "information-gain"]),
+            'window_inc': trial.suggest_int("window_inc", 1, 10),
+            'p_threshold': trial.suggest_float("p_threshold", 0.01, 0.1),
+            'alphabet_size': trial.suggest_int("alphabet_size", 2, 10),
+            'feature_selection': trial.suggest_categorical("feature_selection", ["chi2", "none", "random"]),
+            'support_probabilities': trial.suggest_categorical("support_probabilities", [True]),
+            'random_state': trial.suggest_int("random_state", 0, 100)
+        }, 'MUSE': {
+            'anova': trial.suggest_categorical("anova", [True, False]),
+            'variance': trial.suggest_categorical("variance", [True, False]),
+            'bigrams': trial.suggest_categorical("bigrams", [True, False]),
+            'window_inc': trial.suggest_int("window_inc", 1, 10),
+            'alphabet_size': trial.suggest_int("alphabet_size", 2, 10),
+            'p_threshold': trial.suggest_float("p_threshold", 0.01, 0.1),
+            'use_first_order_differences': trial.suggest_categorical("use_first_order_differences", [True, False]),
+            'support_probabilities': trial.suggest_categorical("support_probabilities", [True]),
+            'feature_selection': trial.suggest_categorical("feature_selection", ["chi2", "none", "random"]),
+            'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),
+            # 1 for single-threaded or -1 for using all processors
+            'random_state': trial.suggest_int("random_state", 0, 100)
+        }, 'Arsenal': {
+            'num_kernels': trial.suggest_int("num_kernels", 100, 5000),
+            'n_estimators': trial.suggest_int("n_estimators", 10, 100),
+            'rocket_transform': trial.suggest_categorical("rocket_transform",
+                                                          ["rocket", "minirocket", "multirocket"]),
+            'max_dilations_per_kernel': trial.suggest_int("max_dilations_per_kernel", 10, 100),
+            'n_features_per_kernel': trial.suggest_int("n_features_per_kernel", 1, 10),
+            'time_limit_in_minutes': trial.suggest_float("time_limit_in_minutes", 0.0, 60.0),
+            'contract_max_n_estimators': trial.suggest_int("contract_max_n_estimators", 10, 500),
+            'save_transformed_data': trial.suggest_categorical("save_transformed_data", [True, False]),
+            'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),
+            # 1 for single-threaded or -1 for using all processors
+            'random_state': trial.suggest_int("random_state", 0, 100)
+        }, 'IndividualBOSS': {
+            'window_size': trial.suggest_int("window_size", 5, 20),
+            'word_length': trial.suggest_int("word_length", 3, 16),
+            'norm': trial.suggest_categorical("norm", [True, False]),
+            'alphabet_size': trial.suggest_int("alphabet_size", 2, 10),
+            'save_words': trial.suggest_categorical("save_words", [True, False]),
+            'use_boss_distance': trial.suggest_categorical("use_boss_distance", [True, False]),
+            'feature_selection': trial.suggest_categorical("feature_selection", ['none', 'entropy', 'gini']),
+            'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),
+            # 1 for single-threaded or -1 for using all processors
+            'random_state': trial.suggest_int("random_state", 0, 100)
+        }, 'BOSSEnsemble': {
+            'threshold': trial.suggest_float("threshold", 0.8, 1.0),
+            'max_ensemble_size': trial.suggest_int("max_ensemble_size", 100, 1000),
+            'max_win_len_prop': trial.suggest_float("max_win_len_prop", 0.5, 1.0),
+            'min_window': trial.suggest_int("min_window", 5, 20),
+            'save_train_predictions': trial.suggest_categorical("save_train_predictions", [True, False]),
+            'alphabet_size': trial.suggest_int("alphabet_size", 2, 6),
+            'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),
+            # 1 for single-threaded or -1 for using all processors
+            'use_boss_distance': trial.suggest_categorical("use_boss_distance", [True, False]),
+            'feature_selection': trial.suggest_categorical("feature_selection", ["chi2", "none", "random"]),
+            'random_state': trial.suggest_int("random_state", 0, 100)}, 'ContractableBOSS': {
+            'n_parameter_samples': trial.suggest_int("n_parameter_samples", 100, 500),
+            'max_ensemble_size': trial.suggest_int("max_ensemble_size", 10, 100),
+            'max_win_len_prop': trial.suggest_float("max_win_len_prop", 0.1, 1.0),
+            'time_limit_in_minutes': trial.suggest_float("time_limit_in_minutes", 0.0, 60.0),
+            'contract_max_n_parameter_samples': trial.suggest_int("contract_max_n_parameter_samples", 100, 1000),
+            'save_train_predictions': trial.suggest_categorical("save_train_predictions", [True, False]),
+            'feature_selection': trial.suggest_categorical("feature_selection", ["chi2", "none", "random"]),
+            'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),
+            # 1 for single-threaded or -1 for using all processors
+            'random_state': trial.suggest_int("random_state", 0, 100)
+        }, 'CNNClassifier': {
+            'n_epochs': trial.suggest_int("n_epochs", 100, 2000),  # 100 to 2000
+            'batch_size': trial.suggest_int("batch_size", 8, 64),  # 8 to 64
+
+            'n_conv_layers': trial.suggest_int("n_conv_layers", 1, 5),  # 1 to 5
+            'random_state': trial.suggest_int("random_state", 0, 100),  # 0 to 100
+            'verbose': trial.suggest_categorical("verbose", [True, False]),
+            'loss': trial.suggest_categorical("loss", ["mean_squared_error", "categorical_crossentropy",
+                                                       "binary_crossentropy"]),
+            'metrics': trial.suggest_categorical("metrics", [["accuracy"], ["precision", "recall"]]),
+            'activation': trial.suggest_categorical("activation", ["relu", "sigmoid", "tanh"]),
+            'use_bias': trial.suggest_categorical("use_bias", [True, False]),
+            'optimizer': trial.suggest_categorical("optimizer", ["Adam", "SGD", "RMSprop"])}, 'RotationForest':
+             {
+                 'n_estimators': trial.suggest_int("n_estimators", 100, 500),
+                 # 100 to 500
+                 'min_group': trial.suggest_int("min_group", 1, 5),  # 1 to 5
+                 'max_group': trial.suggest_int("max_group", 3, 10),  # 3 to 10
+                 'remove_proportion': trial.suggest_float("remove_proportion", 0.1, 1.0),
+                 # 0.1 to 1.0
+                 'time_limit_in_minutes': trial.suggest_float("time_limit_in_minutes",
+                                                              0.0, 60.0),
+                 # 0.0 to 60.0 minutes
+                 'contract_max_n_estimators': trial.suggest_int(
+                     "contract_max_n_estimators", 100, 1000),  # 100 to 1000
+                 'save_transformed_data': trial.suggest_categorical(
+                     "save_transformed_data", [True, False]),
+                 'n_jobs': trial.suggest_categorical("n_jobs", [1, -1]),
+                 # 1 for single-threaded or -1 for using all processors
+                 'random_state': trial.suggest_int("random_state", 0, 100)  # 0 to 100
+             }, 'FCNClassifier': {
+            'n_epochs': trial.suggest_categorical('n_epochs', [2000]),
+            # Since default is 2000, you might want to add more options
+            'batch_size': trial.suggest_categorical('batch_size', [16, 32, 64, 128]),
+            # Examples of different batch sizes
+            'random_state': trial.suggest_categorical('random_state', [None, 42, 2023]),
+            # None or specific random states
+            'verbose': trial.suggest_categorical('verbose', [False, True]),
+            'loss': trial.suggest_categorical('loss', ['categorical_crossentropy', 'mean_squared_error',
+                                                       'binary_crossentropy']),  # Add more losses as needed
+            'optimizer': trial.suggest_categorical('optimizer', ['Adam', 'SGD', 'RMSprop']),
+            # You might need to define learning rates separately
+            'metrics': trial.suggest_categorical('metrics', [['accuracy'], ['mse']]),
+            # Add more metric combinations as needed
+            'activation': trial.suggest_categorical('activation', ['sigmoid', 'relu', 'tanh']),
+            # Other activation functions
+            'use_bias': trial.suggest_categorical('use_bias', [True, False])
+            # If learning rate needs to be optimized, it should be separate for each optimizer type
+            # 'learning_rate': trial.suggest_loguniform('learning_rate', 1e-5, 1e-1)
+        }}
+        if key in store:
+            return store[key]
+        else:
+            KeyError(f"hyperparameter tuning is not available for {key}")
     @staticmethod
     def _custom_evaluate(model:Any, y:pd.DataFrame, X:pd.DataFrame, cv:Any=None, scoring:List[Callable]=None)->Dict[str,List[float]]:
         '''

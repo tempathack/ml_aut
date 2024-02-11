@@ -132,8 +132,6 @@ class Ml_Main(Config_Utils):
                 yield self.ml_train.train_model(*self.args,**self.kwargs)
         else:
             raise AttributeError(f"{key} is not an procedure object used in {self.__class__.__name__}")
-
-
     @WrapStack.FUNCTION_SCREEN
     def _process_seq(self, is_ml_select:bool, *args, **kwargs)->List[Dict[str,Any]]:
         '''

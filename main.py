@@ -20,83 +20,82 @@ import yfinance as yf
 
 import seaborn
 
-# Define the start and end dates for the time series
-start_date = datetime(2022, 1, 1)
-end_date = datetime(2022, 12, 31)
 
-# Generate a DateTimeIndex with hourly frequency
-date_range = pd.date_range(start=start_date, end=end_date, freq='H')
+def datasets(t='ts',d='classification',Multiclass=True):
+    if t=='ts' and d=='classification':
+        if Multiclass:
+            start_date = datetime(2022, 1, 1)
+            end_date = datetime(2022, 12, 31)
 
-# Create a DataFrame with DateTimeIndex
-data = pd.DataFrame(index=date_range).iloc[:1000]
+            # Generate a DateTimeIndex with hourly frequency
+            date_range = pd.date_range(start=start_date, end=end_date, freq='H')
 
-# Generating features (random in this example)
-data['Feature1'] = np.random.randn(len(data))
-data['Feature2'] = np.random.rand(len(data))
-# Add more features as needed
+            # Create a DataFrame with DateTimeIndex
+            data = pd.DataFrame(index=date_range).iloc[:1000]
 
-# Generating labels for classification (binary labels in this example)
-data['Label'] = np.random.randint(0, 2, size=len(data))
+            # Generating features (random in this example)
+            data['Feature1'] = np.random.randn(len(data))
+            data['Feature2'] = np.random.rand(len(data))
+            # Add more features as needed
 
-configs=Config_Utils()
-X,target=data.drop(columns=['Label']),data[['Label']]
+            # Generating labels for classification (binary labels in this example)
+            data['Label'] = np.random.randint(0, 4, size=len(data))
+
+            return data.drop(columns=['Label']), data[['Label']]
+        else:
+            start_date = datetime(2022, 1, 1)
+            end_date = datetime(2022, 12, 31)
+
+            # Generate a DateTimeIndex with hourly frequency
+            date_range = pd.date_range(start=start_date, end=end_date, freq='H')
+
+            # Create a DataFrame with DateTimeIndex
+            data = pd.DataFrame(index=date_range).iloc[:1000]
+
+            # Generating features (random in this example)
+            data['Feature1'] = np.random.randn(len(data))
+            data['Feature2'] = np.random.rand(len(data))
+            # Add more features as needed
+
+            # Generating labels for classification (binary labels in this example)
+            data['Label'] = np.random.randint(0, 2, size=len(data))
+
+            configs = Config_Utils()
+            return  data.drop(columns=['Label']), data[['Label']]
+    elif t=='ts' and d=='regression':
+        start_date = datetime(2022, 1, 1)
+        end_date = datetime(2022, 12, 31)
+        datetime_index= pd.date_range(start=start_date, end=end_date, freq='H')
+        feature_1 = np.random.rand(len(datetime_index))
+        feature_2 = np.random.rand(len(datetime_index))
+
+# Combine into a DataFrame
+        time_series_data = pd.DataFrame({
+                'Feature_1': feature_1,
+                'Feature_2': feature_2
+            }, index=datetime_index)
+
+        time_series_data['target'] =time_series_data['Feature_1'].shift(-10)
+
+        time_series_data.dropna(inplace=True)
+
+        return time_series_data.drop(columns=['target']),time_series_data[['target']]
+    elif    t=='tab' and d=='regression':
+        X=sns.load_dataset('diamonds').drop(columns=['carat'])
+        target=sns.load_dataset('diamonds')[['carat']]
+        return X,target
+    elif    t=='tab' and d=='classification' and Multiclass :
+        X=sns.load_dataset('iris').drop(columns=['species'])
+        target=sns.load_dataset('iris')[['species']].map({'setosa':1,'versicolor':0,'virginica':2})
+        return X,target
 
 
-#X,target=data.drop(columns=['Label']),data[['Label']]
-
-#sns.load_dataset('titanic')
-#d=sns.load_dataset('titanic').drop(columns=['alive'])
-#k=sns.load_dataset('iris')
-#k['species']=k['species'].map({'setosa':1,'versicolor':0,'virginica':2})
-#X,target=k.drop(columns=['species']),k[['species']]
-#from keras.datasets import mnist
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
-
-# Load MNIST data
-#(train_images, train_labels), (test_images, test_labels) = mnist.load_data()
-
-# Preprocess data: Flatten and scale
-#train_images = train_images.reshape((train_images.shape[0], -1)) / 255.0
-#test_images = test_images.reshape((test_images.shape[0], -1)) / 255.0
-
-
-
-
-#IDX=pd.DataFrame(train_images).sample(n=1000).index
-
-#X=pd.DataFrame(train_images).loc[IDX]
-#X=pd.DataFrame(np.random.randn(len(train_images),34))
-#target=pd.DataFrame(train_labels).loc[IDX]
-
-
-#X=sns.load_dataset('diamonds').drop(columns=['carat'])
-#target=sns.load_dataset('diamonds')[['carat']]
-#ct=0
 
 import pandas as pd
 import numpy as np
 
-# Create a datetime index for one year with daily frequency
-#datetime_index = pd.date_range(start='2023-01-01', end='2023-12-31', freq='D')
+configs=Config_Utils()
 
-# Generate two exogenous features with random data
-#np.random.seed(0)  # For reproducibility
-#feature_1 = np.random.rand(len(datetime_index))
-#feature_2 = np.random.rand(len(datetime_index))
-
-# Combine into a DataFrame
-#time_series_data = pd.DataFrame({
- #   'Feature_1': feature_1,
-  #  'Feature_2': feature_2
-#}, index=datetime_index)
-
-#time_series_data['target'] =time_series_data['Feature_1'].shift(-10)
-
-#time_series_data.dropna(inplace=True)
-
-#X,target=time_series_data.drop(columns=['target']),time_series_data[['target']]
 
 #print(X.isnull().sum().any(),target.isnull().sum().any())
 if __name__ == '__main__':
@@ -123,17 +122,23 @@ if __name__ == '__main__':
     l.remove('MiniRocketMultivariate')
     l.remove('TSFreshFeatureExtractor')
     res={}
-    for mod in configs.get_models_available(is_ts=True,pred_med='Classification'):
-        if mod in ['HIVECOTEV2','HIVECOTEV1','Arsenal','ElasticEnsemble','RocketClassifier']:
-            continue
 
-        try:
-            obj = Ml_Main(X, y=target, transform=['MinMaxScaler','StandardScaler'],  # DWTTransformer#PartialAutoCorrelationTransformer
+
+
+    for ele in ['Classification', 'Regression']:
+        for stuff in ['ts','tab']:
+            for mod in configs.get_models_available(is_ts=True,pred_med=ele):
+                X,target=datasets(stuff,ele,False)
+                if mod in ['HIVECOTEV2','HIVECOTEV1','Arsenal','ElasticEnsemble','RocketClassifier']:
+                    continue
+
+                try:
+                    obj = Ml_Main(X, y=target, transform=['MinMaxScaler','StandardScaler'],  # DWTTransformer#PartialAutoCorrelationTransformer
                   features_selection=None, dim_reduction=None
                   , n_jobs=1, ml_model=mod).Process()
 
-            obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
-        except Exception as e:
-            res[mod]=e
-    print(res)
+                    obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
+                except Exception as e:
+                    res[mod]=e
+                print(res)
 
