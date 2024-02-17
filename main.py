@@ -128,14 +128,14 @@ if __name__ == '__main__':
     for ele in ['Classification', 'Regression']:
         for stuff in ['ts','tab']:
             for mod in configs.get_models_available(is_ts=True,pred_med=ele):
-                X,target=datasets(stuff,ele,False)
+                X,target=datasets(stuff,ele.lower(),False)
                 if mod in ['HIVECOTEV2','HIVECOTEV1','Arsenal','ElasticEnsemble','RocketClassifier']:
                     continue
 
                 try:
-                    obj = Ml_Main(X, y=target, transform=['MinMaxScaler','StandardScaler'],  # DWTTransformer#PartialAutoCorrelationTransformer
-                  features_selection=None, dim_reduction=None
-                  , n_jobs=1, ml_model=mod).Process()
+                    obj = Ml_Main(X, y=target, transform=['StandardScaler'],  # DWTTransformer#PartialAutoCorrelationTransformer
+                                                features_selection=None, dim_reduction=None
+                                                ,n_jobs=1, ml_model=mod).Process()
 
                     obj.Tune(5).get_model_metrics().to_csv(f"./Outputs/Tuned_results.csv",index=None)
                 except Exception as e:
